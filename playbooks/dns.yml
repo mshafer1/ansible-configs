@@ -1,0 +1,46 @@
+---
+
+- name: Setup DNS server
+  hosts: dns
+  vars:
+    dns_config_file: /etc/dnsmasq.hosts
+
+  tasks:
+  - name: Include host mapping vars
+    ansible.builtin.include_vars:
+      file: host_ip_mapping.yml
+      name: subdomain1
+
+  - name: Create config file if needed
+    become: true
+    copy:
+      content: ""
+      dest: "{{ dns_config_file }}"
+      force: no
+      group: root
+      owner: root
+      mode: 0644
+
+  - name: "Set dnsmasq to use hosts file"
+    become: true
+    ansible.builtin.lineinfile:
+      path: "/etc/dnsmasq.conf"
+      line: "addn-hosts={{ dns_config_file }}"
+    notify:
+    - Restart dnsmasq
+
+  - name: "Set DNS hosts for {{ subdomain1.dns_subdomain }}"
+    become: true
+    ansible.builtin.lineinfile:
+      path: "{{ dns_config_file }}"
+      line: "{{ item.ip }} {{ item.host }}.{{ subdomain1.dns_subdomain }}"
+    loop: "{{ subdomain1.host_ip_mapping }}"
+    notify:
+    - Restart dnsmasq
+  
+  handlers:
+  - name: Restart dnsmasq
+    ansible.builtin.systemd:
+      state: restarted
+      name: dnsmasq
+    become: true
