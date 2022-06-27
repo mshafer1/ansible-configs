@@ -1,0 +1,7 @@
+---
+
+- name: pyenv
+  hosts: windows
+  tasks:
+  - debug:
+      msg: "{{ ansible_env }}"
