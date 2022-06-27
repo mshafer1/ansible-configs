@@ -1,0 +1,6 @@
+---
+
+- name: python
+  hosts: python
+  roles:
+  - role: python

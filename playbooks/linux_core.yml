@@ -1,0 +1,6 @@
+---
+
+- name: linux_core
+  hosts: linux_core
+  roles:
+  - role: linux_core

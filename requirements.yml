@@ -1,0 +1,10 @@
+---
+roles:
+  - src: staticdev.pyenv
+    version: 2.5.1
+
+collections:
+  - name: chocolatey.chocolatey
+    version: 1.2.0
+    source: https://galaxy.ansible.com
+  
