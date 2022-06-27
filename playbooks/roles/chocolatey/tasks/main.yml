@@ -1,0 +1,58 @@
+- name: Install chocolatey apps
+  win_chocolatey:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+      - putty
+      - windirstat
+      - pyenv-win
+      - vscode
+      - git
+      - sublimetext4
+      - googlechrome
+      - gimp
+      - sharex
+      - shotcut
+      - obs-studio
+      - barrier
+      - audacity
+      - audacity-lame
+      - audacity-ffmpeg
+      - freecad
+      - dbeaver
+      - github-desktop
+      - etcher
+      - discord
+      - gridmove
+      # - win32diskimager
+      - inkscape
+      # - lockhunter
+      - nvm
+      - tightvnc
+      - vlc
+      - notepadplusplus
+    # become: yes
+    # become_user: Administrator
+    # become_method: runas
+
+- name: Install autohotkey
+  win_chocolatey:
+    name: autohotkey
+    version: '1.1.31.01'
+    source: https://community.chocolatey.org/api/v2/
+    state: present
+
+# - name: Install AHK
+#   win_chocolatey:
+#     name: autohotkey
+#     version: '1.1.31.01'
+
+- name: Install python versions
+  ansible.windows.win_shell: "pyenv install {{ item }} -q -f"
+  with_items:
+  - 3.5.4
+  - 3.6.9
+  - 3.7.9
+  - 3.8.10
+  - 3.9.10
+  - 3.10.5
