@@ -4,4 +4,4 @@
   hosts: windows
   roles:
   - chocolatey
-
+  - pyenv-win

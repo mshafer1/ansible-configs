@@ -1,0 +1,36 @@
+
+- name: Setup and configure pyenv-win
+  environment:
+    PATH: '{{ ansible_env.USERPROFILE }}/.pyenv/pyenv-win/bin;{{ ansible_env.USERPROFILE }}/.pyenv/pyenv-win/shims;{{ ansible_env.Path }}'
+  block:
+    - name: Add Pyenv-win to path
+      ansible.windows.win_path:
+        elements:
+        - '%USERPROFILE%\.pyenv\pyenv-win\bin'
+        - '%USERPROFILE%\.pyenv\pyenv-win\shims'
+        scope: user
+        state: present
+
+    - name: pyenv update
+      ansible.windows.win_shell: "pyenv update"
+
+    - name: Install python versions
+      ansible.windows.win_shell: "pyenv install -q -f {{ item }}"
+      args:
+        creates: "{{ ansible_env.USERPROFILE }}/.pyenv/pyenv-win/versions/{{ item }}/python.exe"
+      with_items:
+      - '3.5.4'
+      - '3.6.8'
+      - '3.7.9'
+      - '3.8.10'
+      - '3.9.10'
+      - '3.10.5'
+      register: pyenv_install
+
+    - name: pyenv rehash
+      ansible.windows.win_shell: "pyenv rehash"
+      when: pyenv_install.changed
+
+    - name: pyenv global
+      ansible.windows.win_shell: "pyenv global 3.8.10"
+      
