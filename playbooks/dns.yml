@@ -8,8 +8,13 @@
   tasks:
   - name: Include host mapping vars
     ansible.builtin.include_vars:
-      file: host_ip_mapping.yml
+      file: host_ip_mapping_subdomain1.yml
       name: subdomain1
+  
+  - name: Include host mapping vars2
+    ansible.builtin.include_vars:
+      file: shortnames.yml
+      name: shortnames
 
   - name: Create config file if needed
     become: true
@@ -28,16 +33,29 @@
       line: "addn-hosts={{ dns_config_file }}"
     notify:
     - Restart dnsmasq
-
+ 
+  - name: "Set DNS hosts for {{ shortnames.dns_subdomain }}"
+    become: true
+    ansible.builtin.lineinfile:
+      path: "{{ dns_config_file }}"
+      line: "{{ item.ip }} {{ item.host }}{{ shortnames.dns_subdomain }}"
+    loop: "{{ shortnames.host_ip_mapping }}"
+    notify:
+    - Restart dnsmasq
+  
   - name: "Set DNS hosts for {{ subdomain1.dns_subdomain }}"
     become: true
     ansible.builtin.lineinfile:
       path: "{{ dns_config_file }}"
-      line: "{{ item.ip }} {{ item.host }}.{{ subdomain1.dns_subdomain }}"
+      line: "{{ item.ip }} {{ item.host }}{{ subdomain1.dns_subdomain }}"
     loop: "{{ subdomain1.host_ip_mapping }}"
     notify:
     - Restart dnsmasq
   
+  - name: Sort dns file by ip
+    ansible.builtin.shell: "cp -f {{ dns_config_file }} {{ dns_config_file }}.bak; cat {{ dns_config_file }}.bak | sort | uniq > {{ dns_config_file }}"
+    become: true
+
   handlers:
   - name: Restart dnsmasq
     ansible.builtin.systemd:
