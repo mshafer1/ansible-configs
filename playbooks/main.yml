@@ -1,0 +1,7 @@
+---
+
+- name: pyenv
+  hosts: windows
+  roles:
+  - chocolatey
+
