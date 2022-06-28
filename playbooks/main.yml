@@ -4,4 +4,6 @@
   hosts: windows
   roles:
   - chocolatey
-  - pyenv-win
+  # - pyenv-win
+  tasks:
+  - import_tasks: tasks/taskbar.yml
