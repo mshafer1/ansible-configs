@@ -95,7 +95,15 @@
         exe: VLC media player.exe
         link: VLC media player.lnk
 
-
+- name: Disable startup apps
+  block:
+  - name: discord
+    ansible.windows.win_regedit:
+      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run
+      name: Discord
+      data: hex:03,00,00,00,5c,13,f3,3a,97,8a,d8,01
+      type: binary
+  
 # - name: Disable Auto startup programs
 #   block:
 #     - name: 
