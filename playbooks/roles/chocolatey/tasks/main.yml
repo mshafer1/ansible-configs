@@ -10,6 +10,7 @@
       - git
       - sublimetext4
       - googlechrome
+      - googledrive
       - gimp
       - sharex
       - shotcut
@@ -31,6 +32,7 @@
       - tightvnc
       - vlc
       - notepadplusplus
+      - steam-client
 
 - name: Install autohotkey
   win_chocolatey:
@@ -65,6 +67,9 @@
       - name: Inkscape
         exe: Inkscape.exe
         link: Inkscape.lnk
+      - name: Steam
+        exe: Steam.exe
+        link: Steam.lnk
 - name: Remove all-user shortcuts
   block:
     - name: "Remove {{ item.name }}"
