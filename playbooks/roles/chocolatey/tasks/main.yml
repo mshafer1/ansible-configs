@@ -31,9 +31,6 @@
       - tightvnc
       - vlc
       - notepadplusplus
-    # become: yes
-    # become_user: Administrator
-    # become_method: runas
 
 - name: Install autohotkey
   win_chocolatey:
@@ -42,17 +39,63 @@
     source: https://community.chocolatey.org/api/v2/
     state: present
 
-# - name: Install AHK
-#   win_chocolatey:
-#     name: autohotkey
-#     version: '1.1.31.01'
+- name: Remove user shortcuts
+  block:
+    - name: "Remove {{ item.name }}"
+      community.windows.win_shortcut:
+        state: absent
+        src: "{{ item.exe }}"
+        dest: "Desktop/{{ item.link }}"
+      loop:
+      - name: ShareX
+        exe: ShareX.exe
+        link: ShareX.lnk
+      - name: Discord
+        exe: Discord.exe
+        link: Discord.lnk
+      - name: GitHub Desktop
+        exe: GitHub Desktop.exe
+        link: GitHub Desktop.lnk
+      - name: balenaEtcher
+        exe: balenaEtcher.exe
+        link: balenaEtcher.lnk
+      - name: WinDirStat
+        exe: WinDirStat.exe
+        link: WinDirStat.lnk
+      - name: Inkscape
+        exe: Inkscape.exe
+        link: Inkscape.lnk
+- name: Remove all-user shortcuts
+  block:
+    - name: "Remove {{ item.name }}"
+      community.windows.win_shortcut:
+        state: absent
+        src: "{{ item.exe }}"
+        dest: "%Public%/Desktop/{{ item.link }}"
+      loop:
+      - name: Audacity
+        exe: Audacity.exe
+        link: Audacity.lnk
+      - name: FreeCAD 0.19
+        exe: FreeCAD 0.19.exe
+        link: FreeCAD 0.19.lnk
+      - name: Google Chrome
+        exe: Google Chrome.exe
+        link: Google Chrome.lnk
+      - name: Microsoft Edge
+        exe: Microsoft Edge.exe
+        link: Microsoft Edge.lnk
+      - name: OBS Studio
+        exe: OBS Studio.exe
+        link: OBS Studio.lnk
+      - name: Visual Studio Code
+        exe: Visual Studio Code.exe
+        link: Visual Studio Code.lnk
+      - name: VLC media player
+        exe: VLC media player.exe
+        link: VLC media player.lnk
 
-- name: Install python versions
-  ansible.windows.win_shell: "pyenv install {{ item }} -q -f"
-  with_items:
-  - 3.5.4
-  - 3.6.9
-  - 3.7.9
-  - 3.8.10
-  - 3.9.10
-  - 3.10.5
+
+# - name: Disable Auto startup programs
+#   block:
+#     - name: 
