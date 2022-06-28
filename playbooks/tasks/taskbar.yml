@@ -39,3 +39,47 @@
     path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband
     name: Favorites
     state: absent
+
+- name: show icons on monitor window is on
+  ansible.windows.win_regedit:
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: MMTaskbarMode
+    type: dword
+    data: 2
+
+- name: combine when taskbar is full
+  ansible.windows.win_regedit:
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: TaskbarGlomLevel
+    type: dword
+    data: 1
+
+- name: other monitors, combine when taskbar is full
+  ansible.windows.win_regedit:
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: MMTaskbarGlomLevel
+    type: dword
+    data: 1
+
+- name: use cmd in win-x menu - note, will probably remove when moving to Win11 when replacement is Terminal instead
+  ansible.windows.win_regedit:
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: DontUsePowerShellOnWinX
+    type: dword
+    data: 1
+
+- name: Taskbar left align
+  ansible.windows.win_regedit:
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: TaskbarAl
+    type: dword
+    data: 0
+
+- name: Set taskbar size
+  # source: https://pureinfotech.com/change-taskbar-size-windows-11/#:~:text=Search%20for%20regedit%20and%20click,to%20open%20the%20Registry%20Editor.&text=Right%2Dclick%20the%20Advanced%20key,Taskbar%20icons%20size%20to%20large.
+  # 0 for small, 1 for default, 2 for large
+  ansible.windows.win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    name: TaskbarSi
+    type: dword
+    data: 1
