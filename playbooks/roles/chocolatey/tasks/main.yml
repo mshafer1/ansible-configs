@@ -67,9 +67,18 @@
       - name: Inkscape
         exe: Inkscape.exe
         link: Inkscape.lnk
-      - name: Steam
-        exe: Steam.exe
-        link: Steam.lnk
+      - name: Google Docs
+        exe: Google Docs.exe
+        link: Google Docs.lnk
+      - name: Google Drive
+        exe: Google Drive.exe
+        link: Google Drive.lnk
+      - name: Google Sheets
+        exe: Google Sheets.exe
+        link: Google Sheets.lnk
+      - name: Google Slides
+        exe: Google Slides.exe
+        link: Google Slides.lnk
 - name: Remove all-user shortcuts
   block:
     - name: "Remove {{ item.name }}"
@@ -99,6 +108,9 @@
       - name: VLC media player
         exe: VLC media player.exe
         link: VLC media player.lnk
+      - name: Steam
+        exe: Steam.exe
+        link: Steam.lnk
 
 - name: Disable startup apps
   block:
