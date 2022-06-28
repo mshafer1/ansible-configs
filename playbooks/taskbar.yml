@@ -1,0 +1,6 @@
+---
+
+- name: pyenv
+  hosts: windows
+  tasks:
+  - import_tasks: tasks/taskbar.yml
