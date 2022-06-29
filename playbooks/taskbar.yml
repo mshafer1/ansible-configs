@@ -4,3 +4,4 @@
   hosts: windows
   tasks:
   - import_tasks: tasks/taskbar.yml
+  - import_tasks: tasks/path.yml

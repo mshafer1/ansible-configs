@@ -1,0 +1,9 @@
+- name: Add scripts dirs to path
+  ansible.windows.win_path:
+    elements:
+    - "{{ item.path }}"
+    scope: user
+    state: present
+  loop:
+  - path: 'C:\bin'
+  - path: 'C:\wsl_tools'
