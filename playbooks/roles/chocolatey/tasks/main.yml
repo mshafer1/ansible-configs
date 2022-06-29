@@ -4,6 +4,7 @@
     state: latest
   with_items:
       - putty
+      - winscp
       - windirstat
       - pyenv-win
       - vscode
