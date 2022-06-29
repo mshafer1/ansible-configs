@@ -6,6 +6,9 @@ python: objects/python
 
 install-deps: objects/deps_installed
 
+win-settings:
+	ansible-playbook playbooks/win_settings.yml
+
 objects/:
 	mkdir objects
 
