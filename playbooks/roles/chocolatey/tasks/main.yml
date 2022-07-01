@@ -28,7 +28,7 @@
       - gridmove
       # - win32diskimager
       - inkscape
-      # - lockhunter
+      - lockhunter
       - nvm
       - tightvnc
       - vlc
