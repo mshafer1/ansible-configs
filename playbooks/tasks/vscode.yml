@@ -1,5 +1,5 @@
 - name: "VSCocde: Default terminal: cmd"
-  ansible.builtin.lineinfile:
+  community.windows.win_lineinfile:
     path: "%APPDATA%/code/User/settings.json"
     line: '"terminal.integrated.defaultProfile.windows": "Command Prompt"'
     insertbefore: '}'
