@@ -8,6 +8,8 @@
       - windirstat
       - pyenv-win
       - vscode
+      - vscode-python
+      - vscode-prettier
       - git
       - sublimetext4
       - googlechrome

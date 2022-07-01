@@ -1,3 +1,7 @@
+
+- name: Install VSCdoe Remote- SSH extenstion
+  ansible.windows.win_shell: code --install-extension ms-vscode-remote.remote-ssh
+
 - name: "VSCocde: Default terminal: cmd"
   community.windows.win_lineinfile:
     path: "%APPDATA%/code/User/settings.json"
