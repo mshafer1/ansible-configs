@@ -7,3 +7,22 @@
     path: "%APPDATA%/code/User/settings.json"
     line: '"terminal.integrated.defaultProfile.windows": "Command Prompt"'
     insertbefore: '}'
+
+- name: Create ssh file if needed
+  ansible.windows.win_file:
+    path: "%USERPROFILE%/.ssh/config"
+    state: touch
+
+- name: Setup ssh hosts
+  block:
+  - name: load ssh hosts config
+    ansible.builtin.include_vars:
+      file: ssh_hosts.yml
+      name: ssh_hosts
+
+  - name: setup hosts config
+    ansible.builtin.template:
+      src: ../templates/ssh_hosts
+      dest: "%USERPROFILE%/.ssh/config"
+    vars:
+      SSH_HOSTS: '{{ ssh_hosts.host_info }} '

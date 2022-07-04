@@ -1,0 +1,15 @@
+# Read more about SSH config files: https://linux.die.net/man/5/ssh_config
+{% for setting in SSH_HOSTS %}
+Host {{ setting.host }}
+    HostName {{ setting.hostname }}
+    {% if 'username' in setting -%}
+    User {{ setting.username }}
+    {% else -%}
+    User pi
+    {% endif -%}
+    {% if 'port' in setting -%}
+    Port {{ setting.port }}
+    {% endif -%}
+    IdentityFile {{ setting.key_file }}
+
+{% endfor %}
