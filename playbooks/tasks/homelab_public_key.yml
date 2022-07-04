@@ -1,0 +1,9 @@
+- name: Include host mapping vars
+  ansible.builtin.include_vars:
+    file: pubkeys.yml
+    name: pubkeys
+
+- name: Install homelab pub key
+  ansible.builtin.lineinfile:
+    path: ~/.ssh/authorized_keys
+    line: '{{ pubkeys.pubkeys.homelab }}'

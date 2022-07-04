@@ -6,6 +6,8 @@
     dns_config_file: /etc/dnsmasq.hosts
 
   tasks:
+  - import_tasks: tasks/homelab_public_key.yml
+
   - name: Include host mapping vars
     ansible.builtin.include_vars:
       file: host_ip_mapping_subdomain1.yml
@@ -15,7 +17,7 @@
     ansible.builtin.include_vars:
       file: shortnames.yml
       name: shortnames
-
+  
   - name: Create config file if needed
     become: true
     copy:
