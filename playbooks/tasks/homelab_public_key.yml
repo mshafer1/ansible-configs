@@ -1,4 +1,7 @@
 - name: Include host mapping vars
+  # <vars/pubkeys.yml>
+  # pubkeys:
+  #   <name>: ssh-rsa <public key> <comment>
   ansible.builtin.include_vars:
     file: pubkeys.yml
     name: pubkeys
