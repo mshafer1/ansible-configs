@@ -1,0 +1,22 @@
+- name: "Session: {{ item.name }}"
+  ansible.windows.win_regedit:
+    path: "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions\\{{ item.name }}"
+    name: HostName
+    data: "{{ item.hostName }}"
+- name: "Session: {{ item.name }} - P {{ item.portNumber | default(22) }}"
+  ansible.windows.win_regedit:
+    path: "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions\\{{ item.name }}"
+    name: PortNumber
+    data: "{{ item.portNumber | default(22) }}"
+    type: dword
+- name: "Session: {{ item.name }} - Key {{ item.pubKey }}"
+  ansible.windows.win_regedit:
+    path: "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions\\{{ item.name }}"
+    name: PublicKeyFile
+    data: '{{ user_profile -}}\{{ item.pubKey | replace("/","\;") | replace(";", "") }}'
+  when: "'pubKey' in item"
+- name: "Session: {{ item.name }} - protocol: ssh"
+  ansible.windows.win_regedit:
+    path: "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions\\{{ item.name }}"
+    name: Protocol
+    data: "ssh"

@@ -1,0 +1,24 @@
+---
+- name: Include host mapping vars
+  # sessions:
+  # - name: <name>
+  #   hostName: <user>@<hostname>
+  #   # optional: portNumber: <port>
+  #   # optional: PubKey: '.ssh/<key name>'
+  #   # optional: Protocol: <ssh>
+  ansible.builtin.include_vars:
+    file: putty_sessions.yml
+    name: putty_config
+
+- name: Get user profile dir
+  win_shell: echo "$env:userprofile"
+  register: user_profile_dir
+
+- name: Assign user profile to var
+  set_fact:
+    user_profile: "{{ user_profile_dir.stdout | trim }}"
+
+# doing a loop with an include let's me "loop" a block
+- name: Setup Putty sessions
+  include_tasks: _putty_helper.yml
+  loop: "{{ putty_config.sessions }}"
