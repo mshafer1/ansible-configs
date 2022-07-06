@@ -1,0 +1,178 @@
+- name: Handle Debian
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Assign config filename
+  ansible.builtin.set_fact: config_file="/etc/fail2ban/jail.local" config_dir="/etc/fail2ban/filter.d"
+
+- name: Copy default config
+  become: true
+  copy:
+    remote_src: true
+    src: /etc/fail2ban/jail.conf
+    dest: '{{ config_file }}'
+    force: no
+
+- name: Configure fail2ban
+  become: true
+  block:
+    - name: use incremental block
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^#?\s*bantime.increment.*$'
+        line: bantime.increment = true
+    - name: consider all jails
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^#?\s*bantime.overalljails.*$'
+        line: bantime.overalljails = true
+    - name: ban for an hour to start
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^bantime += .+$'
+        line: bantime  = 1h
+        firstmatch: true
+    - name: max of 2 attempts
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^maxretry = .+$'
+        line: maxretry = 2
+        firstmatch: true
+    - name: Email and log blocks
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^action =.+$'
+        line: action = %(action_mwl)s
+        firstmatch: true
+    - name: Enable nginx-http-auth
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        insertafter: '^\[nginx-http-auth\]$'
+        line: enabled = true
+        firstmatch: true
+    - name: Enable nginx-noscript
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-noscript]'
+        block: |
+          [nginx-noscript]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-noscript
+          logpath  = /var/log/nginx/access.log
+    - name: Enable nginx-badbots
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-badbots]'
+        block: |
+          [nginx-badbots]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-badbots
+          logpath  = /var/log/nginx/access.log
+    - name: Enable nginx-nohome
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-nohome]'
+        block: |
+          [nginx-nohome]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-nohome
+          logpath  = /var/log/nginx/access.log
+    - name: Enable nginx-noproxy
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-noproxy]'
+        block: |
+          [nginx-noproxy]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-noproxy
+          logpath  = /var/log/nginx/access.log
+
+- name: Setup filters for fail2ban
+  become: true
+  block:
+    - name: nginx-http-auth
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_dir }}/nginx-http-auth.conf'
+        line: '            ^ \[error\] \d+#\d+: \*\d+ no user/password was provided for basic authentication, client: <HOST>, server: \S+, request: "\S+ \S+ HTTP/\d+\.\d+", host: "\S+"\s*$'
+        insertafter: '^failregex = \^.+$'
+    - name: nginx-badbots
+      notify:
+      - Restart fail2ban
+      copy:
+        remote_src: true
+        src: '{{ config_dir }}/apache-badbots.conf'
+        dest: '{{ config_dir }}/nginx-badbots.conf'
+        force: no
+    - name: nginx-noscript
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-noscript.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> -.*GET.*(\.php|\.asp|\.exe|\.pl|\.cgi|\.scgi|\.venv)
+
+            ignoreregex =
+    - name: nginx-nohome
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-nohome.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> -.*GET .*/~.*
+
+            ignoreregex =
+    - name: nginx-noproxy
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-noproxy.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> -.*GET http.*
+
+            ignoreregex =

@@ -1,0 +1,9 @@
+# based on https://www.digitalocean.com/community/tutorials/how-to-protect-an-nginx-server-with-fail2ban-on-ubuntu-14-04
+- name: Install utilities
+  ansible.builtin.apt:
+    pkg: 
+    - nginx
+    - fail2ban
+    state: latest
+    update_cache: true
+  become: true

@@ -1,0 +1,13 @@
+---
+
+- name: Configure nginx servers
+  hosts: nginx
+  roles:
+  - role: nginx
+
+  handlers:
+  - name: Restart fail2ban
+    ansible.builtin.systemd:
+      state: restarted
+      name: fail2ban
+    become: true
