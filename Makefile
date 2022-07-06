@@ -6,6 +6,8 @@ python: objects/python
 
 install-deps: objects/deps_installed
 
+win_settings: objects/win_settings
+
 main: objects/main
 
 win-settings:
@@ -28,4 +30,8 @@ objects/main: playbooks/main.yml $(wildcard playbooks/roles/**/*) objects/
 
 objects/python: playbooks/python.yml $(wildcard playbooks/roles/python/**/*) objects/
 	ansible-playbook playbooks/python.yml --ask-become-pass
+	touch $@
+
+objects/win_settings: playbooks/win_settings.yml  $(wildcard playbooks/roles/putty/**/*) $(wildcard playbooks/roles/putty/*) objects/
+	ansible-playbook playbooks/win_settings.yml
 	touch $@
