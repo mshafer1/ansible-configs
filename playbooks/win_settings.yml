@@ -1,9 +1,11 @@
 ---
 
-- name: pyenv
+- name: Windows settings
   hosts: windows
+  roles:
+  - role: putty
   tasks:
   - import_tasks: tasks/taskbar.yml
   - import_tasks: tasks/path.yml
   - import_tasks: tasks/vscode.yml
-  - import_tasks: tasks/putty.yml
+

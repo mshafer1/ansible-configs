@@ -1,4 +1,3 @@
----
 - name: Include host mapping vars
   # sessions:
   # - name: <name>
