@@ -1,0 +1,6 @@
+@ssh 
+{%- if 'key_file' in item %} -i {{ item.key_file }}.pem {% endif -%}
+{%- if 'port' in item -%} -p {{ item.port }} {% endif -%}
+{%- if 'username' in item %} {{ item.username }}{%- else -%} pi {%- endif -%}
+@
+{{- item.hostname }}

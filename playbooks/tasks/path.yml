@@ -7,3 +7,10 @@
   loop:
   - path: 'C:\bin'
   - path: 'C:\wsl_tools'
+- name: create script dirs if needed
+  ansible.windows.win_file:
+    path: "{{ item.path }}"
+    state: directory
+  loop:
+  - path: 'c:\bin'
+  - path: 'C:\wsl_tools'
