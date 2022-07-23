@@ -23,6 +23,13 @@
         dest: '{{ config_file }}'
         regexp: '^#?\s*bantime.increment.*$'
         line: bantime.increment = true
+    - name: safelist local network
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: '^#?\s*ignoreip =.*$'
+        line: 'ignoreip = 127.0.0.1/8 ::1 192.168.1.1/24'
     - name: consider all jails
       notify:
       - Restart fail2ban
