@@ -4,6 +4,7 @@
     pkg: 
     - nginx
     - fail2ban
+    - mailutils
     state: latest
     update_cache: true
   become: true
