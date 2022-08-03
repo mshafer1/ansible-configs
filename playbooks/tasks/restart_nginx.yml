@@ -1,0 +1,13 @@
+---
+- name: check configs
+  shell: nginx -t
+  become: true
+  register: nginx_check_configs
+  listen: restart nginx service
+- name: restart
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: nginx
+  when: nginx_check_configs is changed
+  listen: restart nginx service

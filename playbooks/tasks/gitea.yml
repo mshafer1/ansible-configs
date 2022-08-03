@@ -1,0 +1,10 @@
+- name: Setup gitea docker
+  ansible.builtin.template:
+    src: gitea_config
+    dest: "{{ gitea_config_dir }}/docker-compose.yml"
+  register: gitea_config
+- name: Build and start gitea container
+  shell: 
+    chdir: "{{ gitea_config_dir }}"
+    cmd: "docker-compose build && docker-compose up -d"
+  when: gitea_config.changed

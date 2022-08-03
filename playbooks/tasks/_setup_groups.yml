@@ -1,0 +1,27 @@
+- name: Make sure groups exist
+  block:
+  - name: user's group
+    ansible.builtin.group:
+      name: '{{ user.name }}'
+  - name: user's other groups
+    ansible.builtin.group:
+      name: '{{ group.name }}'
+    loop: '{{ user.groups }}'
+    when: user.groups is defined
+    loop_control:
+      loop_var: group
+- name: Set primary group
+  ansible.builtin.user:
+    groups:
+    - '{{ user.name }}'
+    name: '{{ user.name }}'
+- name: Add extra groups
+  ansible.builtin.user:
+    append: yes
+    groups: 
+      - '{{ group.name }}'
+    name: '{{ user.name }}'
+  loop: '{{ user.groups }}'
+  when: user.groups is defined
+  loop_control:
+    loop_var: group

@@ -1,0 +1,10 @@
+- name: create symlinks
+  ansible.builtin.file:
+        dest: "/home/{{ item.name }}/{{ symlink.name }}"
+        src: "{{ symlink.target }}"
+        state: link
+        force: true
+        follow: false # won't exist while setting up
+  loop: "{{ item.symlinks }}"
+  loop_control:
+    loop_var: symlink

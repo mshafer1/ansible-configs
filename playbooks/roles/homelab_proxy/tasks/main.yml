@@ -1,0 +1,104 @@
+
+- name: Handle Debian
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+# --- vars/proxy_sites.yml template
+# email: no-reply@yourcompany.com
+# optional: default_404_root: /web/www
+# sites:
+# - domain: <www.yourcompany.com>
+#   root: </var/web/www>
+#   # optional: 404_root: /web/www
+  
+- name: Include host proxy sites info
+  ansible.builtin.include_vars:
+    file: proxy_sites.yml
+    name: proxy
+  
+- name: Assign default 404_root
+  ansible.builtin.set_fact: default_404_root="{{ proxy.default_404_root }}"
+
+- name: Setup certbot
+  include_tasks: certbot.yml
+
+- name: ensure nginx config dirs exists
+  become: true
+  block:
+  - name: sites-enabled  
+    file:
+      path: '{{ item }}'
+      state: directory
+    loop:
+    - "{{ nginx_config_dir }}"
+    - "{{ nginx_link_dir }}"
+
+- name: Setup nginx domains
+  become: true
+  ansible.builtin.template:
+    src: nginx_site
+    dest: "{{ nginx_config_dir }}/{{ item.domain }}"
+    owner: root
+    group: root
+    mode: '0644'
+    force: no
+  # creates: "{{ nginx_config_dir }}/{{ item.domain }}"
+  loop: "{{ proxy.sites }}"
+  register: nginx_configs
+  notify:
+    - certbot cert nginx
+    - restart nginx service
+- name: nginx link sites as enabled
+  become: true
+  ansible.builtin.file:
+    dest: "{{ nginx_link_dir }}/{{ item.domain }}"
+    src: "{{ nginx_config_dir }}/{{ item.domain }}"
+    state: link
+  loop: "{{ proxy.sites }}"
+  register: nginx_configs
+  notify:
+    - certbot cert nginx
+    - restart nginx service
+- name: setup users
+  become: true
+  block:
+  - name: Include host mapping vars
+    ansible.builtin.include_vars:
+      file: homelab_users.yml
+      name: homelab
+  - name: Setup users
+    ansible.builtin.user:
+      name: "{{ item.name }}"
+      password: "{{ item.password }}"
+      state: present
+    loop: "{{ homelab.users }}"
+  - name: Configure users' groups
+    include_tasks: _setup_groups.yml
+    loop: "{{ homelab.users }}"
+    loop_control:
+      loop_var: user
+  - name: Create user's shortcuts
+    include_tasks: _setup_shortcuts.yml
+    loop: "{{ homelab.users }}"
+- name: Setup permissions
+  become: true
+  block:
+  - name: /etc/letsencrypt/live should be readable by homelab users
+    ansible.builtin.file:
+      owner: root
+      group: homelab
+      mode: 750
+      state: directory
+      path: '{{ item }}'
+    loop:
+      - /etc/letsencrypt
+      - /etc/letsencrypt/live
+      - /etc/letsencrypt/archive
+  # using raw since file module doens't allow wild-carding (requiring an additional step)
+  # and shell tries to quote the blocks (rendering the wildcard ineffective)  
+  - name: /etc/letsencrypt/live should be readable by homelab users
+    ansible.builtin.raw: "chown root:homelab /etc/letsencrypt/archive/{{ item }}/privkey*.pem"
+    loop: "{{ homelab.domains }}"
+  - name: /etc/letsencrypt/live should be readable by homelab users
+    ansible.builtin.raw: "chmod 640 /etc/letsencrypt/archive/{{ item }}/privkey*.pem"
+    loop: "{{ homelab.domains }}"

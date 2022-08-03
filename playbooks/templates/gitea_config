@@ -1,0 +1,24 @@
+version: "3"
+
+networks:
+  gitea:
+    external: false
+
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - ROOT_URL=https://{{ item.domain }}/
+    restart: always
+    networks:
+      - gitea
+    volumes:
+      - {{ item.data_dir }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "{{ item.web }}:3000"
+      - "{{ item.ssh }}:22"

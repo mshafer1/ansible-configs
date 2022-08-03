@@ -1,0 +1,31 @@
+- name: Install certbot
+  pip:
+    name:
+      - certbot
+      - certbot-nginx
+    executable: pip3
+
+- name: Register certbot
+  block:
+  - name: 'certbot: create dir if needed'
+    become: true
+    ansible.builtin.file:
+      path: /etc/letsencrypt
+      state: directory
+      mode: '0700'
+  - name: register
+    become: true
+    shell: |
+      certbot -n register --agree-tos --email {{ proxy.email }}
+      touch /etc/letsencrypt/.registered
+    args:
+      creates: /etc/letsencrypt/.registered
+
+- name: Setup cronjob for renewal
+  become: true
+  cron:
+    name: certbot-renewal
+    job: "/bin/bash -lc '/usr/local/bin/certbot renew >> /var/log/certbot'"
+    minute: "0"
+    hour: "6"
+    day: "2"

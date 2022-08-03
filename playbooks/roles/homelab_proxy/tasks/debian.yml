@@ -1,0 +1,59 @@
+- name: install Docker deps
+  become: true
+  block:
+  - name: Install aptitude
+    apt:
+      name: aptitude
+      state: latest
+      update_cache: true
+
+  - name: Install required system packages
+    apt:
+      pkg:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+        - sslh
+      state: latest
+      update_cache: true
+- name: install Docker
+  become: true
+  block:
+  - name: Add Docker GPG apt Key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  # - name: Add Docker Repository
+  #   apt_repository:
+  #     repo: deb https://download.docker.com/linux/ubuntu focal stable
+
+  - name: install docker-ce and related
+    apt:
+      pkg:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-compose-plugin
+      state: latest
+
+  - name: Install Docker Module for Python
+    pip:
+      name: docker
+
+- name: Setup www root
+  become: true
+  block:
+  - name: www root location exists
+    file:
+      path: /mounts/web
+      state: directory
+  - name: fstab file mount drive
+    ansible.builtin.lineinfile:
+      path: /etc/fstab
+      line: UUID=63d33372-d4c8-4d9a-a042-f855c98a7e59 /mounts/web ext4 defaults 0 0
+  

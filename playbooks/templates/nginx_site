@@ -1,0 +1,43 @@
+server {
+    server_name {{ item.domain }} {%- if 'extra_domains' in item %}{% for domain in item.extra_domains %} {{ domain }}{%- endfor %}{% endif %};
+    listen 80;
+
+    {% if 'proxy' in item -%}
+    location / {
+        proxy_pass {{ item.proxy }};
+    }
+    {%- else -%}
+    root {{ item.root }};
+    index index.html;
+    {%- endif %}
+
+
+    {% if '404_root' in item -%}
+    error_page 404 /404.html;
+    location = /404.html {
+       root {{ item['404_root'] }};
+       internal;
+    }
+    {%- elif default_404_root is defined -%}
+    error_page 404 /404.html;
+    location = /404.html {
+       root {{ default_404_root }};
+       internal;
+    }
+    {% endif %}
+
+}
+
+{# comment 
+{% if 'ssh' in item %}
+stream {
+    upstream ssh {
+        server localhost:{{ item.ssh }};
+    }
+    server {
+        listen 80;
+        proxy_pass ssh;
+    }
+}
+{% endif %}
+#}
