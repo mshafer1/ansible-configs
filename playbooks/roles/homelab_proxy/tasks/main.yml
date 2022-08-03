@@ -70,6 +70,7 @@
     ansible.builtin.user:
       name: "{{ item.name }}"
       password: "{{ item.password }}"
+      shell: /bin/bash
       state: present
     loop: "{{ homelab.users }}"
   - name: Configure users' groups
@@ -96,6 +97,7 @@
       - /etc/letsencrypt/archive
   # using raw since file module doens't allow wild-carding (requiring an additional step)
   # and shell tries to quote the blocks (rendering the wildcard ineffective)  
+  # oh, apparently, with_fileglob is a thing... https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html
   - name: /etc/letsencrypt/live should be readable by homelab users
     ansible.builtin.raw: "chown root:homelab /etc/letsencrypt/archive/{{ item }}/privkey*.pem"
     loop: "{{ homelab.domains }}"
