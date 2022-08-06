@@ -33,4 +33,11 @@
   # certbot??
   # https://github.com/geerlingguy/ansible-role-certbot
 
-  
+  tasks:
+  - name: include proxy info
+    ansible.builtin.include_vars:
+      file: proxy_sites.yml
+      name: proxy
+  - name: setup gitea hosts
+    ansible.builtin.include_tasks: tasks/gitea.yml
+    loop: "{{ proxy.sites | selectattr('gitea_config_dir', 'defined') }}"

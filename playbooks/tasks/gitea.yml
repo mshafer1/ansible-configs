@@ -1,10 +1,19 @@
+# - name: print
+#   ansible.builtin.debug:
+#     msg: site {{ item.domain }}
+- name: Make sure config dir exists
+  ansible.builtin.file:
+    path: "{{ item.gitea_config_dir }}"
+    state: directory
 - name: Setup gitea docker
   ansible.builtin.template:
     src: gitea_config
-    dest: "{{ gitea_config_dir }}/docker-compose.yml"
+    dest: "{{ item.gitea_config_dir }}/docker-compose.yml"
   register: gitea_config
 - name: Build and start gitea container
   shell: 
-    chdir: "{{ gitea_config_dir }}"
+    chdir: "{{ item.gitea_config_dir }}"
     cmd: "docker-compose build && docker-compose up -d"
+  notify:
+  - restart nginx service
   when: gitea_config.changed
