@@ -5,6 +5,17 @@
 - name: Assign config filename
   ansible.builtin.set_fact: config_file="/etc/fail2ban/jail.local" config_dir="/etc/fail2ban/filter.d"
 
+- name: No default site
+  become: true
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Include safe ips
+  ansible.builtin.include_vars:
+    file: safe_ips.yml
+    name: ips
+
 - name: Copy default config
   become: true
   copy:
@@ -29,7 +40,7 @@
       ansible.builtin.lineinfile:
         dest: '{{ config_file }}'
         regexp: '^#?\s*ignoreip =.*$'
-        line: 'ignoreip = 127.0.0.1/8 ::1 192.168.1.1/24'
+        line: 'ignoreip = 127.0.0.1/8 ::1 192.168.1.1/24 {{ ips.safe | join(" ") }}'
     - name: consider all jails
       notify:
       - Restart fail2ban
@@ -52,6 +63,14 @@
         dest: '{{ config_file }}'
         regexp: '^maxretry = .+$'
         line: maxretry = 2
+        firstmatch: true
+    - name: findtime of 1h
+      notify:
+      - Restart fail2ban
+      ansible.builtin.lineinfile:
+        dest: '{{ config_file }}'
+        regexp: 'findtime *= ?.+$'
+        line: findtime = 1h
         firstmatch: true
     - name: Email and log blocks
       notify:
