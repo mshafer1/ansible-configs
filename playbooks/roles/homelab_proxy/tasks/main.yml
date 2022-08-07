@@ -3,7 +3,7 @@
   import_tasks: debian.yml
   when: ansible_facts['os_family']|lower == 'debian'
 
-# --- vars/proxy_sites.yml template
+# --- vars/homelab_proxy_sites.yml template
 # email: no-reply@yourcompany.com
 # optional: default_404_root: /web/www
 # sites:
@@ -13,7 +13,7 @@
   
 - name: Include host proxy sites info
   ansible.builtin.include_vars:
-    file: proxy_sites.yml
+    file: homelab_proxy_sites.yml
     name: proxy
   
 - name: Assign default 404_root

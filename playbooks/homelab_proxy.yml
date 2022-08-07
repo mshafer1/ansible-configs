@@ -36,7 +36,7 @@
   tasks:
   - name: include proxy info
     ansible.builtin.include_vars:
-      file: proxy_sites.yml
+      file: homelab_proxy_sites.yml
       name: proxy
   - name: setup gitea hosts
     ansible.builtin.include_tasks: tasks/gitea.yml
