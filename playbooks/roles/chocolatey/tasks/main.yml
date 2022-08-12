@@ -3,39 +3,39 @@
     name: '{{ item }}'
     state: latest
   with_items:
-      - putty
-      - winscp
-      - windirstat
-      - pyenv-win
-      - vscode
-      - vscode-python
-      - vscode-prettier
+      - audacity
+      - audacity-ffmpeg
+      - audacity-lame
+      - barrier
+      - dbeaver
+      - discord
+      - etcher
+      - freecad
+      - gimp
       - git
-      - sublimetext4
+      - github-desktop
       - googlechrome
       - googledrive
-      - gimp
-      - sharex
-      - shotcut
-      - obs-studio
-      - barrier
-      - audacity
-      - audacity-lame
-      - audacity-ffmpeg
-      - freecad
-      - dbeaver
-      - github-desktop
-      - etcher
-      - discord
       - gridmove
-      # - win32diskimager
       - inkscape
       - lockhunter
+      - notepadplusplus
       - nvm
+      - obs-studio
+      - putty
+      - pyenv-win
+      - sharex
+      - shotcut
+      - steam-client
+      - sublimetext4
       - tightvnc
       - vlc
-      - notepadplusplus
-      - steam-client
+      - vscode
+      - vscode-prettier
+      - vscode-python
+      - windirstat
+      - winscp
+      # - win32diskimager
 
 - name: Install autohotkey
   win_chocolatey:
