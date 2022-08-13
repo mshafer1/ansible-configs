@@ -13,6 +13,7 @@
       path: /etc/letsencrypt
       state: directory
       mode: '0700'
+      force: no
   - name: register
     become: true
     shell: |
