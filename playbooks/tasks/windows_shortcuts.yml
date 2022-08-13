@@ -68,3 +68,17 @@
       - name: Steam
         exe: Steam.exe
         link: Steam.lnk
+- name: Create user shortcuts
+  block:
+    - name: "create {{ item.name }}"
+      community.windows.win_shortcut:
+        state: present
+        src: "{{ item.exe }}"
+        dest: "{{ item.link }}"
+      loop:
+      - name: AHK hotkeys
+        exe: "G:/My Drive/AHK/hotkeys.ahk"
+        link: Desktop/hotkeys.ahk.lnk
+      - name: AHK startup
+        exe: "G:/My Drive/AHK/hotkeys.ahk"
+        link: "%appdata%/../Roaming/Microsoft/Windows/Start Menu/Programs/Startup/hotkeys.ahk.lnk"
