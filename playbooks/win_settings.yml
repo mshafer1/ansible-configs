@@ -9,4 +9,5 @@
   - import_tasks: tasks/path.yml
   - import_tasks: tasks/vscode.yml
   - import_tasks: tasks/windows_scripts.yml
+  - import_tasks: tasks/windows_shortcuts.yml
 

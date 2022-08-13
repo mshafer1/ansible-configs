@@ -1,0 +1,70 @@
+- name: Remove user shortcuts
+  block:
+    - name: "Remove {{ item.name }}"
+      community.windows.win_shortcut:
+        state: absent
+        src: "{{ item.exe }}"
+        dest: "Desktop/{{ item.link }}"
+      loop:
+      - name: ShareX
+        exe: ShareX.exe
+        link: ShareX.lnk
+      - name: Discord
+        exe: Discord.exe
+        link: Discord.lnk
+      - name: GitHub Desktop
+        exe: GitHub Desktop.exe
+        link: GitHub Desktop.lnk
+      - name: balenaEtcher
+        exe: balenaEtcher.exe
+        link: balenaEtcher.lnk
+      - name: WinDirStat
+        exe: WinDirStat.exe
+        link: WinDirStat.lnk
+      - name: Inkscape
+        exe: Inkscape.exe
+        link: Inkscape.lnk
+      - name: Google Docs
+        exe: Google Docs.exe
+        link: Google Docs.lnk
+      - name: Google Drive
+        exe: Google Drive.exe
+        link: Google Drive.lnk
+      - name: Google Sheets
+        exe: Google Sheets.exe
+        link: Google Sheets.lnk
+      - name: Google Slides
+        exe: Google Slides.exe
+        link: Google Slides.lnk
+- name: Remove all-user shortcuts
+  block:
+    - name: "Remove {{ item.name }}"
+      community.windows.win_shortcut:
+        state: absent
+        src: "{{ item.exe }}"
+        dest: "%Public%/Desktop/{{ item.link }}"
+      loop:
+      - name: Audacity
+        exe: Audacity.exe
+        link: Audacity.lnk
+      - name: FreeCAD 0.19
+        exe: FreeCAD 0.19.exe
+        link: FreeCAD 0.19.lnk
+      - name: Google Chrome
+        exe: Google Chrome.exe
+        link: Google Chrome.lnk
+      - name: Microsoft Edge
+        exe: Microsoft Edge.exe
+        link: Microsoft Edge.lnk
+      - name: OBS Studio
+        exe: OBS Studio.exe
+        link: OBS Studio.lnk
+      - name: Visual Studio Code
+        exe: Visual Studio Code.exe
+        link: Visual Studio Code.lnk
+      - name: VLC media player
+        exe: VLC media player.exe
+        link: VLC media player.lnk
+      - name: Steam
+        exe: Steam.exe
+        link: Steam.lnk
