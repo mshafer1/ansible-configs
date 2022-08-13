@@ -36,28 +36,38 @@
     notify:
     - Restart dnsmasq
  
+  - name: "Load {{ shortnames.dns_subdomain }} block into var"
+    set_fact:
+      hosts_content: |
+        {% for item in shortnames.host_ip_mapping|sort(attribute='ip') %}
+        {{ item.ip }} {{ item.host }}{{ shortnames.dns_subdomain }}
+        {% endfor %}
   - name: "Set DNS hosts for {{ shortnames.dns_subdomain }}"
     become: true
-    ansible.builtin.lineinfile:
-      path: "{{ dns_config_file }}"
-      line: "{{ item.ip }} {{ item.host }}{{ shortnames.dns_subdomain }}"
-    loop: "{{ shortnames.host_ip_mapping }}"
+    ansible.builtin.blockinfile:
+      marker: "# {mark} ANSIBLE CONFIG  {{ shortnames.dns_subdomain }}"
+      dest: "{{ dns_config_file }}"
+      block: "{{ hosts_content }}"
     notify:
     - Restart dnsmasq
   
+  - name: "Load {{ subdomain1.dns_subdomain }} block into var"
+    set_fact:
+      hosts_content: |
+        {% for item in subdomain1.host_ip_mapping|sort(attribute='ip') %}
+        {{ item.ip }} {{ item.host }}{{ subdomain1.dns_subdomain }}
+        {% endfor %}
+
+
   - name: "Set DNS hosts for {{ subdomain1.dns_subdomain }}"
     become: true
-    ansible.builtin.lineinfile:
-      path: "{{ dns_config_file }}"
-      line: "{{ item.ip }} {{ item.host }}{{ subdomain1.dns_subdomain }}"
-    loop: "{{ subdomain1.host_ip_mapping }}"
+    ansible.builtin.blockinfile:
+      marker: "# {mark} ANSIBLE CONFIG  {{ subdomain1.dns_subdomain }}"
+      dest: "{{ dns_config_file }}"
+      block: "{{ hosts_content }}"
     notify:
     - Restart dnsmasq
   
-  - name: Sort dns file by ip
-    ansible.builtin.shell: "cp -f {{ dns_config_file }} {{ dns_config_file }}.bak; cat {{ dns_config_file }}.bak | sort | uniq > {{ dns_config_file }}"
-    become: true
-
   handlers:
   - name: Restart dnsmasq
     ansible.builtin.systemd:
