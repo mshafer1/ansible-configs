@@ -21,5 +21,9 @@
     loop:
     - alias: fnano
       cmd: 'nano `fzf`'
-  
-  
+  - name: fzf shell completions for all users
+    become: true
+    ansible.builtin.file:
+      dest: "/etc/bash_completion.d/fzf_completion.bash"
+      src: "/usr/share/doc/fzf/examples/completion.bash"
+      state: link
