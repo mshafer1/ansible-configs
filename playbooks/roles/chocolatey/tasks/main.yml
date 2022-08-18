@@ -9,6 +9,7 @@
       - audacity-lame
       - barrier
       - dbeaver
+      - chromedriver
       - discord
       - etcher
       - ffmpeg
