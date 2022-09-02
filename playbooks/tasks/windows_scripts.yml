@@ -9,3 +9,14 @@
       src: ../templates/ssh_script
       dest: "c:/bin/{{ item.host }}.bat"
     loop: "{{ ssh_hosts.host_info }}"
+- name: Setup cli alias scripts # Note: using .bat files so they work in cmd, powershell, and calling each other
+  block:
+  - name: 'alias {{ item.name }}'
+    copy:
+      content: '{{ item.command }}'
+      dest: "c:/bin/{{ item.name }}.bat"
+    loop:
+    - name: pr
+      command: poetry run %*
+    - name: pfp
+      command: pr black . && git commit -am "format" && git push
