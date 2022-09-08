@@ -8,6 +8,7 @@
     - wget
     - curl
     - fzf
+    - git
     state: latest
     update_cache: true
   become: true

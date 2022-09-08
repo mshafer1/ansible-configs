@@ -1,0 +1,40 @@
+- name: Install utilities
+  ansible.builtin.apt:
+    pkg: 
+    - python3
+    - python3-pip
+    - nano
+    - tmux
+    - wget
+    - curl
+    - fzf
+    - git
+    state: latest
+    update_cache: true
+  become: true
+- name: Store donwloads dir in var
+  ansible.builtin.set_fact:
+    sys_download_dir: /downloads
+- name: Install Chrome
+  become: true
+  block:
+  - name: System downloads folder exists
+    ansible.builtin.file:
+      path: '{{ sys_download_dir }}'
+      state: directory
+      force: no
+      mode: 775
+      owner: root
+      group: root
+  - name: Download package
+    ansible.builtin.get_url:
+      dest: '{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb'
+      url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      register: chrome_package_download
+  - name: Install Chrome from download
+    when: chrome_package_download.changed
+    ansible.builtin.apt:
+      deb: '{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb'
+
+
+

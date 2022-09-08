@@ -1,0 +1,22 @@
+---
+
+- name: linux_dev
+  hosts: localhost
+  roles:
+  - role: linux_core
+  - role: linux_desktop
+
+- name: pyenv
+  hosts: localhost
+  roles:
+  - role: staticdev.pyenv
+    # pyenv_path: "{{ home }}/pyenv"
+    # pyenv_owner: "{{ instance_owner }}"
+    pyenv_global:
+      - 3.7:latest
+    pyenv_enable_autocompletion: false
+    pyenv_python_versions:
+      - 3.10:latest
+      - 3.9:latest
+      - 3.8:latest
+      - 3.7:latest

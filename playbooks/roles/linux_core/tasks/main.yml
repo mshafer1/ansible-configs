@@ -21,6 +21,8 @@
     loop:
     - alias: fnano
       cmd: 'nano `fzf`'
+    - alias: pr
+      cmd: 'poetry run'
   - name: fzf shell completions for all users
     become: true
     ansible.builtin.file:
