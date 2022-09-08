@@ -25,7 +25,17 @@
       cmd: 'poetry run'
   - name: fzf shell completions for all users
     become: true
-    ansible.builtin.file:
+    copy:
+      content: |
+          if [ -f /usr/share/bash-completion/completions/fzf ]; then
+            source /usr/share/bash-completion/completions/fzf
+          fi
+
+          if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
+            source /usr/share/doc/fzf/examples/key-bindings.bash
+          fi
       dest: "/etc/bash_completion.d/fzf_completion.bash"
-      src: "/usr/share/doc/fzf/examples/completion.bash"
-      state: link
+      force: no
+      group: sys
+      owner: root
+      mode: 0775
