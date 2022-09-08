@@ -2,6 +2,8 @@
 roles:
   - src: staticdev.pyenv
     version: 2.5.1
+  - src: gantsign.visual-studio-code
+    version: 6.8.0
 
 collections:
   - name: chocolatey.chocolatey

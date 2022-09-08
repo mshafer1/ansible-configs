@@ -9,14 +9,30 @@
 - name: pyenv
   hosts: localhost
   roles:
-  - role: staticdev.pyenv
-    # pyenv_path: "{{ home }}/pyenv"
-    # pyenv_owner: "{{ instance_owner }}"
-    pyenv_global:
-      - 3.7:latest
-    pyenv_enable_autocompletion: false
-    pyenv_python_versions:
-      - 3.10:latest
-      - 3.9:latest
-      - 3.8:latest
-      - 3.7:latest
+  # - role: staticdev.pyenv
+  #   # pyenv_path: "{{ home }}/pyenv"
+  #   # pyenv_owner: "{{ instance_owner }}"
+  #   pyenv_global:
+  #     - 3.7:latest
+  #   pyenv_enable_autocompletion: false
+  #   pyenv_python_versions:
+  #     - 3.10:latest
+  #     - 3.9:latest
+  #     - 3.8:latest
+  #     - 3.7:latest
+  - role: gansign.visual-studio-code
+    users:
+      - username: '{{ ansible_user_id }}'
+        visual_studio_code_extensions:
+            - ms-toolsai.jupyter-keymap
+            - ms-vscode-remote.remote-ssh
+            - ms-vscode-remote.remote-ssh-edit
+            - qwtel.sqlite-viewer
+            - esbenp.prettier-vscode
+            - ms-python.python
+            - octref.vetur
+        visual_studio_code_settings_overwrite: yes
+        visual_studio_code_settings: {
+            "editor.rulers": [{"color": "gray", "column": 100}, {"color": "red", "column": 120}],
+            "workbench.editorAssociations": {"*.db": "sqlite-viewer.option"}
+          }
