@@ -30,7 +30,7 @@
     ansible.builtin.get_url:
       dest: '{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb'
       url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-      register: chrome_package_download
+    register: chrome_package_download
   - name: Install Chrome from download
     when: chrome_package_download.changed
     ansible.builtin.apt:
