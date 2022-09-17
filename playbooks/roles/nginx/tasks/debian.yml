@@ -5,6 +5,7 @@
     - nginx
     - fail2ban
     - mailutils
+    - firewalld
     state: latest
     update_cache: true
   become: true
