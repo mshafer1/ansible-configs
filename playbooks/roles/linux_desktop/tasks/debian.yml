@@ -71,7 +71,7 @@
       load-module module-null-sink sink_name=virtspk sink_properties=device.description=Virtual_Speaker
       load-module module-null-sink sink_name=virtmic sink_properties=device.description=Virtual_Microphone_Sink
       load-module module-remap-source master=virtmic.monitor source_name=virtmic source_properties=device.description=Virtual_Microphone
-    path: /etc/pusle/default.pa
+    path: /etc/pulse/default.pa
 - name: Install OBS
   become: true
   block:
