@@ -39,53 +39,53 @@
 - name: Install discord
   become: true
   block:
-    - name: System downloads folder exists
-      ansible.builtin.file:
-        path: "{{ sys_download_dir }}"
-        state: directory
-        force: no
-        mode: 775
-        owner: root
-        group: root
-    - name: Download package
-      ansible.builtin.get_url:
-        dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
-        url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
-      register: discord_package_download
-    - name: Install discord from download
-      when: discord_package_download.changed
-      ansible.builtin.apt:
-        deb: "{{ sys_download_dir }}/discord-0.0.19.deb"
-    - name: Install snaps
-      become: true
-      community.general.snap:
-        name:
-          - teams
-          - vlc
-          - audacity
-- name: Virtual audio devices
-  become: true
-  ansible.builtin.blockinfile:
-    block: |
-      load-module module-null-sink sink_name=virtspk sink_properties=device.description=Virtual_Speaker
-      load-module module-null-sink sink_name=virtmic sink_properties=device.description=Virtual_Microphone_Sink
-      load-module module-remap-source master=virtmic.monitor source_name=virtmic source_properties=device.description=Virtual_Microphone
-    path: /etc/pusle/default.pa
-- name: Install OBS
-  become: true
-  block:
-  - name: Install loopback dev
+  - name: System downloads folder exists
+    ansible.builtin.file:
+      path: "{{ sys_download_dir }}"
+      state: directory
+      force: no
+      mode: 775
+      owner: root
+      group: root
+  - name: Download package
+    ansible.builtin.get_url:
+      dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
+      url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
+    register: discord_package_download
+  - name: Install discord from download
+    when: discord_package_download.changed
     ansible.builtin.apt:
-      pkg:
-        - v4l2loopback-dkms
-    state: latest
-  - name: Add OBS repo
-    ansible.builtin.apt_repository:
-      repo: ppa:obsproject/obs-studio
-      state: present
-  - name: Install OBS Studio
-    ansible.builtin.apt:
-      pkg:
-        - obs-studio
-    state: latest
-    update_cache: true
+      deb: "{{ sys_download_dir }}/discord-0.0.19.deb"
+  - name: Install snaps
+    become: true
+    community.general.snap:
+      name:
+        - teams
+        - vlc
+        - audacity
+# - name: Virtual audio devices
+#   become: true
+#   ansible.builtin.blockinfile:
+#     block: |
+#       load-module module-null-sink sink_name=virtspk sink_properties=device.description=Virtual_Speaker
+#       load-module module-null-sink sink_name=virtmic sink_properties=device.description=Virtual_Microphone_Sink
+#       load-module module-remap-source master=virtmic.monitor source_name=virtmic source_properties=device.description=Virtual_Microphone
+#     path: /etc/pusle/default.pa
+# - name: Install OBS
+#   become: true
+#   block:
+#   - name: Install loopback dev
+#     ansible.builtin.apt:
+#       pkg:
+#         - v4l2loopback-dkms
+#     state: latest
+#   - name: Add OBS repo
+#     ansible.builtin.apt_repository:
+#       repo: ppa:obsproject/obs-studio
+#       state: present
+#   - name: Install OBS Studio
+#     ansible.builtin.apt:
+#       pkg:
+#         - obs-studio
+#     state: latest
+#     update_cache: true
