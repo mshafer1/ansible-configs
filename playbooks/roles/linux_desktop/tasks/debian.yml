@@ -76,8 +76,8 @@
   block:
   - name: Install loopback dev
     ansible.builtin.apt:
-    pkg:
-      - v4l2loopback-dkms
+      pkg:
+        - v4l2loopback-dkms
     state: latest
   - name: Add OBS repo
     ansible.builtin.apt_repository:
@@ -85,7 +85,7 @@
       state: present
   - name: Install OBS Studio
     ansible.builtin.apt:
-    pkg:
-      - obs-studio
+      pkg:
+        - obs-studio
     state: latest
     update_cache: true
