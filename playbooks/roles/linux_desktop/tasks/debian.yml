@@ -1,14 +1,15 @@
 - name: Install utilities
   ansible.builtin.apt:
-    pkg: 
-    - python3
-    - python3-pip
-    - nano
-    - tmux
-    - wget
-    - curl
-    - fzf
-    - git
+    pkg:
+      - python3
+      - python3-pip
+      - nano
+      - tmux
+      - wget
+      - curl
+      - fzf
+      - git
+      - barrier
     state: latest
     update_cache: true
   become: true
@@ -18,23 +19,47 @@
 - name: Install Chrome
   become: true
   block:
-  - name: System downloads folder exists
-    ansible.builtin.file:
-      path: '{{ sys_download_dir }}'
-      state: directory
-      force: no
-      mode: 775
-      owner: root
-      group: root
-  - name: Download package
-    ansible.builtin.get_url:
-      dest: '{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb'
-      url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    register: chrome_package_download
-  - name: Install Chrome from download
-    when: chrome_package_download.changed
-    ansible.builtin.apt:
-      deb: '{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb'
-
-
-
+    - name: System downloads folder exists
+      ansible.builtin.file:
+        path: "{{ sys_download_dir }}"
+        state: directory
+        force: no
+        mode: 775
+        owner: root
+        group: root
+    - name: Download package
+      ansible.builtin.get_url:
+        dest: "{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb"
+        url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      register: chrome_package_download
+    - name: Install Chrome from download
+      when: chrome_package_download.changed
+      ansible.builtin.apt:
+        deb: "{{ sys_download_dir }}/google-chrome-stable_current_amd64.deb"
+- name: Install discord
+  become: true
+  block:
+    - name: System downloads folder exists
+      ansible.builtin.file:
+        path: "{{ sys_download_dir }}"
+        state: directory
+        force: no
+        mode: 775
+        owner: root
+        group: root
+    - name: Download package
+      ansible.builtin.get_url:
+      dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
+      url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
+      register: discord_package_download
+    - name: Install discord from download
+      when: discord_package_download.changed
+      ansible.builtin.apt:
+        deb: "{{ sys_download_dir }}/discord-0.0.19.deb"
+    - name: Install snaps
+      become: true
+      community.general.snap:
+        name:
+          - teams
+          - vlc
+          - audacity
