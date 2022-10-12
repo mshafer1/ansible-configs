@@ -49,8 +49,8 @@
         group: root
     - name: Download package
       ansible.builtin.get_url:
-      dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
-      url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
+        dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
+        url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
       register: discord_package_download
     - name: Install discord from download
       when: discord_package_download.changed
