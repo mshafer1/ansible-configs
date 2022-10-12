@@ -63,3 +63,29 @@
           - teams
           - vlc
           - audacity
+- name: Virtual audio devices
+  become: true
+  ansible.builtin.blockinfile:
+    block: |
+      load-module module-null-sink sink_name=virtspk sink_properties=device.description=Virtual_Speaker
+      load-module module-null-sink sink_name=virtmic sink_properties=device.description=Virtual_Microphone_Sink
+      load-module module-remap-source master=virtmic.monitor source_name=virtmic source_properties=device.description=Virtual_Microphone
+    path: /etc/pusle/default.pa
+- name: Install OBS
+  become: true
+  block:
+  - name: Install loopback dev
+    ansible.builtin.apt:
+    pkg:
+      - v4l2loopback-dkms
+    state: latest
+  - name: Add OBS repo
+    ansible.builtin.apt_repository:
+      repo: ppa:obsproject/obs-studio
+      state: present
+  - name: Install OBS Studio
+    ansible.builtin.apt:
+    pkg:
+      - obs-studio
+    state: latest
+    update_cache: true
