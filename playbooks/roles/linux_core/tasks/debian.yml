@@ -9,6 +9,7 @@
     - curl
     - fzf
     - git
+    - tree
     state: latest
     update_cache: true
   become: true
