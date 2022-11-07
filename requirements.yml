@@ -9,4 +9,6 @@ collections:
   - name: chocolatey.chocolatey
     version: 1.2.0
     source: https://galaxy.ansible.com
-  
+  - name: community.general
+    version: 5.6.0
+    source: https://galaxy.ansible.com
