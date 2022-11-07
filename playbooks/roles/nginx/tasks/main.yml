@@ -51,7 +51,7 @@
         }
     force: yes
 
-- name: Setup baloni cert
+- name: Setup baloney cert
   become: true
   block:
   - name: www root location exists
@@ -74,7 +74,7 @@
         - "DNS:docs.example.com"
     register: csr
 
-  - name: Setup baloni cert
+  - name: Setup baloney cert
     community.crypto.x509_certificate:
       path: /etc/certs/example.pem
       privatekey_path: /etc/certs/example.key
