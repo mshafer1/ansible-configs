@@ -34,11 +34,52 @@
       permanent: yes
       state: enabled
 
-- name: No default site
+- name: Reject default site
   become: true
-  ansible.builtin.file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
+  notify:
+    - restart nginx service
+  ansible.builtin.copy:
+    dest: /etc/nginx/sites-enabled/default
+    content: |
+        server { listen 80 default_server; return 444; }
+        server {
+            listen 443 default_server;
+            ssl_certificate /etc/certs/example.pem;
+            ssl_certificate_key /etc/certs/example.key;
+            ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+            return 444;
+        }
+    force: yes
+
+- name: Setup baloni cert
+  become: true
+  block:
+  - name: www root location exists
+    file:
+      path: /etc/certs
+      state: directory
+  
+  - name: Create private key (RSA, 4096 bits)
+    community.crypto.openssl_privatekey:
+      path: /etc/certs/example.key
+
+  - name: Create certificate signing request (CSR) for self-signed certificate
+    community.crypto.openssl_csr_pipe:
+      privatekey_path: /etc/certs/example.key
+      common_name: example.com
+      organization_name: Not your company
+      subject_alt_name:
+        - "DNS:example.com"
+        - "DNS:www.example.com"
+        - "DNS:docs.example.com"
+    register: csr
+
+  - name: Setup baloni cert
+    community.crypto.x509_certificate:
+      path: /etc/certs/example.pem
+      privatekey_path: /etc/certs/example.key
+      csr_content: "{{ csr.csr }}"
+      provider: selfsigned
 
 - name: Include safe ips
   ansible.builtin.include_vars:
