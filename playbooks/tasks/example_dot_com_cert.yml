@@ -1,0 +1,26 @@
+- name: www root location exists
+  file:
+    path: /etc/certs
+    state: directory
+
+- name: Create private key (RSA, 4096 bits)
+  community.crypto.openssl_privatekey:
+    path: /etc/certs/example.key
+
+- name: Create certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/certs/example.key
+    common_name: example.com
+    organization_name: Not your company
+    subject_alt_name:
+      - "DNS:example.com"
+      - "DNS:www.example.com"
+      - "DNS:docs.example.com"
+  register: csr
+
+- name: Setup baloney cert
+  community.crypto.x509_certificate:
+    path: /etc/certs/example.pem
+    privatekey_path: /etc/certs/example.key
+    csr_content: "{{ csr.csr }}"
+    provider: selfsigned

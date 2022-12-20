@@ -54,32 +54,13 @@
 - name: Setup baloney cert
   become: true
   block:
-  - name: www root location exists
-    file:
-      path: /etc/certs
-      state: directory
-  
-  - name: Create private key (RSA, 4096 bits)
-    community.crypto.openssl_privatekey:
-      path: /etc/certs/example.key
-
-  - name: Create certificate signing request (CSR) for self-signed certificate
-    community.crypto.openssl_csr_pipe:
-      privatekey_path: /etc/certs/example.key
-      common_name: example.com
-      organization_name: Not your company
-      subject_alt_name:
-        - "DNS:example.com"
-        - "DNS:www.example.com"
-        - "DNS:docs.example.com"
-    register: csr
-
-  - name: Setup baloney cert
-    community.crypto.x509_certificate:
+  - name: check if file exists
+    stat:
       path: /etc/certs/example.pem
-      privatekey_path: /etc/certs/example.key
-      csr_content: "{{ csr.csr }}"
-      provider: selfsigned
+    register: baloney_cert_file
+  - name: create cert
+    import_tasks: example_dot_com_cert.yml
+    when: not baloney_cert_file.stat.exists
 
 - name: Include safe ips
   ansible.builtin.include_vars:
