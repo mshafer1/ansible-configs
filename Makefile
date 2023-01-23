@@ -8,6 +8,8 @@ install-deps: objects/deps_installed
 
 win_settings: objects/win_settings
 
+homelab: objects/homelab
+
 main: objects/main
 
 win-settings:
@@ -34,4 +36,8 @@ objects/python: playbooks/python.yml $(wildcard playbooks/roles/python/**/*) obj
 
 objects/win_settings: playbooks/win_settings.yml  $(wildcard playbooks/roles/putty/**/*) $(wildcard playbooks/roles/putty/*) objects/
 	ansible-playbook playbooks/win_settings.yml
+	touch $@
+
+objects/homelab: playbooks/homelab_proxy.yml objects/dns $(wildcard playbooks/var/**/*) $(wildcard playbooks/roles/nginx/*) $(wildcard playbooks/roles/homelab_proxy/*)
+	ansible-playbook playbooks/homelab_proxy.yml
 	touch $@

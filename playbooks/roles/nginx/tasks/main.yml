@@ -34,11 +34,33 @@
       permanent: yes
       state: enabled
 
-- name: No default site
+- name: Reject default site
   become: true
-  ansible.builtin.file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
+  notify:
+    - restart nginx service
+  ansible.builtin.copy:
+    dest: /etc/nginx/sites-enabled/default
+    content: |
+        server { listen 80 default_server; return 444; }
+        server {
+            listen 443 default_server;
+            ssl_certificate /etc/certs/example.pem;
+            ssl_certificate_key /etc/certs/example.key;
+            ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+            return 444;
+        }
+    force: yes
+
+- name: Setup baloney cert
+  become: true
+  block:
+  - name: check if file exists
+    stat:
+      path: /etc/certs/example.pem
+    register: baloney_cert_file
+  - name: create cert
+    import_tasks: example_dot_com_cert.yml
+    when: not baloney_cert_file.stat.exists
 
 - name: Include safe ips
   ansible.builtin.include_vars:

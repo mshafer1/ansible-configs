@@ -1,10 +1,22 @@
 - name: create symlinks
-  ansible.builtin.file:
-        dest: "/home/{{ item.name }}/{{ symlink.name }}"
-        src: "{{ symlink.target }}"
-        state: link
-        force: true
-        follow: false # won't exist while setting up
-  loop: "{{ item.symlinks }}"
-  loop_control:
-    loop_var: symlink
+  block:
+  - name: create dir if needed
+    ansible.builtin.file:
+      path: "/home/{{ item.name }}/{{ symlink.name }}/.."
+      state: directory
+      force: false
+      group: '{{ item.name }}'
+      owner: '{{ item.name }}'
+    loop: "{{ item.symlinks }}"
+    loop_control:
+      loop_var: symlink
+  - name: make the symlink
+    ansible.builtin.file:
+      dest: "/home/{{ item.name }}/{{ symlink.name }}"
+      src: "{{ symlink.target }}"
+      state: link
+      force: true
+      follow: false # won't exist while setting up
+    loop: "{{ item.symlinks }}"
+    loop_control:
+      loop_var: symlink
