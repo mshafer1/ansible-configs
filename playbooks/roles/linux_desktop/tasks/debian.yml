@@ -10,6 +10,8 @@
     - fzf
     - git
     - barrier
+    - apt-transport-https
+    - gpgv
     state: latest
     update_cache: true
   become: true
@@ -48,7 +50,7 @@
         mode: 775
         owner: root
         group: root
-    - name: Download package
+    - name: Download discord package
       ansible.builtin.get_url:
         dest: "{{ sys_download_dir }}/discord-0.0.19.deb"
         url: https://dl.discordapp.net/apps/linux/0.0.19/discord-0.0.19.deb
@@ -57,6 +59,32 @@
       when: discord_package_download.changed
       ansible.builtin.apt:
         deb: "{{ sys_download_dir }}/discord-0.0.19.deb"
+- name: Install Catia
+  become: true
+  block:
+    - name: System downloads folder exists
+      ansible.builtin.file:
+        path: "{{ sys_download_dir }}"
+        state: directory
+        force: no
+        mode: 775
+        owner: root
+        group: root
+    - name: Download kxstudio package
+      ansible.builtin.get_url:
+        dest: "{{ sys_download_dir }}/kxstudio-repos_11.1.0_all.deb"
+        url: https://launchpad.net/~kxstudio-debian/+archive/kxstudio/+files/kxstudio-repos_11.1.0_all.deb
+      register: kxstudio_package_download
+    - name: Install kxtudio repo from download
+      when: kxstudio_package_download.changed
+      ansible.builtin.apt:
+        deb: "{{ sys_download_dir }}/kxstudio-repos_11.1.0_all.deb"
+    - name: Install catia
+      ansible.builtin.apt:
+        pkg: 
+        - catia
+        state: latest
+        update_cache: true
 # - name: Install snaps
 #   become: true
 #   community.general.snap:
