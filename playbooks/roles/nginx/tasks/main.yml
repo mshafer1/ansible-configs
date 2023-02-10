@@ -181,6 +181,25 @@
           port     = http,https
           filter   = nginx-nohome
           logpath  = /var/log/nginx/access.log
+    - name: Enable sshd-no-bad-protocols
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [sshd-no-bad-protocols]'
+        block: |
+          [sshd-nobadprotocols]
+
+          enabled   = true
+          filter    = sshd
+          port      = ssh
+          logpath   = %(sshd_log)s
+          backend   = %(sshd_backend)s
+          maxretry  = 1
+          failregex = ^.+Connection from <HOST> port \d+ on .+ rdomain ""\n.+client sent invalid protocol
+          maxlines  = 3
+
     - name: Enable nginx-noproxy
       notify:
       - Restart fail2ban
