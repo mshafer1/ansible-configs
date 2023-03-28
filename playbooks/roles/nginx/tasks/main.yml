@@ -237,6 +237,35 @@
           filter   = nginx-noproxy
           logpath  = /var/log/nginx/access.log
 
+    - name: No requests for default site
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-nodefaultsite]'
+        block: |
+          [nginx-nodefaultsite]
+
+          enabled   = true
+          filter    = nginx-nodefault
+          port      = http,https
+          logpath   = /var/log/nginx/access.log
+          maxretry  = 1
+    - name: No requests for wordpress config
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-nowordpressconfig]'
+        block: |
+          [nginx-nowordpressconfig]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-wordpressconfig
+          logpath  = /var/log/nginx/access.log
 - name: Setup filters for fail2ban
   become: true
   block:
@@ -255,7 +284,7 @@
         src: '{{ config_dir }}/apache-badbots.conf'
         dest: '{{ config_dir }}/nginx-badbots.conf'
         force: no
-    - name: nginx-noscript
+    - name: nginx-noscript filter
       notify:
       - Restart fail2ban
       ansible.builtin.blockinfile:
@@ -265,7 +294,33 @@
         block: |
             [Definition]
 
-            failregex = ^<HOST> -.*GET.*(\.php|\.asp|\.exe|\.pl|\.cgi|\.scgi|\.venv)
+            failregex = ^<HOST> -.*(GET|POST).*(\.php|\.asp|\.exe|\.pl|\.cgi|\.scgi|\.venv)
+
+            ignoreregex =
+    - name: nginx-nodefault filter
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-nodefault.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> - .* host="[\d\.]+
+
+            ignoreregex =
+    - name: nginx-wordpress-config filter
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-wordpressconfig.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> -.*(GET|POST) /+.*wp-(includes|admin|content|login|style)(/|.php).* HTTP/.*\" (404|444|300|301|302)
 
             ignoreregex =
     - name: nginx-nohome
