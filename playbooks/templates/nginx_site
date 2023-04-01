@@ -2,6 +2,10 @@ server {
     server_name {{ item.domain }} {%- if 'extra_domains' in item %}{% for domain in item.extra_domains %} {{ domain }}{%- endfor %}{% endif %};
     listen 80;
 
+    {% if 'client_max_body_size' in item -%}
+    client_max_body_size {{ item.client_max_body_size }};
+    {%- endif %}
+
     {% if 'proxy' in item -%}
     location / {
         proxy_pass {{ item.proxy }};
