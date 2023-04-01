@@ -86,7 +86,10 @@
 
 - name: Include safe ips
   ansible.builtin.include_vars:
-    file: safe_ips.yml
+  with_first_found:
+  - file: safe_ips.yml
+    name: ips
+  - file: empty_safe_ips.yml
     name: ips
 
 - name: Copy default config
