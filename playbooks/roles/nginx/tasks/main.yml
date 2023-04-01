@@ -41,7 +41,18 @@
   ansible.builtin.copy:
     dest: /etc/nginx/sites-enabled/default
     content: |
-        server { listen 80 default_server; return 444; }
+        server { 
+          listen 80 default_server; 
+          location /status {
+            stub_status on;
+            allow 127.0.0.1;
+            deny all;
+          }
+
+          location / {
+            return 444;
+          }
+        }
         server {
             listen 443 default_server;
             ssl_certificate /etc/certs/example.pem;
