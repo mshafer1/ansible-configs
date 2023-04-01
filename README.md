@@ -75,3 +75,17 @@ This is a collection of [Ansible](https://docs.ansible.com/ansible/latest/gettin
 
 
 
+### **How do I check that it worked**?
+Since we removed the default "Welcome to nginx" page (or, default site), we did also add a `/status` route that will report the server status - BUT ONLY FOR REQUESTS WITHIN LOCALHOST.
+
+So, we can check if it worked by running `curl http://localhost/status`
+Should get a response like:
+
+```
+Active connections: 1
+server accepts handled requests
+ 1 1 1
+Reading: 0 Writing: 1 Waiting: 0
+```
+
+([may need to install curl if this is a completely new server](https://command-not-found.com/curl))
