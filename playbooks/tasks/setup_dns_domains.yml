@@ -1,0 +1,16 @@
+- name: "Load {{ loopdomain.dns_subdomain }} block into var"
+  set_fact:
+    hosts_content: |
+      {% for item in loopdomain.host_ip_mapping|sort(attribute='ip') %}
+      {{ item.ip }} {{ item.host }}{{ loopdomain.dns_subdomain }}
+      {% endfor %}
+
+
+- name: "Set DNS hosts for {{ loopdomain.dns_subdomain }}"
+  become: true
+  ansible.builtin.blockinfile:
+    marker: "# {mark} ANSIBLE CONFIG  {{ loopdomain.dns_subdomain }}"
+    dest: "{{ dns_config_file }}"
+    block: "{{ hosts_content }}"
+  notify:
+  - Restart dnsmasq

@@ -1,0 +1,7 @@
+- name: Install utilities
+  ansible.builtin.apt:
+    pkg: 
+    - dnsmasq
+    state: latest
+    update_cache: true
+  become: true

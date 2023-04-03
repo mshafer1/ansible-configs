@@ -1,0 +1,14 @@
+- name: Set IP if not provided
+  ansible.builtin.set_fact:
+    ip_address: "{{ ip | default('10.20.23.0') }}/24"
+- name: Set gateway if not provided
+  ansible.builtin.set_fact:
+    gateway_address: "{{ gateway | default(ip_address) }}"
+- name: Add an Ethernet connection with static IP configuration
+  community.general.nmcli:
+    conn_name: my-eth1
+    ifname: eth0
+    type: ethernet
+    ip4: "{{ ip_address }}"
+    gw4: "{{ gateway_address }}"
+    state: present
