@@ -1,0 +1,7 @@
+---
+
+- name: speed_tester
+  hosts: localhost
+  roles:
+  - role: speed_tester
+

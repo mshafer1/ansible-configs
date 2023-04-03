@@ -1,0 +1,8 @@
+- name: Install utilities
+  ansible.builtin.apt:
+    pkg: 
+    - iperf3
+    - sshd
+    state: latest
+    update_cache: true
+  become: true

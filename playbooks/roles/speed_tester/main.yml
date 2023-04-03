@@ -1,0 +1,22 @@
+- name: Handle Debian
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Run iperf3 as daemon
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/iperf3.service
+    contents: |
+      [Unit]
+      Description=iperf3 server
+      After=syslog.target network.target auditd.service
+
+      [Service]
+      ExecStart=/usr/bin/iperf3 -s
+
+      [Install]
+      WantedBy=multi-user.target
+- name: Start service
+  ansible.builtin.systemd:
+    name: iperf3
+    state: started
+    enabled: yes
