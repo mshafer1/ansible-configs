@@ -5,7 +5,7 @@
 - name: Run iperf3 as daemon
   ansible.builtin.copy:
     dest: /etc/systemd/system/iperf3.service
-    contents: |
+    content: |
       [Unit]
       Description=iperf3 server
       After=syslog.target network.target auditd.service
