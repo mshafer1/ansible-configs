@@ -1,0 +1,15 @@
+---
+
+- name: dhcp_server
+  hosts: localhost
+  roles:
+  # - role: static_ip
+  - role: dhcp_server
+
+
+  handlers:
+    - name: Restart dnsmasq
+      ansible.builtin.systemd:
+        state: restarted
+        name: dnsmasq
+      become: true
