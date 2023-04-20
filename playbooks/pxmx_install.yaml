@@ -1,0 +1,134 @@
+---
+- name: Install nginx
+  hosts: blackbear
+  tasks:
+  - include_tasks: tasks/nginx.yml
+  - name: Create nginx.service.d directory
+    file:
+      path: /etc/systemd/system/nginx.service.d/
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Set nginx to start after pve-cluster
+    blockinfile:
+      path: /etc/systemd/system/nginx.service.d/override.conf
+      block: |
+          [Unit]
+          Requires=pve-cluster.service
+          After=pve-cluster.service
+      backup: yes
+      create: yes # create if needed
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: Restart nginx
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: nginx
+
+  - name: delete nginx default config
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+  
+  - name: nginx default redirect to fqdn
+    blockinfile:
+      path: /etc/nginx/sites-enabled/default
+      block: |
+          server {
+              listen 80 default;
+              server_name {{ hostvars[inventory_hostname]['HOSTNAME'] }};
+              return 301 https://{{ hostvars[inventory_hostname]['FQDN'] }}$request_uri;
+          }
+      backup: yes
+      create: yes # create if needed
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: nginx proxy fqdn
+    blockinfile:
+      path: /etc/nginx/sites-enabled/proxmox.conf
+      block: |
+        upstream proxmox {
+            server "{{ hostvars[inventory_hostname]['FQDN'] }}";
+        }
+
+        server {
+            listen 80;
+            rewrite ^(.*) https://$host$1 permanent;
+        }
+
+        server {
+            listen 443 ssl;
+            server_name _;
+            ssl_certificate /etc/pve/local/pve-ssl.pem;
+            ssl_certificate_key /etc/pve/local/pve-ssl.key;
+            proxy_redirect off;
+            location / {
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_pass https://localhost:8006;
+                proxy_buffering off;
+                client_max_body_size 0;
+                proxy_connect_timeout  3600s;
+                proxy_read_timeout  3600s;
+                proxy_send_timeout  3600s;
+                send_timeout  3600s;
+            }
+        }
+      backup: yes
+      create: yes # create if needed
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: Restart nginx
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: nginx
+  
+  - name: Blacklist Drivers
+    blockinfile:
+      path: /etc/modprobe.d/blacklist.conf
+      block: |
+        blacklist radeon
+        blacklist nouveau
+        blacklist nvidia
+      backup: yes
+      create: yes # create if needed
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: Add vfio to kernel modules
+    blockinfile:
+      path: /etc/modules
+      block: |
+        vfio
+        vfio_iommu_type1
+        vfio_pci
+        vfio_virqfd
+      backup: yes
+      create: yes # create if needed
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: update-initramfs
+    shell: update-initramfs -u -k all
+
+  - name: Configure grub options
+    # TODO: consider using something like this - https://stackoverflow.com/questions/55844981/ansible-insert-word-in-grub-cmdline
+    lineinfile:
+      path: /etc/default/grub
+      line: GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt"
+
+  - name: update-grub2
+    shell: update-grub2
