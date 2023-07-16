@@ -5,21 +5,6 @@
     nginx_config_dir: /etc/nginx/sites-available
     nginx_link_dir: /etc/nginx/sites-enabled
   
-  handlers:
-    - name: Restart fail2ban
-      become: true
-      ansible.builtin.systemd:
-        state: restarted
-        name: fail2ban
-    
-    - name: restart nginx service
-      import_tasks: tasks/restart_nginx.yml
-    
-    - name: certbot cert nginx
-      loop: "{{ nginx_configs.results | selectattr('changed', 'equalto', true) | map(attribute='item') | map(attribute='domain') | list }}"
-      become: true
-      shell: "certbot register --non-interactive --nginx -d {{ item }}"
-  
   # tasks:
   # - name: Include host mapping vars
   #   ansible.builtin.include_vars:

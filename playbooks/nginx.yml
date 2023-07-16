@@ -8,19 +8,3 @@
   #  https://command-not-found.com/firewall-cmd
   #  https://www.liquidweb.com/kb/an-introduction-to-firewalld/
   #  https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-7
-
-  handlers:
-  - name: Restart fail2ban
-    ansible.builtin.systemd:
-      state: restarted
-      name: fail2ban
-    become: true
-  
-  - name: restart nginx service
-    import_tasks: tasks/restart_nginx.yml
-  
-  - name: certbot cert nginx
-    loop: "{{ nginx_configs.results | selectattr('changed', 'equalto', true) | map(attribute='item') | map(attribute='domain') | list }}"
-    become: true
-    shell: "certbot register --non-interactive --nginx -d {{ item }}"
-  
