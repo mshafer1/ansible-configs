@@ -366,3 +366,13 @@
             failregex = ^<HOST> -.*GET http.*
 
             ignoreregex =
+- name: Permaban bad actors
+  become: true
+  block:
+    - name: Load banned IPs
+      ansible.builtin.include_vars:
+        file: "banned_ips.yml"
+        name: ips
+    - name: ban ips
+      include_tasks: _permaban_ip.yml
+      loop: "{{ ips.banned }}"

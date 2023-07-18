@@ -12,3 +12,5 @@ collections:
   - name: community.general
     version: 5.6.0
     source: https://galaxy.ansible.com
+  - name: ansible.posix
+    version: 1.5.4 # force upgrade ansible.posix

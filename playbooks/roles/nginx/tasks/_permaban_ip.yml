@@ -1,0 +1,7 @@
+- name: "Ban {{ item }}"
+  ansible.posix.firewalld:
+    immediate: yes
+    permanent: yes
+    state: disabled
+    zone: public
+    source: "{{ item.addr }}"
