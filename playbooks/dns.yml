@@ -18,6 +18,11 @@
       file: shortnames.yml
       name: shortnames
   
+  - name: Include host mapping vars (superset)
+    ansible.builtin.include_vars:
+      file: domains.yml
+      name: domain_config
+
   - name: Create config file if needed
     become: true
     copy:
@@ -68,6 +73,12 @@
     notify:
     - Restart dnsmasq
   
+  - name: Setup DNS hosts for domains
+    ansible.builtin.include_tasks: tasks/setup_dns_domains.yml
+    loop: "{{ domain_config.domains }}"
+    loop_control:
+      loop_var: loopdomain
+
   handlers:
   - name: Restart dnsmasq
     ansible.builtin.systemd:
