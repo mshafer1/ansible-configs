@@ -20,3 +20,5 @@
       command: poetry run %*
     - name: pfp
       command: pr black . && git commit -am "format" && git push
+    - name: whipe
+      command: rmdir /Q /S %*
