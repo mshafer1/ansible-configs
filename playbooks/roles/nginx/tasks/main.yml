@@ -8,25 +8,14 @@
 - name: Firewall configs
   become: true
   block:
-  - name: permit traffic in default zone for https service
+  - name: 'firewall: permit traffic in default zone services'
     ansible.posix.firewalld:
-      service: https
+      service: '{{ item }}'
       permanent: yes
       state: enabled
-
-  - name: 'firewall: Enable http'
-    ansible.posix.firewalld:
-      zone: public
-      service: http
-      permanent: yes
-      state: enabled
-
-  - name: 'firewall: Enable https'
-    ansible.posix.firewalld:
-      zone: public
-      service: https
-      permanent: yes
-      state: enabled
+    with_items:
+    - http
+    - https
 
   - name: 'firewall: Enable ssh port'
     ansible.posix.firewalld:
@@ -376,3 +365,9 @@
     - name: ban ips
       include_tasks: _permaban_ip.yml
       loop: "{{ ips.banned }}"
+
+- name: Setup job to monitor for updated bans
+  become: true
+  block:
+  - name: Setup ban monitor
+    include_tasks: '_setup_ban_monitor.yml'

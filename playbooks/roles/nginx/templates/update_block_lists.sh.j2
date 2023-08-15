@@ -1,0 +1,25 @@
+#!/bin/bash -v
+
+date
+echo Starting ...
+printf "\n\n"
+
+set -e
+
+mkdir -p /tmp/update_block_lists
+pushd /tmp/update_block_lists
+
+for file in {% if ban_all_cloud -%} cloud_ips__and__ {%- endif -%} bad_actors__simplified
+do
+    curl https://raw.githubusercontent.com/mshafer1/block_list/main/${file}.json | jq . > ${file}.json
+    total=`cat ${file}.json | jq ". | length"`
+    echo total is $total
+    cat ${file}.json | jq ".[]" --raw-output | while read line
+    do
+        firewall-cmd --zone=public --timeout=48h --add-rich-rule="rule family='ipv4' source address='$line' drop"
+    done | tqdm --total $total
+
+done
+
+echo Finished
+date

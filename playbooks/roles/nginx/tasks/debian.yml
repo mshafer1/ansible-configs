@@ -6,6 +6,9 @@
     - fail2ban
     - mailutils
     - firewalld
+    - python3-tqdm
+    - jq # used for update_block_lists
     state: latest
     update_cache: true
+    cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
   become: true

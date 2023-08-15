@@ -22,7 +22,7 @@ objects/deps_installed: requirements.yml objects/
 	ansible-galaxy install -r requirements.yml
 	touch $@
 
-objects/dns: playbooks/dns.yml $(wildcard playbooks/vars/**/*) objects/
+objects/dns: playbooks/dns.yml $(wildcard playbooks/vars/*) objects/
 	ansible-playbook playbooks/dns.yml --ask-become-pass
 	touch $@
 
@@ -38,6 +38,6 @@ objects/win_settings: playbooks/win_settings.yml  $(wildcard playbooks/roles/put
 	ansible-playbook playbooks/win_settings.yml
 	touch $@
 
-objects/homelab: playbooks/homelab_proxy.yml objects/dns $(wildcard playbooks/var/**/*) $(wildcard playbooks/roles/nginx/*) $(wildcard playbooks/roles/homelab_proxy/*)
+objects/homelab: playbooks/homelab_proxy.yml objects/dns $(wildcard playbooks/vars/*) $(wildcard playbooks/roles/nginx/**/*) $(wildcard playbooks/roles/homelab_proxy/*)
 	ansible-playbook playbooks/homelab_proxy.yml
 	touch $@
