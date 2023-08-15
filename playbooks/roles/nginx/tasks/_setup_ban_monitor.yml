@@ -11,7 +11,3 @@
     minute: '0'
     job: update-block-lists > /var/log/update_block_lists.log 2>&1
     name: Fetch latest IP block lists and apply.
-# - name: Initial setup block_lists
-#   shell:
-#     cmd: /usr/bin/update-block-lists > /var/log/update_block_lists.log 2>&1
-#   when: update_script.changed
