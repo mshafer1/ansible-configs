@@ -9,7 +9,7 @@ set -e
 mkdir -p /tmp/update_block_lists
 pushd /tmp/update_block_lists
 
-for file in {% if ban_all_cloud -%} cloud_ips__and__ {%- endif -%} bad_actors__simplified
+for file in {% if ban_all_cloud %} cloud_ips__and__ {%- endif -%} bad_actors__simplified 
 do
     curl https://raw.githubusercontent.com/mshafer1/block_list/main/${file}.json | jq . > ${file}.json
     total=`cat ${file}.json | jq ". | length"`
