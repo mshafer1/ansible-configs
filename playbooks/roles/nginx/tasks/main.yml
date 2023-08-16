@@ -355,6 +355,13 @@
             failregex = ^<HOST> -.*GET http.*
 
             ignoreregex =
+
+- name: Setup job to monitor for updated bans
+  become: true
+  block:
+  - name: Setup ban monitor
+    include_tasks: '_setup_ban_monitor.yml'
+
 - name: Permaban bad actors
   become: true
   block:
@@ -365,9 +372,3 @@
     - name: ban ips
       include_tasks: _permaban_ip.yml
       loop: "{{ ips.banned }}"
-
-- name: Setup job to monitor for updated bans
-  become: true
-  block:
-  - name: Setup ban monitor
-    include_tasks: '_setup_ban_monitor.yml'
