@@ -2,6 +2,8 @@ all: dns python install-deps
 
 dns: objects/dns
 
+nginx: objects/nginx
+
 python: objects/python
 
 install-deps: objects/deps_installed
@@ -24,6 +26,10 @@ objects/deps_installed: requirements.yml objects/
 
 objects/dns: playbooks/dns.yml $(wildcard playbooks/vars/*) objects/
 	ansible-playbook playbooks/dns.yml --ask-become-pass
+	touch $@
+
+objects/nginx: playbooks/nginx.yml $(wildcard playbooks/vars/*) objects/ $(wildcard playbooks/roles/nginx/**/*)
+	ansible-playbook playbooks/nginx.yml --ask-become-pass
 	touch $@
 
 objects/main: playbooks/main.yml $(wildcard playbooks/roles/**/*) objects/
