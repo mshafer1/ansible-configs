@@ -17,6 +17,7 @@ do
     cat ${file}.json | jq ".[]" --raw-output | while read line
     do
         firewall-cmd --zone=public --timeout=48h --add-rich-rule="rule family='ipv4' source address='$line' drop"
+        sleep 1
     done | tqdm --total $total
 
 done
