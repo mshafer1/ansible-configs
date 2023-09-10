@@ -272,6 +272,21 @@
           port     = http,https
           filter   = nginx-wordpressconfig
           logpath  = /var/log/nginx/access.log
+    - name: No head hunters
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [nginx-noheadhunters]'
+        block: |
+          [nginx-noheadhunters]
+
+          enabled  = true
+          port     = http,https
+          filter   = nginx-noheadhunters
+          logpath  = /var/log/nginx/access.log
+          maxretry  = 1
 - name: Setup filters for fail2ban
   become: true
   block:
@@ -300,7 +315,7 @@
         block: |
             [Definition]
 
-            failregex = ^<HOST> -.*(GET|POST).*(\.php|\.asp|\.exe|\.pl|\.cgi|\.scgi|\.venv)
+            failregex = ^<HOST> -.*(GET|POST|HEAD).*(\.php|\.asp|\.exe|\.pl|\.cgi|\.scgi|\.venv)
 
             ignoreregex =
     - name: nginx-nodefault filter
@@ -326,7 +341,7 @@
         block: |
             [Definition]
 
-            failregex = ^<HOST> -.*(GET|POST) /+.*wp-(includes|admin|content|login|style)(/|.php).* HTTP/.*\" (404|444|300|301|302)
+            failregex = ^<HOST> -.*(GET|POST|HEAD) /+.*wp-(includes|admin|content|login|style)(/|.php).* HTTP/.*\" (404|444|300|301|302)
 
             ignoreregex =
     - name: nginx-nohome
@@ -339,9 +354,23 @@
         block: |
             [Definition]
 
-            failregex = ^<HOST> -.*GET .*/~.*
+            failregex = ^<HOST> -.*(GET|POST|HEAD) .*/~.*
 
             ignoreregex =
+    - name: nginx-noheadhunters
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        create: true
+        dest: '{{ config_dir }}/nginx-noheadhunters.conf'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [Definition]'
+        block: |
+            [Definition]
+
+            failregex = ^<HOST> -.*HEAD /.* 404
+
+            ignoreregex = git-commit/[a-f\d]*
+                          "GitHub VSCode Pull Requests"
     - name: nginx-noproxy
       notify:
       - Restart fail2ban
