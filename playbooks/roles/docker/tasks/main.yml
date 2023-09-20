@@ -1,0 +1,6 @@
+- name: Handle Debian
+  include_tasks: '{{ ansible_os_family }}.yml'
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
