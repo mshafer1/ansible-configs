@@ -23,6 +23,14 @@
       cmd: 'nano `fzf`'
     - alias: pr
       cmd: 'poetry run'
+  - name: setup aliases with args
+    ansible.builtin.lineinfile:
+      line: "{{ item.alias }}() { {{ item.cmd }}; }"
+      path: /etc/profile.d/00-aliases.sh
+      state: present
+    loop:
+    - alias: cheat
+      cmd: 'curl "https://cheat.sh/$1" 2>/dev/null | less -r'
   - name: fzf shell completions for all users
     become: true
     copy:
