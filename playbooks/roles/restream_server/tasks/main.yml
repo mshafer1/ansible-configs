@@ -1,11 +1,6 @@
 - name: Install plugin
   include_tasks: '{{ ansible_os_family }}.yml'
 
-- name: load group vars
-  ansible.builtin.include_vars:
-    file: restream_allowed_publishers.yml
-    name: ALLOWED
-
 - name: Enable rtmp
   become: true
   block:
@@ -19,7 +14,7 @@
           server {
                   listen 1935;
                   chunk_size 2048;
-                  {% for ip in ALLOWED.PUBLISHERS %}
+                  {% for ip in ALLOWED_PUBLISHERS %}
                   allow publish {{ ip }};
                   {% endfor %}
                   deny publish all;
