@@ -4,7 +4,7 @@
   become: true
   register: nginx_check_configs
   listen: restart nginx service
-- name: restart
+- name: restart nginx
   become: true
   ansible.builtin.systemd:
     state: restarted

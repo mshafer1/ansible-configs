@@ -1,27 +1,8 @@
-- name: Handle Debian
-  import_tasks: debian.yml
-  when: ansible_facts['os_family']|lower == 'debian'
+- name: Install based
+  ansible.builtin.include_role: nginx_minimal
 
 - name: Assign config filename
   ansible.builtin.set_fact: config_file="/etc/fail2ban/jail.local" config_dir="/etc/fail2ban/filter.d"
-
-- name: Firewall configs
-  become: true
-  block:
-  - name: 'firewall: permit traffic in default zone services'
-    ansible.posix.firewalld:
-      service: '{{ item }}'
-      permanent: yes
-      state: enabled
-    with_items:
-    - http
-    - https
-
-  - name: 'firewall: Enable ssh port'
-    ansible.posix.firewalld:
-      port: '{{ SSH_PORT }}/tcp'
-      permanent: yes
-      state: enabled
 
 - name: Reject default site
   become: true

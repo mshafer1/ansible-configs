@@ -1,0 +1,18 @@
+server {
+    listen ${{ rtmp_port }};
+    server_name  localhost;
+
+    # rtmp stat
+    location /stat {
+        rtmp_stat all;
+        rtmp_stat_stylesheet stat.xsl;
+    }
+    location /stat.xsl {
+        root /var/www/html/rtmp;
+    }
+
+    # rtmp control
+    location /control {
+        rtmp_control all;
+    }
+}

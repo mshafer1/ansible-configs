@@ -1,0 +1,10 @@
+# based on https://www.digitalocean.com/community/tutorials/how-to-protect-an-nginx-server-with-fail2ban-on-ubuntu-14-04
+- name: Install utilities
+  ansible.builtin.apt:
+    pkg: 
+    - libnginx-mod-rtmp
+    - ffmpeg
+    state: latest
+    update_cache: true
+    cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
+  become: true

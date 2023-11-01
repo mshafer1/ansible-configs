@@ -1,0 +1,6 @@
+---
+
+- name: Configure restream servers
+  hosts: restream
+  roles:
+  - role: restream_server

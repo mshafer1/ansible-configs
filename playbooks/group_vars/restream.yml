@@ -1,0 +1,5 @@
+pushes:
+- 'rtmp://a.rtmp.youtube.com/live2/{{ stream_key }}'
+execs: []
+# - 'ffmpeg -i rtmp://127.0.0.1:1935/live/$name -threads 1 -vcodec flv -acodec copy -b:v 4500k -b:a 192k -f flv rtmps://a.rtmp.youtube.com/live2/{{ stream_key }}'
+# - 'ffmpeg -i rtmp://127.0.0.1:1935/live/$name -threads 1 -vcodec flv -acodec copy -b:v 2M -b:a 192k -s 1280x720 -f flv rtmps://b.rtmp.youtube.com/live2/{{ stream_key }}?backup=1'
