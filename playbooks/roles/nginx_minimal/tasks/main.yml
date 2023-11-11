@@ -1,20 +1,25 @@
 - name: Handle OS based items
-  include_tasks: '{{ ansible_os_family }}.yml'
+  ansible.builtin.include_tasks: '{{ ansible_os_family }}.yml'
 
 - name: Firewall configs
   become: true
   block:
-  - name: 'firewall: permit traffic in default zone services'
-    ansible.posix.firewalld:
-      service: '{{ item }}'
-      permanent: yes
-      state: enabled
-    with_items:
-    - http
-    - https
+    - name: 'Firewall: permit traffic in default zone services'
+      ansible.posix.firewalld:
+        service: '{{ item }}'
+        permanent: true
+        immediate: true
+        state: enabled
+      with_items:
+        - http
+        - https
 
-  - name: 'firewall: Enable ssh port'
-    ansible.posix.firewalld:
-      port: '{{ SSH_PORT }}/tcp'
-      permanent: yes
-      state: enabled
+    - name: 'Firewall: Enable ssh port'
+      ansible.posix.firewalld:
+        port: '{{ SSH_PORT }}/tcp'
+        permanent: true
+        immediate: true
+        state: enabled
+
+- name: Setup certbot
+  ansible.builtin.include_tasks: certbot.yml

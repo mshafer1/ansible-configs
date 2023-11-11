@@ -1,5 +1,5 @@
 - name: Ensure pipx is installed
-  ansible.builtin.pip:
+  ansible.builtin.pip: # TODO: should this be apt??
     name:
       - pipx
     state: present
@@ -14,28 +14,28 @@
         name: certbot
         state: inject
         inject_packages:
-      - certbot-nginx
+          - certbot-nginx
 
 - name: Register certbot
   block:
-  - name: 'certbot: create dir if needed'
-    become: true
-    ansible.builtin.file:
-      path: /etc/letsencrypt
-      state: directory
-      mode: '0700'
-      force: no
-  - name: register
-    become: true
-    shell: |
-      certbot -n register --agree-tos --email {{ proxy.email }}
-      touch /etc/letsencrypt/.registered
-    args:
-      creates: /etc/letsencrypt/.registered
+    - name: 'Certbot: create dir if needed'
+      become: true
+      ansible.builtin.file:
+        path: /etc/letsencrypt
+        state: directory
+        mode: '0700'
+        force: true
+    - name: Register
+      become: true
+      ansible.builtin.shell: |
+        certbot -n register --agree-tos --email {{ proxy.email }}
+        touch /etc/letsencrypt/.registered
+      args:
+        creates: /etc/letsencrypt/.registered
 
 - name: Setup cronjob for renewal
   become: true
-  cron:
+  ansible.builtin.cron:
     name: certbot-renewal
     job: "/bin/bash -lc '/usr/local/bin/certbot renew >> /var/log/certbot'"
     minute: "0"
