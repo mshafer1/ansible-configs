@@ -1,9 +1,14 @@
 - name: Install certbot
-  pip:
-    name:
-      - certbot
+  block:
+    - name: Install Core Certbot
+      community.general.pipx:
+        name: certbot
+    - name: Install Certbot-Nginx
+      community.general.pipx:
+        name: certbot
+        state: inject
+        inject_packages:
       - certbot-nginx
-    executable: pip3
 
 - name: Register certbot
   block:
