@@ -1,5 +1,6 @@
 - name: Install based
-  ansible.builtin.include_role: nginx_minimal
+  ansible.builtin.include_role:
+    name: nginx_minimal
 
 - name: Assign config filename
   ansible.builtin.set_fact: config_file="/etc/fail2ban/jail.local" config_dir="/etc/fail2ban/filter.d"

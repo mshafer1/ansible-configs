@@ -1,5 +1,13 @@
 ---
 
+- name: Configure nginx servers
+  hosts: nginx
+  roles:
+  - role: nginx
+- name: Configure nginx servers
+  hosts: nginx_minimal
+  roles:
+  - role: nginx_minimal
 - name: Windows settings
   hosts: windows
   roles:
