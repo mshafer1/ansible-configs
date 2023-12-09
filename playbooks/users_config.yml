@@ -1,0 +1,27 @@
+- name: Setup Users
+  hosts: users_managed # pass an inventory file to specify what to do
+  tasks:
+    - name: Setup users
+      become: true
+      block:
+        - name: Create users
+          ansible.builtin.user:
+            name: "{{ item.name }}"
+            shell: /bin/bash
+            state: present
+          loop: "{{ users }}"
+        - name: Configure users' groups
+          ansible.builtin.include_tasks: tasks/_setup_groups.yml
+          loop: "{{ users }}"
+          loop_control:
+            loop_var: user
+        - name: Add SSH user key
+          ansible.builtin.lineinfile:
+            path: "/home/{{ item.name }}/.ssh/authorized_keys"
+            create: true
+            owner: "{{ item.name }}"
+            group: "{{ item.name }}"
+            mode: "600"
+            line: "{{ item.key }}"
+          when: "'key' in item"
+          loop: "{{ users }}"
