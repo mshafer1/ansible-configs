@@ -313,6 +313,14 @@
             failregex = ^<HOST> - .* host="[\d\.]+
 
             ignoreregex =
+    - name: Set wordpress ignore re
+      ansible.builtin.set_fact:
+        ignore_regex:  ^<HOST> -.* \d{3} \d+ host="({{ safe_domains | default([]) | join('|') }})"
+      when: safe_domains is defined
+    - name: Clear wordpress ignore re
+      ansible.builtin.set_fact:
+        ignore_regex:  ''
+      when: safe_domains is not defined
     - name: nginx-wordpress-config filter
       notify:
       - Restart fail2ban
@@ -325,7 +333,7 @@
 
             failregex = ^<HOST> -.*(GET|POST|HEAD) /+.*wp-(includes|admin|content|login|style)(/|.php).* HTTP/.*\" (404|444|300|301|302)
 
-            ignoreregex =
+            ignoreregex = {{ ignore_regex }}
     - name: nginx-nohome
       notify:
       - Restart fail2ban
