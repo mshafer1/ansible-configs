@@ -1,1 +1,2 @@
 SSH_PORT: 22
+enable_ssl: false

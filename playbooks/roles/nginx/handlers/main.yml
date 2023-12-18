@@ -11,3 +11,4 @@
   loop: "{{ nginx_configs.results | selectattr('changed', 'equalto', true) | map(attribute='item') | map(attribute='domain') | list }}"
   become: true
   shell: "certbot register --non-interactive --nginx -d {{ item }}"
+  when: enable_ssl
