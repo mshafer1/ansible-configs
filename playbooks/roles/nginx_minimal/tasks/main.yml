@@ -8,7 +8,6 @@
       ansible.posix.firewalld:
         service: '{{ item }}'
         permanent: true
-        immediate: true
         state: enabled
       with_items:
         - http
@@ -18,7 +17,6 @@
       ansible.posix.firewalld:
         port: '{{ SSH_PORT }}/tcp'
         permanent: true
-        immediate: true
         state: enabled
 
 - name: Setup certbot
