@@ -30,7 +30,7 @@
       state: present
     loop:
     - alias: cheat
-      cmd: 'curl "https://cheat.sh/$1" 2>/dev/null | less -r'
+      cmd: '_cheat_arg="$*"; curl "https://cheat.sh/${_cheat_arg// /+}" 2>/dev/null | less -r'
   - name: fzf shell completions for all users
     become: true
     copy:
