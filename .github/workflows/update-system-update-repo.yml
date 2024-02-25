@@ -19,6 +19,8 @@ jobs:
       - name: Trigger workflow
         run: |
           gh workflow run ci.yml
+        env:
+          GH_TOKEN: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
       # - name: Deploy Stage
       #   uses: actions/github-script@v6
       #   with:
