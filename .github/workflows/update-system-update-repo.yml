@@ -4,6 +4,7 @@ on:
         - main
       paths:
         - playbooks/roles/system_up_to_date/**
+        - .github/workflows/upstate-system-update-repo.yml
     workflow_dispatch:
 
 jobs:
