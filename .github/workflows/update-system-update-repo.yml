@@ -11,14 +11,14 @@ jobs:
   trigger_update:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout other repo
-        uses: actions/checkout@v3
-        with: 
-          repository: mshafer1/system_updater.git
-          ref: main
+      # - name: checkout other repo
+      #   uses: actions/checkout@v3
+      #   with: 
+      #     repository: mshafer1/system_updater.git
+      #     ref: main
       - name: Trigger workflow
+        # gh workflow --help
         run: |
-          gh workflow --help
-          gh workflow run ci.yml
+          gh workflow run ci.yml -R mshafer1/system_updater
         env:
           GH_TOKEN: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
