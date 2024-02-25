@@ -11,14 +11,22 @@ jobs:
   trigger_update:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Stage
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: 'mshafer1',
-              repo: 'system_updater',
-              workflow_id: 'ci.yml',
-              ref: 'main'
-            });
+      - name: checkout other repo
+        uses: actions/checkout@v3
+        with: 
+          repository: mshafer1/system_updater.git
+          ref: main
+      - name: Trigger workflow
+        run: |
+          gh workflow run ci.yml
+      # - name: Deploy Stage
+      #   uses: actions/github-script@v6
+      #   with:
+      #     github-token: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
+      #     script: |
+      #       await github.rest.actions.createWorkflowDispatch({
+      #         owner: 'mshafer1',
+      #         repo: 'system_updater',
+      #         workflow_id: 'ci.yml',
+      #         ref: 'main'
+      #       });
