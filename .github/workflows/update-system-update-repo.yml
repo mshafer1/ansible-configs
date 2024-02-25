@@ -14,6 +14,7 @@ jobs:
       - name: Deploy Stage
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: 'mshafer1',
