@@ -15,8 +15,8 @@ jobs:
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
-              'mshafer1',
-              'system_updater',
-              'workflows/ci.yml',
-              'main'
+              owner: 'mshafer1',
+              repo: 'system_updater',
+              workflow_id: 'workflows/ci.yml',
+              ref: 'main'
             });
