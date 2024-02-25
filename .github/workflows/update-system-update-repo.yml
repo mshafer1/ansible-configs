@@ -18,17 +18,7 @@ jobs:
           ref: main
       - name: Trigger workflow
         run: |
+          gh workflow --help
           gh workflow run ci.yml
         env:
           GH_TOKEN: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
-      # - name: Deploy Stage
-      #   uses: actions/github-script@v6
-      #   with:
-      #     github-token: ${{ secrets.CLIENT_PUBLISH_PAT_TOKEN }}
-      #     script: |
-      #       await github.rest.actions.createWorkflowDispatch({
-      #         owner: 'mshafer1',
-      #         repo: 'system_updater',
-      #         workflow_id: 'ci.yml',
-      #         ref: 'main'
-      #       });
