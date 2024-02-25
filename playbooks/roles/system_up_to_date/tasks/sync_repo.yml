@@ -1,0 +1,6 @@
+- name: Clone config repo
+  ansible.builtin.git:
+    repo: 'https://github.com/mshafer1/system_updater.git'
+    dest: '{{ cronjob_git_repo_path }}'
+    update: yes
+    revision: main

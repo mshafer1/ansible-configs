@@ -1,0 +1,2 @@
+- name: Handle OS specific package manager
+  include_tasks: '_{{ ansible_os_family }}.yml'

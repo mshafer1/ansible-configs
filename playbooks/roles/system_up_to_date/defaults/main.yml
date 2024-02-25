@@ -1,0 +1,3 @@
+cronjob_git_repo_path: /usr/local/download/system_updater.git
+cronjob_hour: 6
+cronjob_weekday: SUN
