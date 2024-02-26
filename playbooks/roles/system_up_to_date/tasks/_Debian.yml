@@ -12,7 +12,8 @@
       register: reboot_flag_file
     - name: Update grub config
       when: reboot_flag_file.stat.exists
-      cmd: update-grub
+      ansible.builtin.command: 
+        cmd: update-grub
     - name: Reboot system
       when: reboot_flag_file.stat.exists
       ansible.builtin.reboot:

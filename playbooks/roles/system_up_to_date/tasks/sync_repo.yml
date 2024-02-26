@@ -1,6 +1,16 @@
-- name: Clone config repo
-  ansible.builtin.git:
-    repo: 'https://github.com/mshafer1/system_updater.git'
-    dest: '{{ cronjob_git_repo_path }}'
-    update: yes
-    revision: main
+- name: Sync updates repo
+  become: true
+  block:
+  - name: Make sure dir exists
+    file: 
+      path: '{{ cronjob_git_repo_path | dirname }}'
+      owner: root
+      group: root 
+      mode: 0755 
+      state: directory
+
+  - name: Clone config repo
+    ansible.builtin.git:
+      repo: 'https://github.com/mshafer1/system_updater.git'
+      dest: '{{ cronjob_git_repo_path }}'
+      update: yes

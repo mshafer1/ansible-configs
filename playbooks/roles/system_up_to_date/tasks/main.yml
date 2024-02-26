@@ -1,2 +1,2 @@
 - name: Include specified sub-task
-  include_tasks: '{{ sub_task | default(run_updates) }}.yml'
+  include_tasks: '{{ sub_task | default("run_updates") }}.yml'

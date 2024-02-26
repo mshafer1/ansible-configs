@@ -5,10 +5,12 @@
     sub_task: sync_repo
 
 - name: Create cronjob to update regularly
+  become: true
   ansible.builtin.cron:
     cron_file: ./system_update_tool.cron
+    user: root
     name: Run System Updates - 3bd6a75
     job: /root/.local/bin/ansible-playbook {{ cronjob_git_repo_path }}/plbk__system_up_to_date.yml
     hour: '{{ cronjob_hour }}'
     minute: 0
-    weekday: '{{ conjob_weekday }}'
+    weekday: '{{ cronjob_weekday }}'

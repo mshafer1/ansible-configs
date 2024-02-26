@@ -1,0 +1,6 @@
+- name: System up to date
+  hosts: users_managed
+  roles:
+  - role: system_up_to_date
+  - role: system_up_to_date
+    sub_task: setup_cronjob
