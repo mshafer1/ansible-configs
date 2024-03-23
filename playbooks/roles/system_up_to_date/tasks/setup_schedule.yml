@@ -45,3 +45,4 @@
       ansible.builtin.systemd_service:
         name: system-updater.timer
         enabled: true
+        state: started
