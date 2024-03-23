@@ -7,7 +7,7 @@
     dest: /etc/cron.d/system_update_tool.cron
     state: absent
 
-- name: Create cronjob to update regularly
+- name: Create scheduled service to update regularly
   become: true
   block:
     - name: Setup timer file to run weekly
