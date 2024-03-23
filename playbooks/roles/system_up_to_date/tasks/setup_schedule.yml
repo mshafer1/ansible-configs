@@ -19,7 +19,7 @@
           Description=Run updates weekly
 
           [Timer]
-          OnCalendar={{ cronjob_weekday | title }} *-*-* {{ "%02d" | format(cronjob_hour) }}:00:00 {{ cronjob_timezone }}
+          OnCalendar={{ update_job_weekday | title }} *-*-* {{ "%02d" | format(update_job_hour) }}:00:00 {{ update_job_timezone }}
           Persistent=true
 
           [Install]
@@ -34,7 +34,7 @@
 
           [Service]
           Type=oneshot
-          ExecStart=/root/.local/bin/ansible-playbook {{ cronjob_git_repo_path }}/plbk__system_up_to_date.yml
+          ExecStart=/root/.local/bin/ansible-playbook {{ update_job_git_repo_path }}/plbk__system_up_to_date.yml
           User=root
     - name: Reload systemd
       when: update_service.changed or update_timer.changed

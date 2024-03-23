@@ -1,4 +1,4 @@
-cronjob_git_repo_path: /usr/local/download/system_updater.git
-cronjob_hour: 6
-cronjob_weekday: SUN
-cronjob_timezone: America/Chicago
+update_job_git_repo_path: /usr/local/download/system_updater.git
+update_job_hour: 6
+update_job_weekday: SUN
+update_job_timezone: America/Chicago
