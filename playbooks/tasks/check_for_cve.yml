@@ -1,0 +1,13 @@
+- name: Get package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: liblzma version
+  ansible.builtin.set_fact:
+    version: "{{ansible_facts.packages.get('liblzma5', {'version': '0'}) | map(attribute='version')}}"
+
+- name: Fail if bad version of liblzma is found
+  fail:
+    msg: "Bad version of liblzma found"
+
+  when: "'5.6.0' in version or '5.6.1' in version"

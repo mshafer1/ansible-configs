@@ -1,0 +1,4 @@
+- hosts: all
+  tasks:
+    - name: Check for CVE's
+      ansible.builtin.include_tasks: tasks/check_for_cve.yml
