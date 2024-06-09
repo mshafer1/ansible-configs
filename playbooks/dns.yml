@@ -5,6 +5,9 @@
   vars:
     dns_config_file: /etc/dnsmasq.hosts
 
+  roles:
+  - dns_server
+
   tasks:
   - import_tasks: tasks/homelab_public_key.yml
 

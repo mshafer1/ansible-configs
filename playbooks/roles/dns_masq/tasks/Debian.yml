@@ -1,4 +1,4 @@
-- name: Install utilities
+- name: Install packages
   ansible.builtin.apt:
     pkg: 
     - dnsmasq
