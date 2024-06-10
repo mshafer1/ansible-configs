@@ -26,6 +26,11 @@
         name:
           - pipx
       when: ansible_distribution != 'Ubuntu'
+    - name: Add pipx paths to PATH
+      ansible.builtin.copy:
+        content: |
+          export PATH=/root/.local/bin:$PATH
+        dest: /etc/profile.d/00-pipx-path.sh
 
 
 - name: Install certbot

@@ -20,6 +20,3 @@
         port: '{{ SSH_PORT }}/tcp'
         permanent: true
         state: enabled
-
-- name: Setup certbot
-  ansible.builtin.include_tasks: certbot.yml
