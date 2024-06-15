@@ -10,10 +10,17 @@
       ansible.builtin.stat:
         path: /var/run/reboot-required
       register: reboot_flag_file
+- name: Reboot system
+  become: yes
+  when: reboot_flag_file.stat.exists
+  block:
     - name: Update grub config
-      when: reboot_flag_file.stat.exists
       ansible.builtin.command: 
         cmd: update-grub
     - name: Reboot system
-      when: reboot_flag_file.stat.exists
+      when: not reboot_controller
       ansible.builtin.reboot:
+    - name: Reboot system (shell)
+      when: reboot_controller
+      ansible.builtin.shell:
+        cmd: reboot now
