@@ -1,5 +1,5 @@
 - name: System up to date
-  hosts: users_managed
+  hosts: system_update_managed
   roles:
   - role: system_up_to_date
   - role: system_up_to_date
