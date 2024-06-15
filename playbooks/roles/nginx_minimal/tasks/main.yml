@@ -1,4 +1,5 @@
 - name: Handle OS based items
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
 
 - name: Check for XZ CVE
   ansible.builtin.include_tasks: check_for_cve.yml

@@ -71,3 +71,12 @@
     minute: "0"
     hour: "6"
     day: "2"
+
+- name: Setup ACME DNS hook
+  become: true
+  ansible.builtin.copy:
+    src: files/acme-dns-auth.py
+    dest: /etc/letsencrypt/acme-dns-auth.py
+    mode: '700'
+    owner: root
+    group: root
