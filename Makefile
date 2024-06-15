@@ -1,6 +1,8 @@
-all: dns python install-deps
+all: dns python install-deps certbot
 
 dns: objects/dns
+
+certbot: objects/certbot
 
 nginx: objects/nginx
 
@@ -47,3 +49,6 @@ objects/win_settings: playbooks/win_settings.yml  $(wildcard playbooks/roles/put
 objects/homelab: playbooks/homelab_proxy.yml objects/dns $(wildcard playbooks/vars/*) $(wildcard playbooks/roles/nginx/**/*) $(wildcard playbooks/roles/homelab_proxy/*)
 	ansible-playbook playbooks/homelab_proxy.yml
 	touch $@
+
+objects/certbot: playbooks/setup_certbot.yml $(wildcard playbooks/roles/certbot/*) playbooks/vars/certbot_managed_certs.yml
+	ansible-playbook $< 2>&1 | tee $@
