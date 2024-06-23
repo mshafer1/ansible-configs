@@ -1,0 +1,5 @@
+- name: Setup twingate tunnels
+  hosts: twingate_tunnels
+  roles:
+  - twingate
+  
