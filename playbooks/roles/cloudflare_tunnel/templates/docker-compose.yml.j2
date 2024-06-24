@@ -1,0 +1,6 @@
+version: '2.0'
+services:
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    pull_policy: if_not_present
+    command: ["tunnel", "--no-autoupdate", "run", "--token", "{{ cloudflare_tunnel_token }}", ]

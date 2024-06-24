@@ -2,4 +2,10 @@
   hosts: twingate_tunnels
   roles:
   - twingate
+- name: Setup clodflare tunnels
+  hosts: cloudflare_docker_tunnels
+  roles:
+  - docker
+  - role: cloudflare_tunnel
+    using_docker: yes
   

@@ -1,0 +1,3 @@
+- name: Include strategy
+  ansible.builtin.include_tasks: _docker.yml
+  when: using_docker
