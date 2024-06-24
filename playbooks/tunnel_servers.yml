@@ -8,4 +8,10 @@
   - docker
   - role: cloudflare_tunnel
     using_docker: yes
+- name: Setup system updates
+  hosts:
+  - twingate_tunnels
+  - cloudflare_docker_tunnels
+  roles:
+  - system_up_to_date
   
