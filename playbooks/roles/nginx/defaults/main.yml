@@ -1,2 +1,6 @@
 ban_all_cloud: true
 enable_ssl: true
+enable_cloud_flare_block: false
+nginx_real_ip_sources:
+  - 127.0.0.1/8
+  - 192.168.1.0/24

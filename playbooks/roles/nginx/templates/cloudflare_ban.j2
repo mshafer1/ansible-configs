@@ -1,0 +1,34 @@
+[Definition]
+actionban = python3 /etc/fail2ban/action.d/cloudflare_ban_helper.py \
+     --ban-ip <ip> \
+     --cf-email <cfuser> \
+     --cf-token <cftoken> \
+     {% if required_country_code | default([], True) %}
+     --require-country {% for country_code in required_country_code %}{{ country_code }} {% endfor %} \
+     {% endif %}
+     --zone {% for zone in cloudflare_zones %}{{ zone }} {% endfor %}
+
+
+actionunban = python3 /etc/fail2ban/action.d/cloudflare_ban_helper.py \
+     --unban-ip <ip> \
+     --cf-email <cfuser> \
+     --cf-token <cftoken> \
+     {% if required_country_code | default([], True) %}
+     --require-country {% for country_code in required_country_code %}{{ country_code }} {% endfor %} \
+     {% endif %}
+     --zone {% for zone in cloudflare_zones %}{{ zone }} {% endfor %}
+
+
+
+
+[Init]
+# cloudflare API token
+cftoken = {{ cloudflare_token }}
+
+# cloudflare account email
+cfuser = {{ cloudflare_email }}
+
+cftarget = ip
+
+[Init?family=inet6]
+cftarget = ip6  

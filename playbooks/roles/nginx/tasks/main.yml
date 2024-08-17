@@ -1,6 +1,13 @@
-- name: Install based
+- name: Install base nginx config
   ansible.builtin.include_role:
     name: nginx_minimal
+
+- name: Install utils
+  become: true
+  ansible.builtin.apt:
+    name: 
+    - jq
+    state: present
 
 - name: Assign config filename
   ansible.builtin.set_fact: config_file="/etc/fail2ban/jail.local" config_dir="/etc/fail2ban/filter.d"
@@ -58,13 +65,50 @@
           log_format fuller '$remote_addr - $remote_user [$time_local] '
                       '"$request" $status $body_bytes_sent '
                       'host="$host" http_host="$http_host" "$http_referer" "$http_user_agent"';
+  - name: create format for remote tunnel config
+    notify:
+    - restart nginx service
+    ansible.builtin.blockinfile:
+        dest: '/etc/nginx/nginx.conf'
+        insertbefore: 'access_log /var/log/nginx/.*$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [log format - with real_ip]'
+        block: |
+          log_format fuller_with_real_ip '$http_x_forwarded_for - $remote_user [$time_local] '
+                      '"$request" $status $body_bytes_sent '
+                      'host="$host" http_host="$http_host" "$http_referer" "$http_user_agent"';
   - name: use the fuller as default
     notify:
     - restart nginx service
+    when: not enable_cloud_flare_block
     ansible.builtin.lineinfile:
         dest: '/etc/nginx/nginx.conf'
         regexp: '^#?\s*access_log /var/log/nginx/access.log.*$'
         line: access_log /var/log/nginx/access.log fuller;
+  - name: Use fuller_with_real_ip as default
+    notify:
+    - restart nginx service
+    when: enable_cloud_flare_block
+    ansible.builtin.lineinfile:
+        dest: '/etc/nginx/nginx.conf'
+        regexp: '^#?\s*access_log /var/log/nginx/access.log.*$'
+        line: access_log /var/log/nginx/access.log fuller_with_real_ip;
+  - name: Setup loading forwarded IP
+    ansible.builtin.include_tasks: _setup_forwarded_ip_module.yml
+
+- name: Setup cloudflare ban action
+  when: cloudflare_token is defined
+  become: true
+  block:
+  - name: Setup cloudflare ban action (definition)
+    ansible.builtin.template:
+      src: cloudflare_ban.j2
+      dest: /etc/fail2ban/action.d/cloudflare-ban.conf
+      mode: "0500"
+  - name: Setup cloudflare ban action (helper)
+    ansible.builtin.template:
+      src: cloudflare_ban_helper.py
+      dest: /etc/fail2ban/action.d/cloudflare_ban_helper.py
+      mode: "0500"
 
 - name: Include safe ips
   ansible.builtin.include_vars:
@@ -134,6 +178,7 @@
         line: findtime = 1h
         firstmatch: true
     - name: Email and log blocks
+      when: cloudflare_token is not defined or not enable_cloud_flare_block
       notify:
       - Restart fail2ban
       ansible.builtin.lineinfile:
@@ -141,6 +186,26 @@
         regexp: '^action =.+$'
         line: action = %(action_mwl)s
         firstmatch: true
+    - name: Use Cloudflare to ban
+      when: cloudflare_token is defined and enable_cloud_flare_block
+      block:
+      - name: Disable default action line
+        notify:
+          - Restart fail2ban
+        ansible.builtin.lineinfile:
+          dest: '{{ config_file }}'
+          regexp: '^#? *action ='
+          line: '# action = %(action_mwl)s'
+          firstmatch: true
+      - name: Setup cloudflare ban with logging
+        notify:
+          - Restart fail2ban
+        ansible.builtin.blockinfile:
+          dest: '{{ config_file }}'
+          block: |
+            action = cloudflare-ban
+                     %(action_mwl)s
+          insertafter: '# action = $(action_mwl)s'
     - name: Enable nginx-http-auth
       notify:
       - Restart fail2ban
