@@ -93,6 +93,7 @@
         regexp: '^#?\s*access_log /var/log/nginx/access.log.*$'
         line: access_log /var/log/nginx/access.log fuller_with_real_ip;
   - name: Setup loading forwarded IP
+    when: enable_cloud_flare_block
     ansible.builtin.include_tasks: _setup_forwarded_ip_module.yml
 
 - name: Setup cloudflare ban action

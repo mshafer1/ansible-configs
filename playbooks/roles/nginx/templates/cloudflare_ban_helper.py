@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import contextlib
+import functools
 import http.client
 import json
 import pathlib
-import subprocess
 import time
 import typing
 
@@ -51,7 +51,21 @@ def _micro_db(file="/etc/fail2ban/action.d/_ban_zones.json"):
             with _db_file.open("w") as fout:
                 json.dump(data, fout, indent=4)
 
+def _rate_limit(wrapped, minimum_time_between_calls_ms=250):
+    def _limit(func):
+        _limit.last_called_time = time.time_ns() # Note: this likely makes this decorator only work for one method.
+        @functools.wraps(func)
+        def wrapped_func(*args, **kwargs):
+            time_since_last_called = (time.time_ns() - _limit.last_called_time) / 1000
+            while time_since_last_called < minimum_time_between_calls_ms:
+                time.sleep(.01) # 10 milliseconds
+                time_since_last_called = (time.time_ns() - _limit.last_called_time) / 1000
+            _limit.last_called_time = time.time_ns()
+            return wrapped(*args, **kwargs)
+        return wrapped_func
+    return _limit(wrapped)
 
+@_rate_limit
 def _send_rule_update(
     zone_id,
     ruleset_id,
@@ -189,7 +203,6 @@ def _main(argv):
                 token=args.cf_token,
                 zone_id=zone,
             )
-            time.sleep(1)
 
 
 if __name__ == "__main__":

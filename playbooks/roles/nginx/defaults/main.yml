@@ -1,6 +1,13 @@
 ban_all_cloud: true
 enable_ssl: true
+# region: fail2ban -> cloudflare API settings
 enable_cloud_flare_block: false
 nginx_real_ip_sources:
   - 127.0.0.1/8
+  - 172.17.0.0/16
   - 192.168.1.0/24
+required_country_codes: []
+cloudflare_zones: []
+cloudflare_email: ''
+cloudflare_token: ''
+# endredgion

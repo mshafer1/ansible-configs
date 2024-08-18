@@ -91,3 +91,88 @@ Reading: 0 Writing: 1 Waiting: 0
 ```
 
 ([may need to install curl if this is a completely new server](https://command-not-found.com/curl))
+
+
+## Using CloudFlare 0 Trust tunnel and fail2ban
+
+<details>
+<summary>Why? (click to expand if you want background)</summary>
+
+I started working on using Fail2Ban's built-in Cloudflare action and got it working (and found how to validate) only to be met with a header saying:
+
+> The Firewall Rules API and the associated Cloudflare Filters API are now deprecated. These APIs will stop working on 2025-01-15. You must migrate any automation based on the Firewall Rules API or Cloudflare Filters API to the Rulesets API before this date to prevent any issues.
+>
+>[source](https://web.archive.org/web/20240817201327/https://developers.cloudflare.com/waf/reference/migration-guides/firewall-rules-to-custom-rules/#relevant-changes-for-api-users)
+
+So, ... I set to work figuring out how to adapt the concept to work with the [Rulesets API](https://web.archive.org/web/20240818003927/https://developers.cloudflare.com/waf/custom-rules/create-api/#example-b).
+
+The result was this:
+* A logging config that sets nginx logs to show [the forwarded IP]()
+* a custom `cloufdflare-ban` action that is generated using `zone` IDs ([roughly equivalent to domain names](https://web.archive.org/web/20240808031659/https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/))
+* a Python helper script that handles the posting the current block rule ([idempotent](https://en.wikipedia.org/wiki/Idempotence)) 
+</details>
+
+If using the nginx role (see section above), you can configure [fail2ban]() to use firewall rules in [CloudFlare](https://www.cloudflare.com/) to ban bad actors coming in over the [CloudFlare 0 Trust Tunnel](https://developers.cloudflare.com/cloudflare-one/). The actual source IP will be logged and banned.
+
+A few variables are required to be set to enable this:
+* `cloudflare_token` [your token](https://developers.cloudflare.com/fundamentals/api/get-started/keys/#:~:text=your%20API%20key%3A-,Log%20in%20to%20the%20Cloudflare%20dashboard%20Open%20external%20link,to%20My%20Profile%20%3E%20API%20Tokens.) (used by the script to authenticate)
+* `cloudflare_email` your email (used as "username" in conjunction with the token to authenticate)
+* `cloudflare_zones` list of [zone IDs](https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/) to apply the rules to (note, this setup will ban for all zones regardless of offending domain)
+* `enable_cloud_flare_block` set this to "true" to enable the action (without this, default is to template the action file if other vars are present, but leave the fail2ban action as `iptables`). Enabling [nginx's 'ngx_http_realip_module'](https://nginx.org/en/docs/http/ngx_http_realip_module.html) is also triggered with this variable (this tells nginx to look at the `X-Forwarded-For` header for the IP of the requestor - not Cloudflare - and use in logs for fail2ban to pick up).
+
+
+Optional variables for further control:
+* `required_country_codes` list of [county abbreviations](https://developers.cloudflare.com/waf/custom-rules/use-cases/allow-traffic-from-specific-countries/) to require the source IP is from (i.e., always block if NOT from one of these. This may be useful if you only anticipate users from your home country are legitimate users, and you don't mind if VPN users are unable to access your site)
+* `nginx_real_ip_sources` list of IPs for nginx to examine the `X-Forwarded-For` IP and replace in logs as the source IP. (Note: this defaults to a list containing: (1) `127.0.0.1/8` to handle cloudflared running on localhost, (2) `172.17.0.0/16` to handle [cloudflared running in Docker](https://support.hyperglance.com/knowledge/changing-the-default-docker-subnet#:~:text=By%20default%2C%20Docker%20uses%20172.17.0.0/16.), and (3) `192.168.1.1/24` to handle cloudflared running on another host in a home-lab environment. If your use does not fit one of these, you will likely need to set this as a [host](https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#adding-variables-to-inventory) or [group](https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables) var)
+
+### Example yaml ansible hosts file:
+```yaml
+#/etc/ansible/hosts
+all:
+  hosts:
+    server_1:
+      ansible_user: service_account
+      ansible_host: 127.0.0.1
+      # ...
+      enable_cloud_flare_block: true
+      cloudflare_token: 'token_value'
+      cloudflare_email: 'user@example.com'
+      cloudflare_zones:
+        - deadbeef # domain 1
+        # ...
+      required_country_codes:
+        - US # USA
+        - MX # Mexico
+        - CA # Canada
+  nginx:
+    hosts:
+      server_1: {} # add server_1 to the nginx group
+```
+
+### Validating
+
+1. Get some IPs blocked
+
+  Option a: let the rules get hit
+  
+  Option b: `fail2ban-client set nginx-nohome banip 192.168.1.0` (bans 192.168.1.0 under the `nginx-nohome` jail defined in the nginx role)
+  
+1. Log into [CloudFlare](https://www.cloudflare.com/) dashboard and navigate to:
+
+    A. `Websites` -> `{your domain}` -> `Security` -> `WAF`
+
+    B. Click on on "Custom rules"
+
+    C. Should see a rule named "Block bad actors", click on it
+
+    D. Should see that it is set to block IP addresses in:
+      - `127.255.255.254`
+      - `192.168.1.0` (assuming followed step above)
+      
+      Note: if `required_country_codes`, full rule syntax should in include `ip.src in ...` OR `not ip.geoip.country in {...}` such that IPs that are NOT from specified countries OR are in the naughty list will be blocked (via "Choose action" -> "Block")
+
+1. Unban user
+
+    `fail2ban-client unban 192.168.1.0`
+
+1. Refresh Cloudflare dashboard -> IP should be removed from list of blocked (note, `127.255.255.254` will always be included to provide a simpler syntax and keep the expression valid)
