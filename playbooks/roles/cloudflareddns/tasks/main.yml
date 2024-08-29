@@ -1,0 +1,30 @@
+- name: Setup timer file to run every 15 minutes
+  register: update_timer
+  ansible.builtin.copy:
+    dest: '{{ systemd_folder }}/system-updater.timer'
+    content: |
+      [Unit]
+      Description=Run IP address update every 15 minutes
+
+      [Timer]
+      OnCalendar=*:0/15
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+- name: Setup service file
+  register: update_service
+  ansible.builtin.copy:
+    dest: '{{ systemd_folder }}/system-updater.service'
+    content: |
+      [Unit]
+      Description=Run IP address update on Cloudflare
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/cloudflare-update-dns-ip
+      User=root
+- name: Create script file
+  ansible.builtin.template:
+    dest: /usr/local/bin/cloudflare-update-dns-ip
+    src: cloudflare-update-dns-ip.j2
