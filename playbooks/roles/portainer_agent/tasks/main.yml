@@ -1,0 +1,16 @@
+- name: Tempalte services file
+  become: true
+  block:
+  - name: Make sure dir exists
+    ansible.builtin.file:
+      path: '{{ config_dir }}'
+      state: directory
+  - name: Setup compose file
+    ansible.builtin.template:
+      src: docker-compose.yml.j2
+      dest: '{{ config_dir }}/docker-compose.yml'
+- name: Start service
+  become: true
+  ansible.builtin.shell:
+    cmd: docker compose up -d
+    chdir: '{{ config_dir }}'
