@@ -17,6 +17,7 @@
     - name: Update grub config
       ansible.builtin.command: 
         cmd: update-grub
+      when: grub_handled
     - name: Reboot system
       when: not reboot_controller
       ansible.builtin.reboot:
