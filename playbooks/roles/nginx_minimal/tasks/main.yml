@@ -6,6 +6,7 @@
 
 - name: Firewall configs
   become: true
+  when: use_firewalld | bool
   block:
     - name: 'Firewall: permit traffic in default zone services'
       ansible.posix.firewalld:

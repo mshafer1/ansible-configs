@@ -449,6 +449,7 @@
 
 - name: Permaban bad actors
   become: true
+  when: use_firewalld | bool
   block:
     - name: Load banned IPs
       ansible.builtin.include_vars:

@@ -1,5 +1,6 @@
 ban_all_cloud: true
 enable_ssl: true
+use_firewalld: true
 # region: fail2ban -> cloudflare API settings
 enable_cloud_flare_block: false
 nginx_real_ip_sources:
