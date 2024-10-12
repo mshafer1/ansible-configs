@@ -1,0 +1,5 @@
+dependencies:
+  - role: docker
+    when: using_docker
+  - role: docker_watchtower_service
+    when: using_docker

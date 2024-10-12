@@ -4,3 +4,7 @@ services:
     image: cloudflare/cloudflared:latest
     pull_policy: if_not_present
     command: ["tunnel", "--no-autoupdate", "run", "--token", "{{ cloudflare_tunnel_token }}", ]
+    restart: unless-stopped
+    deploy:
+      labels:
+        com.centurylinklabs.watchtower.enable: "true"

@@ -3,19 +3,19 @@
   block:
   - name: Make sure dir exists
     ansible.builtin.file:
-      path: /usr/local/cloudflared
+      path: '{{ config_dir }}'
       state: directory
   - name: Setup compose file
     ansible.builtin.template:
       src: docker-compose.yml.j2
-      dest: /usr/local/cloudflared/docker-compose.yml
+      dest: '{{ config_dir }}/docker-compose.yml'
 # - name: Start service
 #   become: true
 #   community.docker.docker_compose_v2:
-#     project_src: /usr/local/cloudflared
+#     project_src: '{{ config_dir }}'
 #     state: present
 - name: Start service
   become: true
   ansible.builtin.shell:
     cmd: docker compose up -d
-    chdir: /usr/local/cloudflared
+    chdir: '{{ config_dir }}'

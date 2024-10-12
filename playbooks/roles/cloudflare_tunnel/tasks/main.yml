@@ -1,3 +1,7 @@
 - name: Include strategy
   ansible.builtin.include_tasks: _docker.yml
   when: using_docker
+
+
+# this appears to need a  `ufw insert 1 allow from 172.16.0.0/12`` to any port 80 proto tcp` when used in companion with the nginx role
+# NOTE: this enables ALL class B local IPs in an effort to handle anything from Docker...

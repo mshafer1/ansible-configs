@@ -6,6 +6,7 @@
       name: aptitude
       state: latest
       update_cache: true
+      cache_valid_time: '{{ 3600 * 24 }}'
 
   - name: Install required system packages
     apt:
@@ -31,7 +32,13 @@
 
   - name: Add Docker Repository
     apt_repository:
-      repo: deb https://download.docker.com/linux/ubuntu focal stable
+      repo: deb https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    register: repo_updated
+  
+  - name: Update cache
+    when: repo_updated.changed
+    apt:
+      update_cache: true
 
   - name: install docker-ce and related
     apt:

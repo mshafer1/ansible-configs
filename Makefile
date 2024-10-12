@@ -1,4 +1,4 @@
-all: dns python install-deps certbot
+all: dns python install-deps certbot tunnels
 
 dns: objects/dns
 
@@ -15,6 +15,8 @@ win_settings: objects/win_settings
 homelab: objects/homelab
 
 main: objects/main
+
+tunnels: objects/tunnels
 
 win-settings:
 	ansible-playbook playbooks/win_settings.yml
@@ -51,4 +53,9 @@ objects/homelab: playbooks/homelab_proxy.yml objects/dns $(wildcard playbooks/va
 	touch $@
 
 objects/certbot: playbooks/setup_certbot.yml $(wildcard playbooks/roles/certbot/*) playbooks/vars/certbot_managed_certs.yml
-	ansible-playbook $< 2>&1 | tee $@
+	ansible-playbook $< 2>&1 | tee $@.tmp
+	mv $@.tmp $@
+
+objects/tunnels: playbooks/tunnel_servers.yml $(wildcard playbooks/roles/cloudflare_tunnel/*) $(wildcard playbooks/roles/docker_watchtower_services/*)
+	ansible-playbook $< 2>&1 | tee $@.tmp
+	mv $@.tmp $@

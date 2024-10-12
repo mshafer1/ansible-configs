@@ -14,4 +14,5 @@
   - cloudflare_docker_tunnels
   roles:
   - system_up_to_date
-  
+  - role: system_up_to_date
+    sub_task: setup_schedule
