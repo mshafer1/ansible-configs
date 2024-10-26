@@ -18,11 +18,25 @@
           - docker
         append: true
 - name: Setup service config
-  notify: Restart service
   become: true
-  ansible.builtin.template:
-    dest: '{{ sensu_backend__service_dir }}/docker-compose.yaml'
-    src: 'docker-compose.yaml'
-    owner: '{{ sensu_backend__service_user }}'
-    group: '{{ sensu_backend__service_user }}'
-    mode: '0664'
+  block:
+    - name: Create docker service config
+      notify: Restart service
+      ansible.builtin.template:
+        dest: '{{ sensu_backend__service_dir }}/docker-compose.yaml'
+        src: 'docker-compose.yaml'
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0664'
+    - name: Ensure variables in env file
+      notify: Restart service
+      ansible.builtin.blockinfile:
+        # NOTE: admin credentionals do NOT have role defaults and must be set as host or group var.
+        block: |
+          SENSU_BACKEND_CLUSTER_ADMIN_USERNAME={{ sensu_backend__admin_username }}
+          SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD='{{ sensu_backend__admin_password }}'
+        path: '{{ sensu_backend__service_dir }}/.env'
+        create: true
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0660'
