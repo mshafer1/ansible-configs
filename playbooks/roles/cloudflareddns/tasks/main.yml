@@ -1,3 +1,8 @@
+- name: Install requirements
+  ansible.builtin.package:
+    name: jq
+    state: present
+
 - name: Setup timer file to run every 15 minutes
   register: update_timer
   ansible.builtin.copy:
@@ -12,6 +17,9 @@
 
       [Install]
       WantedBy=timers.target
+    owner: root
+    group: root
+    mode: '0644'
 - name: Setup service file
   register: update_service
   ansible.builtin.copy:
@@ -24,7 +32,13 @@
       Type=oneshot
       ExecStart=/usr/local/bin/cloudflare-update-dns-ip
       User=root
+    owner: root
+    group: root
+    mode: '0644'
 - name: Create script file
   ansible.builtin.template:
     dest: /usr/local/bin/cloudflare-update-dns-ip
     src: cloudflare-update-dns-ip.j2
+  owner: root
+  group: root
+  mode: '0770'

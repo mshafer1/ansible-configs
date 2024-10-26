@@ -27,6 +27,7 @@ SOFTWARE.
 Original: https://web.archive.org/web/20240829031208/https://raw.githubusercontent.com/K0p1-Git/cloudflare-ddns-updater/7b1ba6eb2d058cae843a49b5cd87f40221ef7151/cloudflare-template.sh
 Changes:
   (mshafer1) inline license file
+  (mshafer1) add local ip switch
 '
 
 auth_email=""                                       # The email used to login 'https://dash.cloudflare.com'
@@ -42,10 +43,11 @@ slackuri=""                                         # URI for Slack WebHook "htt
 discorduri=""                                       # URI for Discord WebHook "https://discordapp.com/api/webhooks/xxxxx"
 
 
+ipv4_regex='([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])'
+{% if cloudflareddns__store_public_ip %}
 ###########################################
 ## Check if we have a public IP
 ###########################################
-ipv4_regex='([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])'
 ip=$(curl -s -4 https://cloudflare.com/cdn-cgi/trace | grep -E '^ip'); ret=$?
 if [[ ! $ret == 0 ]]; then # In the case that cloudflare failed to return an ip.
     # Attempt to get the ip from other websites.
@@ -60,6 +62,28 @@ if [[ ! $ip =~ ^$ipv4_regex$ ]]; then
     logger -s "DDNS Updater: Failed to find a valid IP."
     exit 2
 fi
+{% else %}
+###########################################
+## Check if we have a local IP
+###########################################
+ip=$(ip --json addr | jq -r '[.[] | select(.operstate == "UP")
+    | select(.ifname | startswith("br-") | not) 
+    | select(has("master") | not) 
+    | .addr_info[] | select(.family == "inet")
+    | .local
+    ][0]'); ret=$?
+if [[ ! $ret == 0 ]]; then # In the case that asking ip for the address failed...
+    # This is not supported yet
+    logger -s "DDNS Updater: Failed to find a local IP."
+    exit 2
+fi
+
+# Use regex to check for proper IPv4 format.
+if [[ ! $ip =~ ^$ipv4_regex$ ]]; then
+    logger -s "DDNS Updater: Failed to find a valid IP."
+    exit 2
+fi
+{% endif %}
 
 ###########################################
 ## Check and set the proper auth header
