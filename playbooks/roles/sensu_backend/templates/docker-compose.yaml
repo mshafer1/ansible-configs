@@ -1,0 +1,13 @@
+services:
+  sensu-backend:
+    image: sensu/sensu:6.11.0
+    restart: unless-stopped
+    hostname: sensu-backend
+    command: >-
+      start
+    ports:
+      - "127.0.0.1:3000:3000"  # Web UI
+      - "127.0.0.1:8080:8080"  # API
+      - "127.0.0.1:8081:8081"  # Agent communication
+    volumes:
+      - ./sensu_config:/var/lib/sensu

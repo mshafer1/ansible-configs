@@ -1,0 +1,28 @@
+- name: Ensure user and dir exists
+  become: true
+  block:
+    - name: Ensure user exists
+      ansible.builtin.user:
+        name: '{{ sensu_backend__service_user }}'
+    - name: Ensure service dir exists
+      ansible.builtin.file:
+        path: '{{ sensu_backend__service_dir }}'
+        state: directory
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0770'
+    - name: Ensure user is in docker group
+      ansible.builtin.user:
+        name: '{{ sensu_backend__service_user }}'
+        groups: 
+          - docker
+        append: true
+- name: Setup service config
+  notify: Restart service
+  become: true
+  ansible.builtin.template:
+    dest: '{{ sensu_backend__service_dir }}/docker-compose.yaml'
+    src: 'docker-compose.yaml'
+    owner: '{{ sensu_backend__service_user }}'
+    group: '{{ sensu_backend__service_user }}'
+    mode: '0664'

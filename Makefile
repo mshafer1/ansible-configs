@@ -18,6 +18,10 @@ main: objects/main
 
 tunnels: objects/tunnels
 
+sensu: objects/sensu
+
+.PHONY: dns nginx certbot sensu
+
 win-settings:
 	ansible-playbook playbooks/win_settings.yml
 
@@ -58,4 +62,8 @@ objects/certbot: playbooks/setup_certbot.yml $(wildcard playbooks/roles/certbot/
 
 objects/tunnels: playbooks/tunnel_servers.yml $(wildcard playbooks/roles/cloudflare_tunnel/*) $(wildcard playbooks/roles/docker_watchtower_services/*)
 	ansible-playbook $< 2>&1 | tee $@.tmp
+	mv $@.tmp $@
+
+objects/sensu: playbooks/sensu.yml $(wildcard playbooks/roles/nginx_minimal/*) $(wildcard playbooks/roles/docker/*) $(wildcard playbooks/roles/sensu_backend/*)
+	$(shell unbuffer ansible-playbook $< 2>&1 | tee $@.tmp; exit $$PIPESTATUS[0])
 	mv $@.tmp $@

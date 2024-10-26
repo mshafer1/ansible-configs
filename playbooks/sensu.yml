@@ -1,0 +1,4 @@
+- name: Sensu backend
+  hosts: sensu_backend
+  roles:
+    - sensu_backend

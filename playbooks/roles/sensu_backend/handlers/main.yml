@@ -1,0 +1,21 @@
+- name: Bring up service
+  listen: Restart service
+  become: true
+  become_user: '{{ sensu_backend__service_user }}'
+  community.docker.docker_compose_v2:
+    project_src: '{{ sensu_backend__service_dir }}'
+    state: present
+    wait: true
+  register: bring_up_result
+
+
+- name: Restart service
+  become: true
+  become_user: '{{ sensu_backend__service_user }}'
+  become_flags: '-s /bin/sh'
+  become_method: su
+  community.docker.docker_compose_v2:
+    project_src: '{{ sensu_backend__service_dir }}'
+    state: present
+    wait: true
+  when: not bring_up_result.changed

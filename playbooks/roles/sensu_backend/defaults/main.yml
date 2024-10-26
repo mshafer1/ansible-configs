@@ -1,0 +1,2 @@
+sensu_backend__service_user: sensu_user
+sensu_backend__service_dir: '{{ "/root/sensu_backend" if sensu_backend__service_user == "root" else ("/home/" + sensu_backend__service_user) }}'
