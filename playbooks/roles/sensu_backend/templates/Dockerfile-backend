@@ -1,6 +1,6 @@
 FROM sensu/sensu:6.11.0
 
 # Reasons:
-# jq, yq -> for sensuflow.sh
+# curl, jq, yq -> for sensuflow.sh
 # nano -> my saniy
-RUN apk add jq yq nano
+RUN apk add curl jq yq nano

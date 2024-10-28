@@ -25,7 +25,7 @@ SOFTWARE.
 
 Source: https://github.com/sensu/sensu-flow/blob/5b087b628662ba80673c910bc2792c140ece3dfa/sensuflow.sh
 Changes:
- (mshafer1) inline license
+ (mshafer1) inline license, add some debug output
 '
 
 ###
@@ -61,6 +61,8 @@ Changes:
 ## Read in envvars from .env from current directory
 if [ -f  ./.env ] ; then
   source ./.env
+else
+  echo "No .env found in ${PWD}"
 fi
 
 ### Setup envvar values, including fallback defaults where needed
@@ -279,8 +281,9 @@ do
 
   echo "Namespace ${namespace}"
   echo -e "Pruning resources...\n"
-  if [[ $VERBOSE ]] 
+  if [[ $VERBOSE ]]
   then 
+    echo -e "pwd is ${PWD}"
 	  echo -e "sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector \"${LABEL_SELECTOR}\" -r -f ${namespace} | jq '. | length'"
   fi
 
@@ -292,7 +295,7 @@ do
   fi
   echo "${num} resources deleted"
 
-  echo -e "Creating/Updating resources...\c"
+  echo -e "Creating/Updating resources... for ${namespae}\c"
   # Would be really nice if this gave us some type of output
   sensuctl create -r -f ${namespace} --namespace ${namespace}
   retval=$?

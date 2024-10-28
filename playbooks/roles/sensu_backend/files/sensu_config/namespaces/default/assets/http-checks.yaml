@@ -12,6 +12,8 @@ metadata:
   created_by: admin
   name: http-checks
   namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
 spec:
   builds:
   - filters:
