@@ -1,0 +1,59 @@
+
+- name: Setup sensu-flow user
+  ansible.builtin.include_tasks: _run_in_backend_container.yml
+  vars:
+    label: '{{ item.label }}'
+    command: '{{ item.command }}'
+  with_items:
+    - label: Configure sensuctl
+      command: >
+        sensuctl configure -n --url http://localhost:8080
+        --password '{{ sensu_backend__admin_password }}'
+        --username {{ sensu_backend__admin_username }}
+    - label: Create cluster role
+      command: >
+        sensuctl cluster-role create sensu-flow
+        --resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets
+        --verb get,list,create,update,delete
+    - label: Create role binding
+      command: >
+        sensuctl cluster-role-binding create sensu-flow
+        --cluster-role sensu-flow
+        --group sensu-flow
+    - label: Create sensu-flow user
+      command: >
+        sensuctl user create sensu-flow
+          --password '{{ sensu_backend__sensu_flow_password }}'
+          --groups sensu-flow
+
+
+- name: Copy in config files
+  block:
+    # NOTE: choosing to do a zip and copy over the zip to extract as I understand this to be much quicker then a file glob.
+    - name: Zip up config files on localhost
+      delegate_to: localhost
+      community.general.archive:
+        dest: /tmp/ansible_http_checks.tar.gz
+        path: '{{ role_path }}/files/'
+    - name: Copy into container shared folder
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/ansible_http_checks.tar.gz
+        dest: '{{ sensu_backend__service_dir }}/sensu_config/ansible_http_checks.tar.gz'
+    - name: Extract in container
+      ansible.builtin.include_tasks: _run_in_backend_container.yml
+      vars:
+        label: '{{ item.label }}'
+        command: '{{ item.command }}'
+      with_items:
+        - label: Ensure dest is gone
+          command: >
+            rm -rf /tmp/ansible_http_checks
+        - label: Ensure folder exists
+          command: >
+            mkdir -p /tmp/ansible_http_checks
+        - label: Extact into folder
+          command: >
+            tar -xzf /var/lib/sensu/ansible_http_checks.tar.gz -C /tmp/ansible_http_checks
+        - label: Make script executable
+          command: chmod +x /tmp/ansible_http_checks/sensuflow.sh

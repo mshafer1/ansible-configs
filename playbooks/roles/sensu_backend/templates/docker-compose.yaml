@@ -1,13 +1,36 @@
 services:
-  sensu-backend:
-    image: sensu/sensu:6.11.0
+  {{ sensu_backend__service_name }}:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-backend
     restart: unless-stopped
     hostname: sensu-backend
     command: >-
-      sensu-backend start
+      sensu-backend start --state-dir /var/lib/sensu/sensu-backend
     ports:
       - "127.0.0.1:3000:3000"  # Web UI
       - "127.0.0.1:8080:8080"  # API
       - "127.0.0.1:8081:8081"  # Agent communication
     volumes:
       - ./sensu_config:/var/lib/sensu
+    environment:
+      - SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${SENSU_BACKEND_CLUSTER_ADMIN_USERNAME}
+      - SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD}
+    networks:
+      - sensu
+
+  sensu-proxy:
+    image: sensu/sensu:6.11.0
+    restart: unless-stopped
+    hostname: sensu-proxy-agent
+    networks:
+      - sensu
+    command: >-
+      sensu-agent start --config-file /etc/sensu/agent.yml --backend-url ws://sensu-backend:8081
+    volumes:
+      - ./sensu_proxy_agent.yml:/etc/sensu/agent.yml
+
+
+networks:
+  sensu:
+    driver: bridge

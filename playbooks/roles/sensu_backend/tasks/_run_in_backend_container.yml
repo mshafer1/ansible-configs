@@ -1,0 +1,11 @@
+- name: Configure sensu - {{ label }}
+  delegate_to: '{{ inventory_hostname }}'
+  register: task_result
+  retries: 3
+  delay: 5
+  failed_when:
+    - task_result.rc != 0
+    - 'task_result.stderr != "Error: resource already exists"'
+  community.docker.docker_container_exec:
+    container: '{{ sensu_backend__service_dir | basename }}-{{ sensu_backend__service_name }}-1'
+    command: '{{ command }}'

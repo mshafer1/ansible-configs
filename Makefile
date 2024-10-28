@@ -65,5 +65,5 @@ objects/tunnels: playbooks/tunnel_servers.yml $(wildcard playbooks/roles/cloudfl
 	mv $@.tmp $@
 
 objects/sensu: playbooks/sensu.yml $(wildcard playbooks/roles/nginx_minimal/*) $(wildcard playbooks/roles/docker/*) $(wildcard playbooks/roles/sensu_backend/*)
-	$(shell unbuffer ansible-playbook $< 2>&1 | tee $@.tmp; exit $$PIPESTATUS[0])
+	unbuffer ansible-playbook -vv $< 2>&1
 	mv $@.tmp $@

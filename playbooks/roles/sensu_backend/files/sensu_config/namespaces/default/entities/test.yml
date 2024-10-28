@@ -1,0 +1,32 @@
+# I guess I template this out based on urls_to_monitor??
+
+---
+type: Entity
+api_version: core/v2
+metadata:
+  name: sensu-docs
+  labels:
+    proxy_type: website
+    url: https://docs.sensu.io
+spec:
+  entity_class: proxy
+---
+type: Entity
+api_version: core/v2
+metadata:
+  name: packagecloud-site
+  labels:
+    proxy_type: website
+    url: https://packagecloud.io
+spec:
+  entity_class: proxy
+---
+type: Entity
+api_version: core/v2
+metadata:
+  name: github-site
+  labels:
+    proxy_type: website
+    url: https://github.com
+spec:
+  entity_class: proxy
