@@ -1,0 +1,19 @@
+{% for proxy in proxy_entities %}
+type: Entity
+api_version: core/v2
+metadata:
+  name: {{ proxy.name }}
+  labels:
+    proxy_type: {{ proxy.type | default("website") }}
+{% if 'url' in proxy %}
+    url: {{ proxy.url }}
+{% endif %}
+    sensu.io/workflow: sensu-flow
+spec:
+  entity_class: proxy
+{% if not loop.last %}
+
+---
+
+{% endif %}
+{% endfor %}

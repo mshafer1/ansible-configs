@@ -30,7 +30,7 @@
   notify: Restart service
   become: true
   ansible.builtin.blockinfile:
-    # NOTE: admin credentionals do NOT have role defaults and must be set as host or group var.
+    # NOTE: admin credentials do NOT have role defaults and must be set as host or group var.
     block: |
       SENSU_API_URL=http://localhost:8080
       SENSU_USER='sensu-flow'
@@ -52,11 +52,27 @@
       community.general.archive:
         dest: /tmp/ansible_http_checks.tar.gz
         path: '{{ role_path }}/files/'
+        owner: '{{ ansible_user_id }}'
+        group: '{{ ansible_user_id }}'
+        mode: '0664'
     - name: Copy into container shared folder
       become: true
       ansible.builtin.copy:
         src: /tmp/ansible_http_checks.tar.gz
         dest: '{{ sensu_backend__service_dir }}/sensu_config/ansible_http_checks.tar.gz'
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0664'
+    - name: Render checks file
+      become: true
+      ansible.builtin.template:
+        dest: '{{ sensu_backend__service_dir }}/sensu_config/_proxy_entities.yml'
+        src: _proxy_entities.yml.j2
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0664'
+      vars:
+        proxy_entities: '{{ sensu_backend__proxy_entities }}'
     - name: Extract in container
       ansible.builtin.include_tasks: _run_in_backend_container.yml
       vars:
@@ -69,11 +85,13 @@
         - label: Ensure folder exists
           command: >
             mkdir -p /tmp/ansible_http_checks
-        - label: Extact into folder
+        - label: Extract into folder
           command: >
             tar -xzf /var/lib/sensu/ansible_http_checks.tar.gz -C /tmp/ansible_http_checks
         - label: Make script executable
           command: chmod +x /tmp/ansible_http_checks/sensuflow.sh
+        - label: Copy proxy entities file into config dir
+          command: cp -f /var/lib/sensu/_proxy_entities.yml /tmp/ansible_http_checks/sensu_config/namespaces/default/entities/proxy.yml
     - name: Run config
       ansible.builtin.include_tasks: _run_in_backend_container.yml
       vars:

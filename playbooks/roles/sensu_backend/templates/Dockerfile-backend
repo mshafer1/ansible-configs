@@ -1,6 +1,10 @@
+# TODO: do build from hee
+# https://github.com/sensu/sensu-go
+# then copy those binaries into image
+
 FROM sensu/sensu:6.11.0
 
 # Reasons:
 # curl, jq, yq -> for sensuflow.sh
-# nano -> my saniy
+# nano -> my sanity 
 RUN apk add curl jq yq nano

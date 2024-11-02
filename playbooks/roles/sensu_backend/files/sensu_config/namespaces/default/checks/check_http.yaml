@@ -7,7 +7,7 @@ metadata:
     sensu.io/workflow: sensu-flow
 spec:
   command: 'http-check --url {{ .labels.url }}'
-  interval: 300
+  interval: 1800 # 60 s/min * 30 min
   proxy_requests:
     entity_attributes:
       - entity.entity_class == 'proxy'

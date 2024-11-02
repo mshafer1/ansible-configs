@@ -11,6 +11,13 @@
         owner: '{{ sensu_backend__service_user }}'
         group: '{{ sensu_backend__service_user }}'
         mode: '0770'
+    - name: Ensure service config dir exists
+      ansible.builtin.file:
+        path: '{{ sensu_backend__service_dir }}/sensu_config'
+        state: directory
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0770'
     - name: Ensure user is in docker group
       ansible.builtin.user:
         name: '{{ sensu_backend__service_user }}'
