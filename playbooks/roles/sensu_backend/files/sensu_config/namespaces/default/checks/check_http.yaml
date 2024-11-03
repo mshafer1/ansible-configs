@@ -6,7 +6,6 @@ metadata:
   labels:
     sensu.io/managed_by: sensuctl
     sensu.io/workflow: sensu-flow
-  created_by: admin
 spec:
   check_hooks: null
   command: http-check --url {{ .labels.url }}
