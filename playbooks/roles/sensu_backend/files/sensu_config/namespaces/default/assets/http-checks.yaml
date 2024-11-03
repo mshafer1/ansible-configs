@@ -9,7 +9,6 @@ metadata:
     io.sensu.bonsai.tier: Community
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/sensu/http-checks
     io.sensu.bonsai.version: 0.5.0
-  created_by: admin
   name: http-checks
   namespace: default
   labels:

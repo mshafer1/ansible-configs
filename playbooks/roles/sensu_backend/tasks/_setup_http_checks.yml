@@ -73,6 +73,14 @@
         mode: '0664'
       vars:
         proxy_entities: '{{ sensu_backend__proxy_entities }}'
+    - name: Render handlers file
+      become: true
+      ansible.builtin.template:
+        dest: '{{ sensu_backend__service_dir }}/sensu_config/influxdb.yml'
+        src: handlers/influxdb.yml.j2
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0664'
     - name: Extract in container
       ansible.builtin.include_tasks: _run_in_backend_container.yml
       vars:
@@ -92,6 +100,8 @@
           command: chmod +x /tmp/ansible_http_checks/sensuflow.sh
         - label: Copy proxy entities file into config dir
           command: cp -f /var/lib/sensu/_proxy_entities.yml /tmp/ansible_http_checks/sensu_config/namespaces/default/entities/proxy.yml
+        - label: Copy influx handler file into config dir
+          command: cp -f /var/lib/sensu/influxdb.yml /tmp/ansible_http_checks/sensu_config/namespaces/default/handlers/influxdb.yml
     - name: Run config
       ansible.builtin.include_tasks: _run_in_backend_container.yml
       vars:

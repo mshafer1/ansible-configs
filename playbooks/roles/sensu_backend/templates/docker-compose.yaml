@@ -30,6 +30,27 @@ services:
     volumes:
       - ./sensu_proxy_agent.yml:/etc/sensu/agent.yml
 
+  influxdb:
+    image: influxdb:2
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/config:/etc/influxdb2
+      - ./influxdb/scripts:/docker-entrypoint-initdb.d
+    networks:
+      - sensu
+    ports:
+      - 127.0.0.1:8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - V1_DB_NAME=v1-db
+      - V1_RP_NAME=v1-rp
+      - V1_AUTH_USERNAME=v1-user
+      - TZ=America/Chicago
+      - DOCKER_INFLUXDB_INIT_USERNAME=influx_admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD={{ sensu_backend__influx_password }}
+      - DOCKER_INFLUXDB_INIT_ORG=sensu
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensu
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN={{ sensu_backend__influx_admin_token }}
 
 networks:
   sensu:
