@@ -21,3 +21,22 @@ spec:
     - sensu/sensu-influxdb-handler:4.0.0
   timeout: 10
   type: pipe
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: ntfy
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: ntfy-send
+  env_vars:
+    - NTFY_DEFAULT_CHANNELS={{ sensu_backend__ntfy_default_channels }}
+    - NTFY_TOKEN={{ sensu_backend__ntfy_token }}
+    - NTFY_SERVER={{ sensu_backend__ntfy_server }}
+  filters:
+    - state_change_only
+  handlers: null
+  timeout: 10
+  type: pipe
