@@ -7,4 +7,9 @@ FROM sensu/sensu:6.11.0
 # Reasons:
 # curl, jq, yq -> for sensuflow.sh
 # nano -> my sanity 
-RUN apk add curl jq yq nano
+# util-linux -> uuidgen for ntfy-handler
+RUN apk add curl jq yq nano util-linux
+
+
+# make symlinks for scripts
+RUN ln -s /opt/sensu_scripts/bin/ntfy-send.sh /usr/local/bin/ntfy-send

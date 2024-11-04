@@ -13,6 +13,7 @@ services:
       - "127.0.0.1:8081:8081"  # Agent communication
     volumes:
       - ./sensu_config:/var/lib/sensu
+      - ./sensu_backend_scripts/:/opt/sensu_scripts/bin
     environment:
       - SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${SENSU_BACKEND_CLUSTER_ADMIN_USERNAME}
       - SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD}

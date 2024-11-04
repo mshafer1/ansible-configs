@@ -8,6 +8,9 @@ metadata:
 {% if 'url' in proxy %}
     url: {{ proxy.url }}
 {% endif %}
+{% if 'ntfy_channels' in proxy %}
+    ntfy_channels: {{ proxy.ntfy_channels }}
+{% endif %}
     sensu.io/workflow: sensu-flow
 spec:
   entity_class: proxy

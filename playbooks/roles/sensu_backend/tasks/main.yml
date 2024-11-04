@@ -25,6 +25,9 @@
           - docker
         append: true
 
+- name: Setup backend sensu scripts
+  ansible.builtin.include_tasks: _setup_sensu_scripts.yml
+
 - name: Setup proxy agent config
   become: true
   block:

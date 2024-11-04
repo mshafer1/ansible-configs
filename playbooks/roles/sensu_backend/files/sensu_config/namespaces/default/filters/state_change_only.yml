@@ -1,0 +1,12 @@
+---
+type: EventFilter
+api_version: core/v2
+metadata:
+  created_by: admin
+  name: state_change_only
+  namespace: default
+spec:
+  action: allow
+  expressions:
+  - 'event.check.occurrences == 1'
+  runtime_assets: null
