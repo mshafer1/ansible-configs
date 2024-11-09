@@ -13,7 +13,7 @@
     - label: Create cluster role
       command: >
         sensuctl cluster-role create sensu-flow
-        --resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets,entities
+        --resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets,entities,pipelines
         --verb get,list,create,update,delete
     - label: Create role binding
       command: >
