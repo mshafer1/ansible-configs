@@ -20,5 +20,4 @@
       with_items:
         - src: ntfy-send.sh
           name: ntfy-send.sh
-        - src: email-send.sh
-          name: email-send.sh
+

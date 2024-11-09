@@ -17,6 +17,7 @@ spec:
   handlers:
     - influxdb
     - ntfy
+    - email
     - log-handler
   high_flap_threshold: 0
   interval: 15

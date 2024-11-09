@@ -40,3 +40,31 @@ spec:
   handlers: null
   timeout: 10
   type: pipe
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: email
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: |
+    {% raw %}event_info=$(cat -)
+    to_email=$(echo "${event_info}" | jq -r '.entity.metadata.labels["to_emails"]  // env.TO_EMAILS')
+    echo "${event_info}" | sensu-email-handler -f "${SENDGRID_FROM_ADDRESS}" -t "${to_email}" -s smtp.sendgrid.net -P 587 \
+    -u apikey -p "${SENDGRID_API_TOKEN}" -S '{{ $out := split "\n" .Check.Output -}}Sensu Alert - {{.Entity.Name}}/{{.Check.Name}}: {{ $out._0 }}'{% endraw %}
+  
+  env_vars:
+    - SENDGRID_API_TOKEN={{ sensu_backend__email_api_key }}
+    - SENDGRID_FROM_ADDRESS={{ sensu_backend__email_from_addresses }}
+    - TO_EMAILS={{ sensu_backend__default_alert_email_addresses }}
+  filters:
+    # - fatigue_check
+    - not_silenced
+    - state_change_only
+  handlers: null
+  timeout: 10
+  type: pipe
+  runtime_assets:
+    - sensu/sensu-email-handler
