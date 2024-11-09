@@ -7,8 +7,8 @@ metadata:
     sensu.io/managed_by: sensuctl
     sensu.io/workflow: sensu-flow
   annotations:
-    fatigue_check/occurrences: '4'
-    fatigue_check/interval: '900'
+    fatigue_check/occurrences: '2' # two failures in a row
+    fatigue_check/interval: '0' # do not repeat
     fatigue_check/allow_resolution: 'true'
 spec:
   check_hooks: null
