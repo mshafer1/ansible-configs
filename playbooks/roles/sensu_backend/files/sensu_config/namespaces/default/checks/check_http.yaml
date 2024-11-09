@@ -6,6 +6,10 @@ metadata:
   labels:
     sensu.io/managed_by: sensuctl
     sensu.io/workflow: sensu-flow
+  annotations:
+    fatigue_check/occurrences: '4'
+    fatigue_check/interval: '900'
+    fatigue_check/allow_resolution: 'true'
 spec:
   check_hooks: null
   command: http-check --url {{ .labels.url }}

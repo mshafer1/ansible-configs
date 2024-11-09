@@ -36,7 +36,7 @@ spec:
     - NTFY_TOKEN={{ sensu_backend__ntfy_token }}
     - NTFY_SERVER={{ sensu_backend__ntfy_server }}
   filters:
-    - state_change_only
+    - fatigue_check
   handlers: null
   timeout: 10
   type: pipe

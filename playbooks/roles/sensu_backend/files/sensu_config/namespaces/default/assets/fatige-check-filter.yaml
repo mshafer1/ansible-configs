@@ -1,0 +1,23 @@
+---
+type: Asset
+api_version: core/v2
+metadata:
+  annotations:
+    io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/nixwiz/sensu-go-fatigue-check-filter
+    io.sensu.bonsai.name: sensu-go-fatigue-check-filter
+    io.sensu.bonsai.namespace: nixwiz
+    io.sensu.bonsai.tags: eventfilter, filter
+    io.sensu.bonsai.tier: Community
+    io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-go-fatigue-check-filter
+    io.sensu.bonsai.version: 0.8.1
+  created_by: admin
+  name: nixwiz/sensu-go-fatigue-check-filter
+  namespace: default
+spec:
+  builds:
+  - filters: null
+    headers: null
+    sha512: d584a9c62631044e8496abca2fd7cdbe724b3b68fb09fe8dcb93da07b73f6a0211a4d6cc20ea23dd9d1ce5a580d409d9cb21e5a227f33dd7ed4c496ec0eba4a0
+    url: https://assets.bonsai.sensu.io/5d3f277dff2847d55d5dcbcbc3db98296991bb67/sensu-go-fatigue-check-filter_0.8.1.tar.gz
+  filters: null
+  headers: null
