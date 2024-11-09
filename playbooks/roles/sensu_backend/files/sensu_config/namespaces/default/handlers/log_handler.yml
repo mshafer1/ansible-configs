@@ -8,8 +8,9 @@ metadata:
     sensu.io/workflow: sensu-flow
 spec:
   command: >-
-    cat >> /var/log/sensu_events
-  filters: null
+    cat >> /var/log/sensu_events; echo "" >> /var/log/sensu_events
+  filters:
+    - fatigue_check
   handlers: null
   runtime_assets: []
   timeout: 10

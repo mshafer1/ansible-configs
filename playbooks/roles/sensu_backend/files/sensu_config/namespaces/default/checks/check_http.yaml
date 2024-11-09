@@ -16,7 +16,8 @@ spec:
   env_vars: null
   handlers:
     - influxdb
-    # - log-handler
+    - ntfy
+    - log-handler
   high_flap_threshold: 0
   interval: 15
   low_flap_threshold: 0

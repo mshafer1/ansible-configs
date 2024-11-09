@@ -11,8 +11,10 @@ metadata:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-go-fatigue-check-filter
     io.sensu.bonsai.version: 0.8.1
   created_by: admin
-  name: nixwiz/sensu-go-fatigue-check-filter
+  name: fatigue-check-filter
   namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
 spec:
   builds:
   - filters: null
