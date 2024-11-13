@@ -19,3 +19,9 @@
     build: always
     wait: true
   when: not bring_up_result.changed
+
+- name: Reload nginx
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/sbin/nginx -s reload
+  changed_when: true

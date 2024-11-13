@@ -80,3 +80,13 @@
 
 - name: Setup http checks
   ansible.builtin.include_tasks: _setup_http_checks.yml
+
+- name: Copy nginx server template
+  notify: Reload nginx
+  become: true
+  ansible.builtin.template:
+    src: 'nginx-site.j2'
+    dest: /etc/nginx/sites-enabled/sensu
+    owner: root
+    group: root
+    mode: '0664'
