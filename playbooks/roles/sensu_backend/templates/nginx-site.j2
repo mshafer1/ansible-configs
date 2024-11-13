@@ -1,0 +1,9 @@
+server {
+    server_name {% for domain in sensu_backend__domains %}{{ domain }} {% endfor %};
+    listen 80;
+
+    location / {
+      client_max_body_size 26M;
+      proxy_pass http://127.0.0.1:3000/;
+    }
+}

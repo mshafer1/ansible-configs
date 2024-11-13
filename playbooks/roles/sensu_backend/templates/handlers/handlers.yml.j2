@@ -1,0 +1,70 @@
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: influxdb
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: >-
+    sensu-influxdb-handler --addr ${INFLUXDB_ADDR} --org ${INFLUXDB_ORG}
+    --bucket ${INFLUXDB_BUCKET} -t ${INFLUXDB_TOKEN}
+  env_vars:
+    - INFLUXDB_ADDR=http://influxdb:8086
+    - INFLUXDB_ORG=sensu
+    - INFLUXDB_BUCKET=sensu
+    - INFLUXDB_TOKEN={{ sensu_backend__influx_admin_token }}
+  filters: null
+  handlers: null
+  runtime_assets:
+    - sensu/sensu-influxdb-handler:4.0.0
+  timeout: 10
+  type: pipe
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: ntfy
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: ntfy-send
+  env_vars:
+    - NTFY_DEFAULT_CHANNELS={{ sensu_backend__ntfy_default_channels }}
+    - NTFY_TOKEN={{ sensu_backend__ntfy_token }}
+    - NTFY_SERVER={{ sensu_backend__ntfy_server }}
+  filters:
+    - fatigue_check
+  handlers: null
+  timeout: 10
+  type: pipe
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: email
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: |
+    {% raw %}event_info=$(cat -)
+    to_email=$(echo "${event_info}" | jq -r '.entity.metadata.annotations["to_emails"]  // env.TO_EMAILS')
+    echo "${event_info}" | sensu-email-handler -f "${SENDGRID_FROM_ADDRESS}" -t "${to_email}" -s smtp.sendgrid.net -P 587 \
+    -u apikey -p "${SENDGRID_API_TOKEN}" -S '{{ $out := split "\n" .Check.Output -}}Sensu Alert - {{.Entity.Name}}/{{.Check.Name}}: {{ $out._0 }}'{% endraw %}
+  
+  env_vars:
+    - SENDGRID_API_TOKEN={{ sensu_backend__email_api_key }}
+    - SENDGRID_FROM_ADDRESS={{ sensu_backend__email_from_addresses }}
+    - TO_EMAILS={{ sensu_backend__default_alert_email_addresses }}
+  filters:
+    # - fatigue_check
+    - not_silenced
+    - state_change_only
+  handlers: null
+  timeout: 10
+  type: pipe
+  runtime_assets:
+    - sensu/sensu-email-handler

@@ -11,12 +11,46 @@
         owner: '{{ sensu_backend__service_user }}'
         group: '{{ sensu_backend__service_user }}'
         mode: '0770'
+    - name: Ensure service config dir exists
+      ansible.builtin.file:
+        path: '{{ sensu_backend__service_dir }}/sensu_config'
+        state: directory
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0770'
     - name: Ensure user is in docker group
       ansible.builtin.user:
         name: '{{ sensu_backend__service_user }}'
-        groups: 
+        groups:
           - docker
         append: true
+
+- name: Setup backend sensu scripts
+  ansible.builtin.include_tasks: _setup_sensu_scripts.yml
+
+- name: Setup proxy agent config
+  become: true
+  block:
+    - name: Create proxy agent config
+      ansible.builtin.template:
+        dest: '{{ sensu_backend__service_dir }}/sensu_proxy_agent.yml'
+        src: 'proxy_agent.yml.j2'
+        owner: '{{ sensu_backend__service_user }}'
+        group: '{{ sensu_backend__service_user }}'
+        mode: '0664'
+
+- name: Template out config files
+  become: true
+  notify: Restart service
+  ansible.builtin.template:
+    dest: '{{ sensu_backend__service_dir }}/{{ item.name }}'
+    src: '{{ item.src | default(item.name) }}'
+    owner: '{{ sensu_backend__service_user }}'
+    group: '{{ sensu_backend__service_user }}'
+    mode: '0664'
+  with_items:
+    - name: Dockerfile-backend
+
 - name: Setup service config
   become: true
   block:
@@ -40,3 +74,19 @@
         owner: '{{ sensu_backend__service_user }}'
         group: '{{ sensu_backend__service_user }}'
         mode: '0660'
+
+- name: Bring up container now
+  ansible.builtin.meta: flush_handlers
+
+- name: Setup http checks
+  ansible.builtin.include_tasks: _setup_http_checks.yml
+
+- name: Copy nginx server template
+  notify: Reload nginx
+  become: true
+  ansible.builtin.template:
+    src: 'nginx-site.j2'
+    dest: /etc/nginx/sites-enabled/sensu
+    owner: root
+    group: root
+    mode: '0664'

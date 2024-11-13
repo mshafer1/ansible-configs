@@ -1,0 +1,15 @@
+# TODO: do build from hee
+# https://github.com/sensu/sensu-go
+# then copy those binaries into image
+
+FROM sensu/sensu:6.11.0
+
+# Reasons:
+# curl, jq, yq -> for sensuflow.sh
+# nano -> my sanity 
+# util-linux -> uuidgen for ntfy-handler
+RUN apk add curl jq yq nano util-linux
+
+
+# make symlinks for scripts
+RUN ln -s /opt/sensu_scripts/bin/ntfy-send.sh /usr/local/bin/ntfy-send

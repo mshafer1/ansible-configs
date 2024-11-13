@@ -1,0 +1,17 @@
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: log-handler
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: >-
+    cat >> /var/log/sensu_events; echo "" >> /var/log/sensu_events
+  filters:
+    - fatigue_check
+  handlers: null
+  runtime_assets: []
+  timeout: 10
+  type: pipe
