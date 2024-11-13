@@ -20,4 +20,6 @@
       with_items:
         - src: ntfy-send.sh
           name: ntfy-send.sh
+        - src: check-stream.sh
+          name: check-stream.sh
 

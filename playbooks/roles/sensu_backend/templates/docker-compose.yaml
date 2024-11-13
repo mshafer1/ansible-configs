@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile-backend
+    image: sensu-customized:latest
     restart: unless-stopped
     hostname: sensu-backend
     command: >-
@@ -21,7 +22,7 @@ services:
       - sensu
 
   sensu-proxy:
-    image: sensu/sensu:6.11.0
+    image: sensu-customized:latest
     restart: unless-stopped
     hostname: sensu-proxy-agent
     networks:
@@ -30,6 +31,7 @@ services:
       sensu-agent start --config-file /etc/sensu/agent.yml --backend-url ws://sensu-backend:8081
     volumes:
       - ./sensu_proxy_agent.yml:/etc/sensu/agent.yml
+      - ./sensu_backend_scripts/:/opt/sensu_scripts/bin
 
   influxdb:
     image: influxdb:2
