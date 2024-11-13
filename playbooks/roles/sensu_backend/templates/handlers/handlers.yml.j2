@@ -51,7 +51,7 @@ metadata:
 spec:
   command: |
     {% raw %}event_info=$(cat -)
-    to_email=$(echo "${event_info}" | jq -r '.entity.metadata.labels["to_emails"]  // env.TO_EMAILS')
+    to_email=$(echo "${event_info}" | jq -r '.entity.metadata.annotations["to_emails"]  // env.TO_EMAILS')
     echo "${event_info}" | sensu-email-handler -f "${SENDGRID_FROM_ADDRESS}" -t "${to_email}" -s smtp.sendgrid.net -P 587 \
     -u apikey -p "${SENDGRID_API_TOKEN}" -S '{{ $out := split "\n" .Check.Output -}}Sensu Alert - {{.Entity.Name}}/{{.Check.Name}}: {{ $out._0 }}'{% endraw %}
   
