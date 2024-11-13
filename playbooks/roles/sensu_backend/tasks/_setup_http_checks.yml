@@ -47,13 +47,19 @@
 - name: Copy in config files
   block:
     # NOTE: choosing to do a zip and copy over the zip to extract as I understand this to be much quicker then a file glob.
+    - name: Get local username
+      become: false
+      delegate_to: localhost
+      ansible.builtin.command:
+        cmd: whoami
+      register: local_username
     - name: Zip up config files on localhost
       delegate_to: localhost
       community.general.archive:
         dest: /tmp/ansible_http_checks.tar.gz
         path: '{{ role_path }}/files/'
-        owner: '{{ ansible_user_id }}'
-        group: '{{ ansible_user_id }}'
+        owner: '{{ local_username.stdout }}'
+        group: '{{ local_username.stdout }}'
         mode: '0664'
     - name: Copy into container shared folder
       become: true
