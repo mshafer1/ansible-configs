@@ -1,0 +1,34 @@
+type: CheckConfig
+api_version: core/v2
+metadata:
+  name: test-email-handler
+  namespace: default
+  labels:
+    sensu.io/managed_by: sensuctl
+    sensu.io/workflow: sensu-flow
+  annotations:
+    fatigue_check/occurrences: '1' # first time
+    fatigue_check/interval: '1' # every interval
+    fatigue_check/allow_resolution: 'true'
+spec:
+  check_hooks: null
+  command: echo "Verifying failure triggers an email"; exit 1
+  env_vars: null
+  handlers:
+    - email
+  high_flap_threshold: 0
+  interval: 30
+  low_flap_threshold: 0
+  pipelines: []
+  publish: false
+  round_robin: true
+  runtime_assets:
+  secrets: null
+  stdin: false
+  subdue: null
+  subscriptions:
+    - run_proxies
+  timeout: 0
+  ttl: 0
+  max_output_size: 0
+  discard_output: false
