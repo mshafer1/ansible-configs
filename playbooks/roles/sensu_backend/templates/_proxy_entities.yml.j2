@@ -53,6 +53,8 @@ metadata:
     fatigue_check/occurrences: '1' # immediately
     fatigue_check/interval: '1' # every time
     fatigue_check/allow_resolution: 'false' # only failures
+    ntfy/title: 'Trouble getting the stream live?'
+    ntfy/template: 'check_output'
 spec:
   check_hooks: null
   command: '/opt/sensu_scripts/bin/check-stream.sh {% raw %}--stream-source {{ .labels.stream_source }} --api-key ${YOUTUBE_API_KEY}{% endraw %}'
