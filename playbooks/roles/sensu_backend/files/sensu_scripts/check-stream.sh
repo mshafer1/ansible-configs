@@ -43,7 +43,7 @@ print_help() {
 
 debug_print() {
 if [ $debug -eq 1 ]; then
-    echo -e "$1"
+    echo "$1"
 fi
 }
 
@@ -61,25 +61,26 @@ if [ -z "$stream_id" ]; then
         exit 1
     fi
 
-    stream_link=$(curl -Ls -o /dev/null -w %{url_effective} "$stream_source")
+    stream_link=$(curl -Ls -o /dev/null -w '%{url_effective}' "$stream_source")
     debug_print "Stream link is $stream_link"
     query_string=$(echo "$stream_link" | sed -e 's/^.*?//g')
     debug_print "Query string is $query_string"
 
     # Extract the value of the 'q' parameter
     stream_id=$(echo "$query_string" | sed -n 's/.*v=\([^&]*\).*/\1/p')
-    echo "Stream ID is $stream_id"
+    debug_print "Stream ID is $stream_id"
 fi
 
 actual_start_time=$(curl -s "https://www.googleapis.com/youtube/v3/videos?key=${api_key}&part=liveStreamingDetails&id=${stream_id}" | jq '.items[0].liveStreamingDetails.actualStartTime')
-echo ""
-echo "Actual start time: $actual_start_time"
+debug_print ""
+debug_print "Actual start time: $actual_start_time"
 
 if [ "$actual_start_time" = "null" ]; then
     echo "" >&2
-    echo "Trouble getting the stream live?" >&2
     echo "Stream ${stream_id} is not started yet." >&2
     echo "" >&2
-    echo "Text Matthew if you need help." >&2
+    echo "Call/text Matthew if you need help." >&2
     exit 2
+else
+  echo "OK: Stream ${stream_id} is live as of ${actual_start_time}."
 fi
