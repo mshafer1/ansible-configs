@@ -41,11 +41,19 @@ print_help() {
     echo "If stream-source is passed, it must be a redirect to a youtube url with a steam id to check" >&2
 }
 
+debug_log() {
+  # echo "$(date) -- $1" >> /var/log/sensu/check_stream.log
+  echo "$(date) -- $1" >/dev/null
+}
+
 debug_print() {
 if [ $debug -eq 1 ]; then
     echo "$1"
 fi
+debug_log "$1"
 }
+
+debug_log "-------"
 
 if [ -z "$api_key" ]; then
     print_help
@@ -71,16 +79,20 @@ if [ -z "$stream_id" ]; then
     debug_print "Stream ID is $stream_id"
 fi
 
-actual_start_time=$(curl -s "https://www.googleapis.com/youtube/v3/videos?key=${api_key}&part=liveStreamingDetails&id=${stream_id}" | jq '.items[0].liveStreamingDetails.actualStartTime')
+api_response=$(curl -s "https://www.googleapis.com/youtube/v3/videos?key=${api_key}&part=liveStreamingDetails&id=${stream_id}" | jq .)
+debug_log "API response: ${api_response}"
+actual_start_time=$(echo "$api_response" | jq '.items[0].liveStreamingDetails.actualStartTime')
 debug_print ""
 debug_print "Actual start time: $actual_start_time"
 
 if [ "$actual_start_time" = "null" ]; then
+    debug_log "Fail"
     echo "" >&2
     echo "Stream ${stream_id} is not started yet." >&2
     echo "" >&2
     echo "Call/text Matthew if you need help." >&2
     exit 2
 else
+  debug_log "Pass"
   echo "OK: Stream ${stream_id} is live as of ${actual_start_time}."
 fi
