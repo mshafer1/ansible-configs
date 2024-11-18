@@ -47,6 +47,7 @@ spec:
     splay_coverage: 0
   publish: true
   round_robin: true
+  runtime_assets: []
   secrets: null
   stdin: false
   subdue: null
