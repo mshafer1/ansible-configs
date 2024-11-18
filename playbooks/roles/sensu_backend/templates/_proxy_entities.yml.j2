@@ -19,6 +19,9 @@ metadata:
 {% if 'domain' in proxy %}
     domain: {{ proxy.domain }}
 {% endif %}
+{% if 'status_proxy' in proxy %}
+    status_proxy: '{{ proxy.status_proxy }}'
+{% endif %}
     sensu.io/workflow: sensu-flow
 
 spec:
