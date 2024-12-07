@@ -18,7 +18,6 @@ spec:
     - influxdb
     - ntfy
     - email
-    - log-handler
   high_flap_threshold: 0
   cron: '0 16 * * *'
   low_flap_threshold: 0
