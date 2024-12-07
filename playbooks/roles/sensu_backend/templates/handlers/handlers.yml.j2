@@ -44,6 +44,25 @@ spec:
 type: Handler
 api_version: core/v2
 metadata:
+  name: ntfy-failures-only
+  namespace: default
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: ntfy-send
+  env_vars:
+    - NTFY_DEFAULT_CHANNELS={{ sensu_backend__ntfy_default_channels }}
+    - NTFY_TOKEN={{ sensu_backend__ntfy_token }}
+    - NTFY_SERVER={{ sensu_backend__ntfy_server }}
+  filters:
+    - failures_only
+  handlers: null
+  timeout: 10
+  type: pipe
+---
+type: Handler
+api_version: core/v2
+metadata:
   name: email
   namespace: default
   labels:

@@ -64,7 +64,7 @@ spec:
   env_vars:
     - YOUTUBE_API_KEY={{ sensu_backend__youtube_api_key }}
   handlers:
-    - ntfy
+    - ntfy-failures-only
     - email
     - influxdb
   high_flap_threshold: 0
