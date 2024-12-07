@@ -4,6 +4,9 @@ api_version: core/v2
 metadata:
   name: fatigue_check
   namespace: default
+  labels:
+    sensu.io/managed_by: sensuctl
+    sensu.io/workflow: sensu-flow
 spec:
   action: allow
   expressions:
