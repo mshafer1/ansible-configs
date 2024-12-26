@@ -1,7 +1,31 @@
+- name: Make sure hostname still resolves
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: '127.0.0.1 {{ ansible_hostname }}'
+
+- name: Handle Ubuntu systemd-resolved
+  include_tasks: '_{{ ansible_distribution }}.yml'
+  when: ansible_distribution == 'Ubuntu'
+
 - name: Install packages
+  become: true
   ansible.builtin.apt:
     pkg: 
     - dnsmasq
     state: latest
     update_cache: true
+    cache_valid_time: 3600 # to speed up secondary runs within a small span
+
+- name: reload systemd
+  meta: flush_handlers
+
+- name: Enable/start dnsmasq
   become: true
+  ansible.builtin.systemd:
+    name: dnsmasq
+    state: started
+    enabled: true
+
+- name: Backup dnsmasq original config
+  include_tasks: _backup_config.yml

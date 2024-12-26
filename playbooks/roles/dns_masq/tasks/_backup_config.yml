@@ -1,0 +1,12 @@
+- name: Backup original config
+  become: true
+  block:
+    - name: Backup original config
+      ansible.builtin.copy:
+        src: /etc/dnsmasq.conf
+        dest: /etc/dnsmasq.conf.bak
+        owner: root
+        group: root
+        mode: '0664'
+        remote_src: yes
+        force: false

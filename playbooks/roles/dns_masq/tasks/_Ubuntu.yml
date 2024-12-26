@@ -1,0 +1,21 @@
+- name: set systemd to not serve on 53
+  become: true
+  block:
+    - name: Set upstream DNS to OpenDNS
+      notify: Restart systemd-resolved
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        line: DNS=208.67.222.222 208.67.220.220
+        regexp: '^#?DNS='
+    - name: Specify fall back upstream DNS (Google and Cloudflare)
+      notify: Restart systemd-resolved
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        line: FallbackDNS=8.8.4.4 1.1.1.1
+        regexp: '^#?FallbackDNS='
+    - name: Disable stub listener
+      notify: Restart systemd-resolved
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        line: DNSStubListener=no
+        regexp: '#?DNSStubListener='

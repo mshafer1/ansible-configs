@@ -1,0 +1,48 @@
+- name: Set dnsmasq to ignore /etc/resolv.conf
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/etc/dnsmasq.conf"
+    line: no-resolv
+    regexp: '\# *no-resolv'
+
+- name: Set upstream servers for dnsmasq
+  become: true
+  block:
+    - name: Setup upstream DNS 1
+      ansible.builtin.lineinfile:
+        path: "/etc/dnsmasq.conf"
+        line: server=208.67.222.222
+        insertafter: 'Add other name servers here'
+
+    - name: Setup upstream DNS 2
+      ansible.builtin.lineinfile:
+        path: "/etc/dnsmasq.conf"
+        line: server=208.67.220.220
+        insertafter: 'Add other name servers here'
+
+## TODO:?? add conf-dir=/etc/dnsmas.d,*.conf
+
+- name: Set dnsmasq to load hosts file
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/etc/dnsmasq.conf"
+    line: "addn-hosts=/etc/dnsmasq.hosts"
+    regexp: "^#?addn-hosts="
+
+- name: Set dnsmasq to load blocklists
+  become: true
+  block:
+    - name: Create blocklists dir
+      ansible.builtin.file:
+        path: /etc/dnsmasq.blocklists
+        state: directory
+        owner: root
+        group: root
+        mode: '0664'
+    - name: Set hostsdir setting
+      ansible.builtin.lineinfile:
+        path: "/etc/dnsmasq.conf"
+        line: conf-dir=/etc/dnsmasq.blocklists,*.txt
+        regexp: '^ *hostsdir='
+        insertbefore: 'addn-hosts='
+        firstmatch: true
