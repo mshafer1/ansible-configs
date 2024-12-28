@@ -1,0 +1,8 @@
+[Unit]
+Description=Update DNSMasq blocklists
+
+[Service]
+ExecStart=/bin/bash /usr/sbin/update-dnsmasq-block-lists.sh
+
+[Install]
+WantedBy=multi-user.target

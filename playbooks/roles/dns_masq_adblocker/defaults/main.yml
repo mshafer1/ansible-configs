@@ -1,0 +1,17 @@
+# NOTE: adding to the list is simple, just run again to download more.
+# However, cleanup is currently manual...
+dns_masq_adblocker_files:
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/popupads.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/doh-vpn-proxy-bypass.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/hoster.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/anti.piracy.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/gambling.txt
+
+  # block device trackers
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.amazon.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.apple.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.huawei.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.tiktok.txt
+  - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.tiktok.extended.txt

@@ -1,0 +1,45 @@
+- name: Setup script to download latest block lists
+  become: true
+  block:
+    - name: Ensure script dir exists
+      ansible.builtin.file:
+        path: /usr/sbin
+        state: directory
+        owner: root
+        group: root
+        mode: '0775'
+    - name: Template script into place
+      ansible.builtin.template:
+        src: update-dnsmasq-block-lists.sh.j2
+        dest: /usr/sbin/update-dsnmasq-block-lists.sh
+        owner: root
+        group: root
+        mode: "0774"
+- name: Copy initial block lists
+  become: true
+  changed_when: true
+  ansible.builtin.shell:
+    cmd: /usr/sbin/update-dsnmasq-block-lists.sh
+
+- name: Create service to update blocklists
+  notify: Reload systemd
+  become: true
+  ansible.builtin.copy:
+    src: files/{{ item }}
+    dest: /etc/systemd/system/{{ item }}
+    owner: root
+    group: root
+    mode: '0440'
+  with_items:
+    - update-dnsmasq-blocklists.service
+    - update-dnsmasq-blocklists.timer
+
+- name: reload systemd
+  meta: flush_handlers
+
+- name: Enable service
+  become: true
+  ansible.builtin.systemd:
+    name: update-dnsmasq-blocklists.timer
+    state: started
+    enabled: true

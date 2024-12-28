@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu -o pipefail
+
+{% for item in dns_masq_adblocker_files %}
+(cd /etc/dnsmasq.blocklists; curl -O "{{item}}")
+
+{% endfor %}
+
+systemctl restart dnsmasq
