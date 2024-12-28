@@ -40,6 +40,14 @@ services:
     volumes:
       - ./sensu_proxy_agent.yml:/etc/sensu/agent.yml
       - ./sensu_backend_scripts/:/opt/sensu_scripts/bin
+    deploy:
+      resources:
+        limits:
+          cpus: ".5"
+          memory: "250M"
+        reservations:
+          cpus: "0.1"
+          memory: "50M"
 
   influxdb:
     image: influxdb:2
@@ -66,10 +74,10 @@ services:
       resources:
         limits:
           cpus: ".25"
-          memory: "125M"
+          memory: "256M"
         reservations:
           cpus: "0.1"
-          memory: "50M"
+          memory: "100M"
 
 networks:
   sensu:
