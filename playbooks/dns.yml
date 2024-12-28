@@ -9,82 +9,91 @@
   - dns_server
 
   tasks:
-  - import_tasks: tasks/homelab_public_key.yml
+    - import_tasks: tasks/homelab_public_key.yml
 
-  - name: Include host mapping vars
-    ansible.builtin.include_vars:
-      file: host_ip_mapping_subdomain1.yml
-      name: subdomain1
+    - name: Include host mapping vars
+      ansible.builtin.include_vars:
+        file: host_ip_mapping_subdomain1.yml
+        name: subdomain1
+    
+    - name: Include host mapping vars2
+      ansible.builtin.include_vars:
+        file: shortnames.yml
+        name: shortnames
+    
+    - name: Include host mapping vars (superset)
+      ansible.builtin.include_vars:
+        file: domains.yml
+        name: domain_config
+
+    - name: Create config file if needed
+      become: true
+      copy:
+        content: ""
+        dest: "{{ dns_config_file }}"
+        force: no
+        group: root
+        owner: root
+        mode: 0644
+
+    - name: "Set dnsmasq to use hosts file"
+      become: true
+      ansible.builtin.lineinfile:
+        path: "/etc/dnsmasq.conf"
+        line: "addn-hosts={{ dns_config_file }}"
+      notify:
+      - Restart dnsmasq
   
-  - name: Include host mapping vars2
-    ansible.builtin.include_vars:
-      file: shortnames.yml
-      name: shortnames
-  
-  - name: Include host mapping vars (superset)
-    ansible.builtin.include_vars:
-      file: domains.yml
-      name: domain_config
-
-  - name: Create config file if needed
-    become: true
-    copy:
-      content: ""
-      dest: "{{ dns_config_file }}"
-      force: no
-      group: root
-      owner: root
-      mode: 0644
-
-  - name: "Set dnsmasq to use hosts file"
-    become: true
-    ansible.builtin.lineinfile:
-      path: "/etc/dnsmasq.conf"
-      line: "addn-hosts={{ dns_config_file }}"
-    notify:
-    - Restart dnsmasq
- 
-  - name: "Load {{ shortnames.dns_subdomain }} block into var"
-    set_fact:
-      hosts_content: |
-        {% for item in shortnames.host_ip_mapping|sort(attribute='ip') %}
-        {{ item.ip }} {{ item.host }}{{ shortnames.dns_subdomain }}
-        {% endfor %}
-  - name: "Set DNS hosts for {{ shortnames.dns_subdomain }}"
-    become: true
-    ansible.builtin.blockinfile:
-      marker: "# {mark} ANSIBLE CONFIG  {{ shortnames.dns_subdomain }}"
-      dest: "{{ dns_config_file }}"
-      block: "{{ hosts_content }}"
-    notify:
-    - Restart dnsmasq
-  
-  - name: "Load {{ subdomain1.dns_subdomain }} block into var"
-    set_fact:
-      hosts_content: |
-        {% for item in subdomain1.host_ip_mapping|sort(attribute='ip') %}
-        {{ item.ip }} {{ item.host }}{{ subdomain1.dns_subdomain }}
-        {% endfor %}
+    - name: "Load {{ shortnames.dns_subdomain }} block into var"
+      set_fact:
+        hosts_content: |
+          {% for item in shortnames.host_ip_mapping|sort(attribute='ip') %}
+          {{ item.ip }} {{ item.host }}{{ shortnames.dns_subdomain }}
+          {% endfor %}
+    - name: "Set DNS hosts for {{ shortnames.dns_subdomain }}"
+      become: true
+      ansible.builtin.blockinfile:
+        marker: "# {mark} ANSIBLE CONFIG  {{ shortnames.dns_subdomain }}"
+        dest: "{{ dns_config_file }}"
+        block: "{{ hosts_content }}"
+      notify:
+      - Restart dnsmasq
+    
+    - name: "Load {{ subdomain1.dns_subdomain }} block into var"
+      set_fact:
+        hosts_content: |
+          {% for item in subdomain1.host_ip_mapping|sort(attribute='ip') %}
+          {{ item.ip }} {{ item.host }}{{ subdomain1.dns_subdomain }}
+          {% endfor %}
 
 
-  - name: "Set DNS hosts for {{ subdomain1.dns_subdomain }}"
-    become: true
-    ansible.builtin.blockinfile:
-      marker: "# {mark} ANSIBLE CONFIG  {{ subdomain1.dns_subdomain }}"
-      dest: "{{ dns_config_file }}"
-      block: "{{ hosts_content }}"
-    notify:
-    - Restart dnsmasq
-  
-  - name: Setup DNS hosts for domains
-    ansible.builtin.include_tasks: tasks/setup_dns_domains.yml
-    loop: "{{ domain_config.domains }}"
-    loop_control:
-      loop_var: loopdomain
+    - name: "Set DNS hosts for {{ subdomain1.dns_subdomain }}"
+      become: true
+      ansible.builtin.blockinfile:
+        marker: "# {mark} ANSIBLE CONFIG  {{ subdomain1.dns_subdomain }}"
+        dest: "{{ dns_config_file }}"
+        block: "{{ hosts_content }}"
+      notify:
+      - Restart dnsmasq
+    
+    - name: Setup DNS hosts for domains
+      ansible.builtin.include_tasks: tasks/setup_dns_domains.yml
+      loop: "{{ domain_config.domains }}"
+      loop_control:
+        loop_var: loopdomain
 
   handlers:
-  - name: Restart dnsmasq
-    ansible.builtin.systemd:
-      state: restarted
-      name: dnsmasq
-    become: true
+    - name: Restart dnsmasq
+      ansible.builtin.systemd:
+        state: restarted
+        name: dnsmasq
+      become: true
+
+
+- name: Setup DNS ad blocker
+  hosts: dns_adblocker
+  vars:
+    dns_config_file: /etc/dnsmasq.hosts
+
+  roles:
+    - dns_masq_adblocker
