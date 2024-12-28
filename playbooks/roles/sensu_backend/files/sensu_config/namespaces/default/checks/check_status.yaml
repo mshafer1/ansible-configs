@@ -14,14 +14,14 @@ spec:
   check_hooks: null
   command: |
     output=$(curl {{ .labels.url }} 2>/dev/null )
-    if [ "${output}" == *'"x - '* ]; then
-            echo "Error:" >&2
-            echo $(echo "${output}" | jq .) >&2
-            exit 2
-    elif [ "${output}" == *'"! - '* ]; then
-            echo "Warning:" >&2
-            echo $(echo "${output}" | jq .) >&2
-            exit 1
+    if [[ "${output}" == *'"x - '* ]]; then
+        echo "Error:" >&2
+        echo "${output}" | jq . >&2
+        exit 2
+    elif [[ "${output}" == *'"! - '* ]]; then
+        echo "Warning:" >&2
+        echo "${output}" | jq . >&2
+        exit 1
     fi
     echo "OK:"
     echo "${output}" | jq .
