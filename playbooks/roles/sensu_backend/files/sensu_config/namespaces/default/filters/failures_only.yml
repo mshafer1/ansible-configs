@@ -1,0 +1,14 @@
+---
+type: EventFilter
+api_version: core/v2
+metadata:
+  name: failures_only
+  namespace: default
+  labels:
+    sensu.io/managed_by: sensuctl
+    sensu.io/workflow: sensu-flow
+spec:
+  action: allow
+  expressions:
+  - 'event.check.status != 0'
+  runtime_assets: null
