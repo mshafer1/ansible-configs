@@ -81,9 +81,9 @@ fi
 
 api_response=$(curl -s "https://www.googleapis.com/youtube/v3/videos?key=${api_key}&part=liveStreamingDetails&id=${stream_id}" | jq .)
 debug_log "API response: ${api_response}"
-actual_start_time=$(echo "$api_response" | jq '.items[0].liveStreamingDetails.actualStartTime')
+actual_start_time=$(echo "$api_response" | jq -r '.items[0].liveStreamingDetails.actualStartTime')
 debug_print ""
-debug_print "Actual start time: $actual_start_time"
+debug_print "Actual (raw) start time: $actual_start_time"
 
 if [ "$actual_start_time" = "null" ]; then
     debug_log "Fail"
@@ -94,5 +94,10 @@ if [ "$actual_start_time" = "null" ]; then
     exit 2
 else
   debug_log "Pass"
-  echo "OK: Stream ${stream_id} is live as of ${actual_start_time}."
+  parsable_start_time=$(echo "$actual_start_time" | sed -e "s;T; ;" -e "s;Z;;" -e 's;";;')
+  sec=$(TZ="UTC" date "+%s" -d "$parsable_start_time")
+  actual_start_time=$(date -d "@$sec")
+  debug_print "Actual start time: $actual_start_time"
+
+  echo "OK: Stream ${stream_id} is live as of:  ${actual_start_time}."
 fi
