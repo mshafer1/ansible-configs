@@ -10,6 +10,7 @@ metadata:
     fatigue_check/occurrences: '2' # two failures in a row
     fatigue_check/interval: '0' # do not repeat
     fatigue_check/allow_resolution: 'true'
+    ntfy/template: 'check_output'
 spec:
   check_hooks: null
   command: |
