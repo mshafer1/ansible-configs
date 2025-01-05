@@ -6,4 +6,11 @@ set -eu -o pipefail
 
 {% endfor %}
 
+{% for item in dns_masq_raw_domain_lists %}
+(cd /etc/dnsmasq.blocklists; curl -O "{{item}}";  sed -e '/^#/! s;^;local=/.;' -e '/^#/! s;$;/;' -i '{{ item | basename }}' )
+
+{% endfor %}
+
+(cd /etc/dnsmasq.blocklists; sed {% for item in dns_masq_adblocker_whitelist %} -e 's;{{ item.expression }};# {{ item.name }} enabled;' {% endfor %} ./*.txt -i)
+
 systemctl restart dnsmasq

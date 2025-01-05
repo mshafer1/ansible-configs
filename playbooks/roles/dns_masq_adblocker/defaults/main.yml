@@ -15,3 +15,15 @@ dns_masq_adblocker_files:
   - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.huawei.txt
   - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.tiktok.txt
   - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/native.tiktok.extended.txt
+
+  # block ID'd bad actors
+  - https://raw.githubusercontent.com/mshafer1/dns-blocklists/main/manual_blocks.txt
+
+# additional lists of domains that need to be converted to dnsmasq format
+dns_masq_raw_domain_lists:
+  - https://raw.githubusercontent.com/xRuffKez/NRD/main/lists/14-day/domains-only/nrd-14day.txt
+  - https://raw.githubusercontent.com/xRuffKez/NRD/main/lists/30-day_phishing/domains-only/nrd-phishing-30day.txt
+
+dns_masq_adblocker_whitelist:
+  - expression: 'local=/.*twingate.com/'
+    name: twingate

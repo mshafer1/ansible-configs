@@ -11,7 +11,7 @@
     - name: Template script into place
       ansible.builtin.template:
         src: update-dnsmasq-block-lists.sh.j2
-        dest: /usr/sbin/update-dsnmasq-block-lists.sh
+        dest: /usr/sbin/update-dnsmasq-block-lists.sh
         owner: root
         group: root
         mode: "0774"
@@ -19,7 +19,7 @@
   become: true
   changed_when: true
   ansible.builtin.shell:
-    cmd: /usr/sbin/update-dsnmasq-block-lists.sh
+    cmd: /usr/sbin/update-dnsmasq-block-lists.sh
 
 - name: Create service to update blocklists
   notify: Reload systemd
