@@ -17,13 +17,6 @@
     update_cache: true
     cache_valid_time: 3600 # to speed up secondary runs within a small span
 
-- name: Set the cache size
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/dnsmasq.conf
-    line: cache-size=10000
-    regexp: '\#? *cache-size='
-
 - name: Reload systemd
   meta: flush_handlers
 

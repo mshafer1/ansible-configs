@@ -29,6 +29,13 @@
     line: "addn-hosts=/etc/dnsmasq.hosts"
     regexp: "^#?addn-hosts="
 
+- name: Set the cache size
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/dnsmasq.conf
+    line: cache-size=10000
+    regexp: '^#? *cache-size='
+
 - name: Set dnsmasq to load blocklists
   become: true
   block:
