@@ -1,3 +1,9 @@
+- name: Ensure Git is installed
+  become: true
+  ansible.builtin.package:
+    name: git
+    state: present
+
 - name: Sync updates repo
   become: true
   block:
