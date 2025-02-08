@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu -o pipefail
+set -eu -o pipefail -o xtrace
 
 {% for item in dns_masq_adblocker_files %}
 (cd /etc/dnsmasq.blocklists; curl -O "{{item}}")
@@ -7,7 +7,7 @@ set -eu -o pipefail
 {% endfor %}
 
 {% for item in dns_masq_raw_domain_lists %}
-(cd /etc/dnsmasq.blocklists; curl -O "{{item}}";  sed -e '/^#/! s;^;local=/.;' -e '/^#/! s;$;/;' -i '{{ item | basename }}' )
+(cd /etc/dnsmasq.blocklists; curl -O "{{item}}" && sed -e '/^#/! s;^;local=/.;' -e '/^#/! s;$;/;' -i '{{ item | basename }}' )
 
 {% endfor %}
 

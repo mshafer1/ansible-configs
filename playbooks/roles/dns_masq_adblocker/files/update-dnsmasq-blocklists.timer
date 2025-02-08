@@ -3,7 +3,7 @@ Description="Run update-dnsmasq-blocklists.service 5min after boot and every 24 
 
 [Timer]
 OnBootSec=5min
-OnCalendar=* *-*-* 07:00:00
+OnCalendar=*-*-* 06:00:00
 Unit=update-dnsmasq-blocklists.service
 
 [Install]
