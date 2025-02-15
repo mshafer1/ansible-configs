@@ -1,3 +1,6 @@
+
+[[_TOC_]]
+
 # Ansible-configs
 
 This is a collection of [Ansible](https://docs.ansible.com/ansible/latest/getting_started/index.html) playbooks and supporting documents that I use to configure servers quickly. Some of these may be useful to others, so I share them.
