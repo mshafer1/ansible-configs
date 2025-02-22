@@ -46,7 +46,7 @@ This is a collection of [Ansible](https://docs.ansible.com/ansible/latest/gettin
     ```
     The 'Y/n' syntax means that it wants a yes or no, but if you put nothing (and press enter) it will default to "yes" (denoted by the capital Y)
 
-1. Once that has finished, close an re-open your shell to load in the changes to environment variables (if connected via SSH, disconnect and reconnect; if using a terminal window, close and re-open).
+1. Once that has finished, close and re-open your shell to load in the changes to environment variables (if connected via SSH, disconnect and reconnect; if using a terminal window, close and re-open).
 
 1. Check that it worked by running
 
@@ -67,12 +67,10 @@ This is a collection of [Ansible](https://docs.ansible.com/ansible/latest/gettin
         - [`fail2ban`](https://www.fail2ban.org/wiki/index.php/Main_Page), a configurable daemon that monitors logs for bad actors and blocks them via the system firewall
         - [`mailutils`](https://packages.debian.org/stretch/mailutils), a standard mail program for Linux (this is for fail2ban to be able to log messages to root about bans)
     * [Configure firewalld to allow HTTP (port 80),  HTTPS (port 443), and whatever you set SSH_PORT to through (blocking others)](https://github.com/mshafer1/ansible-configs/blob/master/playbooks/roles/nginx/tasks/main.yml#L8)
-    * [Configure nginx to return status code 444 for HTTP and HTTP requests on the default server](https://github.com/mshafer1/ansible-configs/blob/master/playbooks/roles/nginx/tasks/main.yml#L37) -> using a self-signed cert for "example.com"
+    * [Configure nginx to return status code 444 for HTTP and HTTPS requests on the default server](https://github.com/mshafer1/ansible-configs/blob/master/playbooks/roles/nginx/tasks/main.yml#L37) -> using a self-signed cert for "example.com"
 
 
-            This is because nginx will default serve the first cert it finds when asked for https on the default site. Because it is assumed that anyone requesting a site from the server via IP address is a bad-actor doing web scanning. 
-            
-            Blocking them and not telling them what website(s) are actually hosted on this server seems like a good idea.
+            This is because nginx will default serve the first cert it finds when asked for https on the default site. Because it is assumed that anyone requesting a site from the server via IP address is a bad-actor doing web scanning, blocking them and not telling them what website(s) are actually hosted on this server seems like a good idea.
     
     * Configure fail2ban to flag and block [a number of situations](https://github.com/mshafer1/ansible-configs/blob/master/playbooks/roles/nginx/tasks/main.yml#:~:text=%2D%20name%3A-,Configure%20fail2ban,-become%3A%20true)
 
