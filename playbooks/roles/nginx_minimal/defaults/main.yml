@@ -1,3 +1,4 @@
 SSH_PORT: 22
 enable_ssl: false
 use_firewalld: false
+enable_public_web: true

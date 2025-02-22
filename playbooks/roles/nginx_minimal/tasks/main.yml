@@ -4,7 +4,7 @@
 - name: Check for XZ CVE
   ansible.builtin.include_tasks: check_for_cve.yml
 
-- name: Firewall configs
+- name: Firewall configs (firewalld)
   become: true
   when: use_firewalld | bool
   block:
@@ -13,6 +13,7 @@
         service: '{{ item }}'
         permanent: true
         state: enabled
+      when: enable_public_web | bool
       with_items:
         - http
         - https
@@ -22,3 +23,26 @@
         port: '{{ SSH_PORT }}/tcp'
         permanent: true
         state: enabled
+
+- name: Firewall configs (ufw)
+  become: true
+  when: not (use_firewalld | bool)
+  block:
+    - name: Deny everything and enable UFW
+      community.general.ufw:
+        state: enabled
+        default: reject
+    - name: 'Firewall: Enable ssh port'
+      community.general.ufw:
+        port: '{{ SSH_PORT }}'
+        rule: allow
+        proto: tcp
+        comment: 'Allow SSH connections on port {{ SSH_PORT }}'
+    - name: 'Firewall: permit traffic in default zone services'
+      community.general.ufw:
+        app: '{{ item }}'
+        policy: allow
+      when: enable_public_web | bool
+      with_items:
+        - http
+        - https

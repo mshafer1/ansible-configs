@@ -5,11 +5,21 @@
     - nginx
     - fail2ban
     - mailutils
-    - firewalld
     - python3-tqdm
     - python3
     - python3-pip
     - jq # used for update_block_lists
+    state: latest
+    update_cache: true
+    cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
+  become: true
+
+# based on https://www.digitalocean.com/community/tutorials/how-to-protect-an-nginx-server-with-fail2ban-on-ubuntu-14-04
+- name: Install utilities
+  when: use_firewalld | bool
+  ansible.builtin.apt:
+    pkg: 
+    - firewalld
     state: latest
     update_cache: true
     cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
