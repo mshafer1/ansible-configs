@@ -13,4 +13,6 @@ set -eu -o pipefail -o xtrace
 
 (cd /etc/dnsmasq.blocklists; sed {% for item in dns_masq_adblocker_whitelist %} -e 's;{{ item.expression }};# {{ item.name }} enabled;' {% endfor %} ./*.txt -i)
 
+(cd /etc/dnsmasq.blocklists; {% for item in dns_masq_adblocker_file_whitelist %}sed  -e 's;{{ item.expression }};# {{ item.name }} enabled;' -i {{ item.file}}; {% endfor %})
+
 systemctl restart dnsmasq

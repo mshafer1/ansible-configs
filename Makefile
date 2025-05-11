@@ -32,7 +32,7 @@ objects/deps_installed: requirements.yml objects/
 	ansible-galaxy install -r requirements.yml
 	touch $@
 
-objects/dns: playbooks/dns.yml $(wildcard playbooks/vars/*) objects/
+objects/dns: playbooks/dns.yml $(wildcard playbooks/roles/dns_masq_adblocker/*) $(wildcard playbooks/vars/*) objects/
 	ansible-playbook playbooks/dns.yml --ask-become-pass
 	touch $@
 

@@ -100,16 +100,26 @@
   when: cloudflare_token is defined
   become: true
   block:
-  - name: Setup cloudflare ban action (definition)
+  - name: Copy cloudflare ban action files
     ansible.builtin.template:
-      src: cloudflare_ban.j2
-      dest: /etc/fail2ban/action.d/cloudflare-ban.conf
+      src: '{{ item.src }}'
+      dest: '/etc/fail2ban/action.d/{{ item.dest }}'
       mode: "0500"
-  - name: Setup cloudflare ban action (helper)
-    ansible.builtin.template:
-      src: cloudflare_ban_helper.py
-      dest: /etc/fail2ban/action.d/cloudflare_ban_helper.py
-      mode: "0500"
+    loop_control:
+      label: '{{ item.name }}'
+    with_items:
+      - src: cloudflare_ban.j2
+        dest: cloudflare-ban.conf
+        name: definition
+      - src: cloudflare_ban_helper.py
+        dest: cloudflare_ban_helper.py
+        name: helper
+      - src: list_zone_rules.sh.j2
+        dest: list_zone_rules
+        name: check-script
+      - src: clear_zone_rules.sh.j2
+        dest: clear_zone_rules
+        name: clear-script
 
 - name: Include safe ips
   ansible.builtin.include_vars:
@@ -140,7 +150,7 @@
         dest: '{{ config_file }}'
         regexp: '^#?\s*bantime.increment.*$'
         line: bantime.increment = true
-    - name: safelist local network
+    - name: safe list local network
       notify:
       - Restart fail2ban
       ansible.builtin.lineinfile:
@@ -228,6 +238,24 @@
           enabled  = true
           port     = http,https
           filter   = nginx-noscript
+          logpath  = /var/log/nginx/access.log
+    - name: Enable test-short-jail-time
+      notify:
+      - Restart fail2ban
+      ansible.builtin.blockinfile:
+        dest: '{{ config_file }}'
+        insertbefore: '^\[php-url-fopen\]$'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK [test-short-jail-time]'
+        block: |
+          [test-short-jail-time]
+
+          enabled  = true
+          bantime  = 5m
+          bantime.increment = false
+          maxretry  = 1
+          failregex = ^<HOST> -.*(GET|POST|HEAD).*/test-ban-time
+          filter   = nginx-bad-request
+          port     = http,https
           logpath  = /var/log/nginx/access.log
     - name: Enable nginx-badbots
       notify:
@@ -443,6 +471,7 @@
 
 - name: Setup job to monitor for updated bans
   become: true
+  when: not enable_cloud_flare_block
   block:
   - name: Setup ban monitor
     include_tasks: '_setup_ban_monitor.yml'

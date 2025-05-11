@@ -1,4 +1,5 @@
 - name: Sensu backend
+  # hosts: sensu-backend-proto
   hosts: sensu_monitoring
   roles:
     - sensu_backend

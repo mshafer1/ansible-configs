@@ -70,7 +70,8 @@
     job: "/bin/bash -lc '/usr/local/bin/certbot renew >> /var/log/certbot'"
     minute: "0"
     hour: "6"
-    day: "2"
+    day: "*"
+    dow: 5
 
 - name: Setup ACME DNS hook
   become: true

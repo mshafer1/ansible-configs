@@ -21,9 +21,22 @@ dns_masq_adblocker_files:
 
 # additional lists of domains that need to be converted to dnsmasq format
 dns_masq_raw_domain_lists:
-  - https://raw.githubusercontent.com/xRuffKez/NRD/main/lists/14-day/domains-only/nrd-14day.txt
+  # - https://raw.githubusercontent.com/xRuffKez/NRD/main/lists/14-day/domains-only/nrd-14day.txt
   - https://raw.githubusercontent.com/xRuffKez/NRD/main/lists/30-day_phishing/domains-only/nrd-phishing-30day.txt
 
 dns_masq_adblocker_whitelist:
   - expression: 'local=/.*twingate.com/'
     name: twingate
+  - expression: 'local=/openvpn.net/'
+    name: Open VPN
+
+dns_masq_adblocker_file_whitelist:
+  - expression: 'local=/.*cloudflare.net/'
+    name: cloudflare
+    file: doh-vpn-proxy-bypass.txt
+  - expression: 'local=/.*cloudflare.com/'
+    name: cloudflare
+    file: doh-vpn-proxy-bypass.txt
+  - expression: 'local=/cloudflare.*.com/'
+    name: cloudflare
+    file: doh-vpn-proxy-bypass.txt

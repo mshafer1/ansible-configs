@@ -2,5 +2,7 @@
   hosts: system_update_managed
   roles:
   - role: system_up_to_date
+    sub_task: sync_repo
   - role: system_up_to_date
     sub_task: setup_schedule
+  - role: system_up_to_date
