@@ -1,0 +1,23 @@
+contact_form_server_git_repo_path: /usr/local/app/contact_form
+contact_form_server_domains: []
+contact_form_server_form_name: 'contact_form'
+
+# NOTE: while these are empty, the role won't work properly unless they are populated.
+
+# domains that are allowed to load the form (whether by iframe or direct link). Use the value "none" to require loading directly only.
+contact_form_server_valid_referers: []
+
+# generate a random key for flask to use as the coookies-secret key
+contact_form_server_secret_key: ''
+
+# sendgrid api key and email address to send contact form submissions to
+contact_form_server_sendgrid_api_key: ''
+
+# list of domains (pattern, uses fnmatch), sender, and recipient:
+# - pattern: example.com
+#   sender_address: 'no-reply@example.com'
+#   recipient_address: 'contact-us@example.com'
+# - pattern: '*.contact.website2.com'
+#   sender_address: 'no-reply@website2.com'
+#   recipient_address: 'contact-us@website2.com'
+contact_form_server_config_emails: []

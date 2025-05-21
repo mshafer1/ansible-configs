@@ -1,0 +1,23 @@
+  - name: Setup certs
+    become: true
+    block:
+      - name: Get cert {{ item.name }} (automatic)
+        ansible.builtin.command:
+          cmd: /root/.local/bin/certbot run -d {{ item.name }} --nginx
+        when: not item.get('private_challenge')
+        loop: '{{ certbot_domains }}'
+      - name: Get cert {{ item.name }} (acme challenge)
+        ansible.builtin.shell:
+          cmd: >
+            /root/.local/bin/certbot certonly
+            -v
+            --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py
+            --preferred-challenges dns 
+            --debug-challenges
+            -d {{ item.name }} | tee /var/tmp/certbot_output_{{ my_index }}_{{ item.name }}
+        args:
+          creates: /etc/letsencrypt/live/{{ item.name.strip('*.') }}/privkey.pem
+        when: item.get('private_challenge')
+        loop: '{{ certbot_domains }}'
+        loop_control:
+          index_var: my_index

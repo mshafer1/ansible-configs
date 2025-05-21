@@ -1,0 +1,18 @@
+- name: Install nvm
+  ansible.builtin.shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+
+- name: installing node versions using loop
+  command: sudo -iu yournonrootuser nvm install {{item}}
+  args:
+    executable: /bin/bash
+    chdir: "$HOME"
+    creates: "$HOME/.nvm/versions/node/v{{item}}"
+  loop:
+    # TODO: update these??
+    - 16.13.1
+    - 18.20.6
+    - 20.18.2
+    - 22.13.1

@@ -1,0 +1,33 @@
+- name: Sync contact form repo
+  become: true
+  block:
+    - name: Make sure dir exists
+      ansible.builtin.file:
+        path: '{{ contact_form_server_git_repo_path | dirname }}'
+        owner: root
+        group: root
+        mode: '0550'
+        state: directory
+
+    - name: Clone config repo
+      ansible.builtin.git:
+        repo: 'https://github.com/mshafer1/contact_form.git'
+        dest: '{{ contact_form_server_git_repo_path }}'
+        update: true
+        version: main
+      notify: restart contact form
+
+- name: Render config files
+  become: true
+  ansible.builtin.template:
+    src: '{{ item.src }}'
+    dest: '{{ contact_form_server_git_repo_path }}/{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - src: env_file
+      dest: image/.env
+    - src: config.yaml.j2
+      dest: contact_form/.config.yaml
+  notify: restart contact form

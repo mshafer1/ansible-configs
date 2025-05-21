@@ -28,10 +28,17 @@
   become: true
   when: not (use_firewalld | bool)
   block:
-    - name: Deny everything and enable UFW
+    - name: Check whether ufw status is active
+      check_mode: true
+      community.general.ufw:
+        state: enabled
+      register: ufw_enable_check
+    - name: Enable UFW and deny everything # noqa: no-handler - this is a only if needed step
+      when: ufw_enable_check.changed
       community.general.ufw:
         state: enabled
         default: reject
+
     - name: 'Firewall: Enable ssh port'
       community.general.ufw:
         port: '{{ SSH_PORT }}'

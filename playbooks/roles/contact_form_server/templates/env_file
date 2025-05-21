@@ -1,0 +1,6 @@
+VALID_REFERERS={{ contact_form_server_valid_referers | join(" ") }}
+DOMAIN={{ contact_form_server_domains | join(" ") }}
+SECRET_KEY='{{ contact_form_server_secret_key }}'
+FORM_NAME={{ contact_form_server_form_name }}
+
+SENDGRID_API_KEY='{{ contact_form_server_sendgrid_api_key }}'

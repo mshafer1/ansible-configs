@@ -1,0 +1,17 @@
+- name: restart contact form
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: '{{ contact_form_server_git_repo_path }}/image'
+    state: restarted
+    remove_orphans: true
+    wait: true
+
+# order matters -> docker creates the socket file for the upstream
+- name: Setup nginx config
+  listen: restart contact form
+  become: true
+  shell:
+    cmd: |
+      make install
+  args:
+    chdir: '{{ contact_form_server_git_repo_path }}/hosting'
