@@ -1,4 +1,4 @@
-all: dns python install-deps certbot tunnels
+all: dns python install-deps certbot tunnels kitchen_owl
 
 dns: objects/dns
 
@@ -20,7 +20,9 @@ tunnels: objects/tunnels
 
 sensu: objects/sensu
 
-.PHONY: dns nginx certbot sensu
+kitchen_owl: objects/kitchen_owl
+
+.PHONY: dns nginx certbot sensu kitchen_owl
 
 win-settings:
 	ansible-playbook playbooks/win_settings.yml
@@ -34,6 +36,10 @@ objects/deps_installed: requirements.yml objects/
 
 objects/dns: playbooks/dns.yml $(wildcard playbooks/roles/dns_masq_adblocker/*) $(wildcard playbooks/vars/*) objects/
 	ansible-playbook playbooks/dns.yml --ask-become-pass
+	touch $@
+
+objects/kitchen_owl: playbooks/kitchen_owl.yml $(wildcard playbooks/roles/kitchen_owl/*) objects/
+	ansible-playbook $<
 	touch $@
 
 objects/nginx: playbooks/nginx.yml $(wildcard playbooks/vars/*) objects/ $(wildcard playbooks/roles/nginx/**/*)
