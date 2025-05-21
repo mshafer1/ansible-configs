@@ -1,0 +1,7 @@
+- name: start_samba
+  become: true
+  systemd_service:
+    name: smb
+    daemon_reload: true
+    enabled: true
+    state: started

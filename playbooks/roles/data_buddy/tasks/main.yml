@@ -1,0 +1,3 @@
+- name: Include sub-task
+  ansible.builtin.include_tasks:
+    file: '{{ sub_task }}.yml'

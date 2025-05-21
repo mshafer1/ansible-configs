@@ -1,0 +1,47 @@
+- name: Setup SMB share
+  become: true
+  block:
+    - name: Install samba requirements
+      ansible.builtin.apt:
+        name: samba
+        state: present
+        update_cache: true
+        cache_valid_time: '{{ 3600 * 24 }}'
+    - name: Creation smbusers group
+      ansible.builtin.group:
+        name: smbusers
+        state: present
+    - name: Create share users
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        shell: "/sbin/nologin"
+        append: true
+        groups:
+        - smbusers
+        create_home: false
+      loop:
+        - name: '{{ data_buddy_smb_user }}'
+    - name: Make sure dir exists
+      ansible.builtin.file:
+        path: '{{ data_buddy_smb_root }}'
+        state: directory
+        owner: root
+        group: smbusers
+        mode: "2775"
+        setype: "samba_share_t"
+    - name: Set SMB users' password
+      ansible.builtin.command:
+        cmd: echo '{{ data_buddy_smb_pass }}' | smbpasswd -s -a -e data-buddy
+    - name: Configure the samba share
+      notify:
+        - start_samba
+      ansible.builtin.blockinfile:
+        path: /etc/samba/smb.conf
+        block: |
+          [{{ data_buddy_share_name }}]
+                path = {{ data_buddy_smb_root }}
+                guest ok = no
+                writable = yes
+                browsable = yes
+                valid users = @smbusers
+                write list = "@smbusers"

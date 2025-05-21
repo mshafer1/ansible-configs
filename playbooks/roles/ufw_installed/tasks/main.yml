@@ -1,0 +1,21 @@
+- name: Handle OS Family
+  include_tasks: '{{ ansible_os_family }}.yml'
+
+- name: Config ufw
+  become: true
+  block:
+  - name: Check whether ufw status is active
+    check_mode: true
+    community.general.ufw:
+      state: enabled
+    register: ufw_enable_check
+  - name: Enable UFW and deny everything # noqa: no-handler - this is a only if needed step
+    when: ufw_enable_check.changed
+    community.general.ufw:
+      state: enabled
+      default: reject
+  - name: 'Firewall: permit traffic in default zone services'
+    community.general.ufw:
+      app: '{{ item }}'
+      policy: allow
+    with_items: '{{ ufw_installed__allowed_apps }}'

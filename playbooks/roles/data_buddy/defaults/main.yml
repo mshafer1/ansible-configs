@@ -1,0 +1,3 @@
+data_buddy_smb_root: /usr/local/app/data_buddy/local/network_share
+data_buddy_smb_user: data-buddy
+data_buddy_share_name: share 
