@@ -1,0 +1,6 @@
+- name: Setup Kitchen Owl
+  hosts: kitchen_owl
+  roles:
+    - role: kitchen_owl
+    - role: certbot_installed
+      sub_task: setup_certs

@@ -1,0 +1,25 @@
+- name: Start docker app
+  listen: Restart docker app
+  become: true
+  community.docker.docker_compose_v2:
+    state: present
+    project_src: '{{ kitchen_owl_site_dir }}'
+
+- name: Restart docker app
+  become: true
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: '{{ kitchen_owl_site_dir }}'
+
+- name: Check nginx config
+  become: true
+  listen: Restart nginx
+  changed_when: false
+  ansible.builtin.command:
+    cmd: nginx -t
+
+- name: Restart nginx
+  become: true
+  ansible.builtin.systemd:
+    unit: nginx
+    state: restarted

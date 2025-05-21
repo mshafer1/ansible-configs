@@ -10,6 +10,6 @@ services:
     image: tombursch/kitchenowl-backend:latest
     restart: unless-stopped
     environment:
-      - JWT_SECRET_KEY={{ kitchen_owl_javascript_web_token_secret_key }}
+      - JWT_SECRET_KEY='{{ kitchen_owl_javascript_web_token_secret_key }}'
     volumes:
       - ./data:/data

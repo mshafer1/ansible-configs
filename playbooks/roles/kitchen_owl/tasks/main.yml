@@ -1,0 +1,30 @@
+# ✓ 1. compose file
+- name: Setup Compose file
+  become: true
+  block:
+  - name: Setup folder
+    ansible.builtin.file:
+      path: '{{ kitchen_owl_site_dir }}'
+      state: directory
+  - name: Setup Compose file
+    notify: Restart docker app
+    ansible.builtin.template:
+      src: templates/docker-compose.yml.j2
+      dest: '{{ kitchen_owl_site_dir }}/docker-compose.yml'
+# ✓ 2. Use handler to start/restart app
+
+# 3. nginx config
+- name: Setup nginx site
+  become: true
+  block:
+    - name: Render site config
+      notify: Restart nginx
+      ansible.builtin.template:
+        force: false # only create, don't change
+        src: templates/nginx-site.j2
+        dest: "/etc/nginx/sites-enabled/{{ kitchen_owl_domain_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+# 4. Use handler to reload nginx

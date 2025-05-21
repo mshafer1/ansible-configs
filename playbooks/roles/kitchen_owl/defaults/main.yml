@@ -1,0 +1,4 @@
+kitchen_owl_site_dir: /usr/local/app/kitchen_owl
+kitchen_owl_docker_port: 8085
+kitchen_owl_domain_name: kitchen-owl.lan
+kitchen_owl_setup_ssl: true # requires certbot or similar
