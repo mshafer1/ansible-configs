@@ -1,0 +1,25 @@
+- name: Start docker
+  listen: Restart docker
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: '{{ immich_install_location }}'
+    state: present
+  register: docker_started
+- name: Restart docker
+  when: not docker_started.changed
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: '{{ immich_install_location }}'
+    state: restarted
+
+- name: Check nginx config
+  become: true
+  listen: Restart nginx
+  changed_when: false
+  ansible.builtin.command:
+    cmd: nginx -t
+- name: Restart nginx
+  become: true
+  ansible.builtin.systemd:
+    unit: nginx
+    state: restarted

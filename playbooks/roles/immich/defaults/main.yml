@@ -1,0 +1,10 @@
+immich_TZ: US/Central
+# immich_DB_PASSWORD is NOT defaulted
+
+immich_install_location: /usr/local/app/immich
+
+immich_use_cloudflare_ddns: false # NOTE: if using an actual domain, set this to true to load in cloudflareddns role
+
+# nginx settings
+immich_domain_name: immich.lan
+immich_setup_ssl: false

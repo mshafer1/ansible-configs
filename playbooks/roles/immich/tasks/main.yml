@@ -1,0 +1,77 @@
+- name: Store vars
+  ansible.builtin.set_fact:
+    immich_nginx_conf_file: '/etc/nginx/sites-enabled/{{ immich_domain_name }}'
+- name: Setup immich web-server
+  become: true
+  block:
+    - name: Ensure dir exists
+      ansible.builtin.file:
+        path: '{{ immich_install_location }}'
+        state: directory
+        owner: root
+        group: root
+        mode: '0770'
+    - name: 'Render files - {{ item }}'
+      notify: Restart docker
+      ansible.builtin.template:
+        src: '{{ item }}.j2'
+        dest: '{{ immich_install_location }}/{{ item }}'
+        owner: root
+        group: root
+        mode: '0770'
+      loop:
+        - .env
+        - docker-compose.yml
+    - name: Render nginx site config
+      notify: Restart nginx
+      register: nginx_config
+      ansible.builtin.template:
+        src: nginx.site.j2
+        dest: '{{ immich_nginx_conf_file }}'
+        force: false # don't overwrite if exists
+        owner: root
+        group: root
+        mode: '0664'
+  rescue:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+- name: Setup SSL
+  become: true
+  when: immich_setup_ssl
+  block:
+    - name: Attempt to get cert
+      register: certbot_call
+      ansible.builtin.shell:
+        cmd: >
+          /root/.local/bin/certbot certonly
+          -v
+          --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py
+          --preferred-challenges dns
+          --debug-challenges
+          -d {{ immich_domain_name }} 2>&1 | tee /var/tmp/certbot_output_{{ immich_domain_name }}
+      failed_when: "'skipped, since' not in certbot_call.stdout and 'Certbot failed to authenticate some domains' in certbot_call.stdout"
+      changed_when: >
+        certbot_call.stdout.find('Successfully received certificate.') or
+        certbot_call.stdout.find('skipped, since /etc/letsencrypt/live/' + immich_domain + '/privkey.pem exists')
+      args:
+        creates: /etc/letsencrypt/live/{{ immich_domain_name.strip('*.') }}/privkey.pem
+    - name: Install cert
+      register: certbot_install_call
+      notify: Restart nginx
+      ansible.builtin.shell:
+        cmd: >
+          /root/.local/bin/certbot install
+          -v
+          --nginx
+          --redirect
+          --non-interactive --agree-tos
+          --cert-name {{ immich_domain_name }} 2>&1 | tee /var/tmp/certbot_output_{{ immich_domain_name }}_install
+      failed_when: "'Could not install certificates' in certbot_install_call.stdout or 'Missing command line flag' in certbot_install_call.stdout"
+      changed_when: "'Successfully deployed certificate for' in certbot_install_call.stdout"
+
+  rescue:
+    - name: Print certbot output
+      failed_when: true
+      ansible.builtin.debug:
+        var: certbot_call.stdout_lines + certbot_install_call.stdout_lines

@@ -1,0 +1,6 @@
+dependencies:
+  - role: cloudflareddns
+    when: immich_use_cloudflare_ddns
+    cloudflareddns__store_public_ip: false
+    cloudflareddns__record_name: '{{ immich_domain_name }}'
+  - role: nginx_minimal
