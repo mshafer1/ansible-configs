@@ -1,3 +1,17 @@
+# Make sure apache is not...
+- name: Remove apache2 (if present)
+  become: true
+  block:
+    - name: Stop/disable apache
+      ansible.builtin.systemd:
+        name: apache2
+        state: stopped
+        enabled: false
+    - name: Uninstall apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: absent
+
 # based on https://www.digitalocean.com/community/tutorials/how-to-protect-an-nginx-server-with-fail2ban-on-ubuntu-14-04
 - name: Install utilities
   ansible.builtin.apt:
