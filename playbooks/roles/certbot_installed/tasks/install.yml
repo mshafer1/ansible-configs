@@ -5,6 +5,7 @@
     - python3
     - python3-pip
     - python3-venv
+    - cron # make sure crontab is available
     state: latest
     update_cache: true
     cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
@@ -57,6 +58,7 @@
         force: true
     - name: Register
       become: true
+      when: cerbot_email is defined
       ansible.builtin.shell: |
         certbot -n register --agree-tos --email {{ certbot_email }}
         touch /etc/letsencrypt/.registered
