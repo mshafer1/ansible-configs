@@ -1,1 +1,2 @@
 cloudflareddns__store_public_ip: true # setting this to false will cause it to store the local IP
+cloudflareddns__timer_interval_hours: 12

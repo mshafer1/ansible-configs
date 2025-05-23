@@ -1,44 +1,61 @@
-- name: Install requirements
-  ansible.builtin.package:
-    name: jq
-    state: present
+- name: Setup CloudFlare Dynamic DNS script
+  become: true
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: jq
+        state: present
 
-- name: Setup timer file to run every 15 minutes
-  register: update_timer
-  ansible.builtin.copy:
-    dest: '{{ systemd_folder }}/system-updater.timer'
-    content: |
-      [Unit]
-      Description=Run IP address update every 15 minutes
+    - name: 'Setup timer file to run every hours: {{ cloudflareddns__timer_interval_hours }}'
+      register: update_timer
+      ansible.builtin.copy:
+        dest: '{{ systemd_folder }}/cloudflare-ddns-ip-update.timer'
+        content: |
+          [Unit]
+          Description=Run IP address update every {{ cloudflareddns__timer_interval_hours }} hours
 
-      [Timer]
-      OnCalendar=*:0/15
-      Persistent=true
+          [Timer]
+          OnCalendar=*-*-* 00/{{ cloudflareddns__timer_interval_hours }}:00:00
+          Persistent=true
+          Unit=cloudflare-ddns-ip-update.service
 
-      [Install]
-      WantedBy=timers.target
-    owner: root
-    group: root
-    mode: '0644'
-- name: Setup service file
-  register: update_service
-  ansible.builtin.copy:
-    dest: '{{ systemd_folder }}/system-updater.service'
-    content: |
-      [Unit]
-      Description=Run IP address update on Cloudflare
+          [Install]
+          WantedBy=timers.target
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Setup service file
+      register: update_service
+      ansible.builtin.copy:
+        dest: '{{ systemd_folder }}/cloudflare-ddns-ip-update.service'
+        content: |
+          [Unit]
+          Description=Run IP address update on Cloudflare
+          Wants=network-online.target
+          After=network-online.target
 
-      [Service]
-      Type=oneshot
-      ExecStart=/usr/local/bin/cloudflare-update-dns-ip
-      User=root
-    owner: root
-    group: root
-    mode: '0644'
-- name: Create script file
-  ansible.builtin.template:
-    dest: /usr/local/bin/cloudflare-update-dns-ip
-    src: cloudflare-update-dns-ip.j2
-  owner: root
-  group: root
-  mode: '0770'
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/cloudflare-update-dns-ip
+          User=root
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Create script file
+      ansible.builtin.template:
+        dest: /usr/local/bin/cloudflare-update-dns-ip
+        src: cloudflare-update-dns-ip.j2
+        owner: root
+        group: root
+        mode: '0770'
+    - name: Enable service and timer and start them both
+      ansible.builtin.systemd_service:
+        name: '{{ item }}'
+        state: started # run now
+        enabled: true # allow running on boot
+      loop:
+        - cloudflare-ddns-ip-update.service
+        - cloudflare-ddns-ip-update.timer

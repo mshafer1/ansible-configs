@@ -30,12 +30,12 @@ Changes:
   (mshafer1) add local ip switch
 '
 
-auth_email=""                                       # The email used to login 'https://dash.cloudflare.com'
+auth_email="{{ cloudflareddns__auth_email }}"       # The email used to login 'https://dash.cloudflare.com'
 auth_method="token"                                 # Set to "global" for Global API Key or "token" for Scoped API Token
-auth_key=""                                         # Your API Token or Global API Key
-zone_identifier=""                                  # Can be found in the "Overview" tab of your domain
-record_name=""                                      # Which record you want to be synced
-ttl=3600                                            # Set the DNS TTL (seconds)
+auth_key="{{ cloudflareddns__auth_api_token }}"     # Your API Token or Global API Key
+zone_identifier="{{ cloudflareddns__zone_id }}"     # Can be found in the "Overview" tab of your domain
+record_name="{{ cloudflareddns__record_name }}"     # Which record you want to be synced
+ttl={{ cloudflareddns__record_ttl | default(3600) }}                                            # Set the DNS TTL (seconds)
 proxy="false"                                       # Set the proxy to true or false
 sitename=""                                         # Title of site "Example Site"
 slackchannel=""                                     # Slack Channel #example
