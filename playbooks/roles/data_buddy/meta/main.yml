@@ -4,3 +4,5 @@ dependencies:
     ufw_installed__allowed_apps:
       - ssh
       - smb
+  - role: cloudflare_tunnel
+    using_docker: yes
