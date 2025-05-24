@@ -1,0 +1,10 @@
+- name: Check that immich DNS is configured
+  when: "'immich.lan' == immich_domain_name"
+  ansible.builtin.fail:
+    msg: Error, must set immich_domain_name
+- name: Setup immich
+  ansible.builtin.include_role:
+    name: immich
+  vars:
+    immich_install_location: '{{ data_buddy_immich_root }}'
+    immich_setup_ssl: true
