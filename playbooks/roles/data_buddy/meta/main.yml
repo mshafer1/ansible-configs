@@ -4,5 +4,3 @@ dependencies:
     ufw_installed__allowed_apps:
       - ssh
       - smb
-  - role: cloudflareddns
-    cloudflareddns__store_public_ip: false
