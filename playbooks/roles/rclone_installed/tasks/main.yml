@@ -1,0 +1,31 @@
+- name: Install system requirements
+  become: true
+  ansible.builtin.package:
+    name: unzip
+    state: present
+
+- name: Download and install rclone
+  become: true
+  block:
+    - name: Make sure download dir exists
+      ansible.builtin.file:
+        path: /usr/local/downloads
+        state: directory
+        owner: root
+        group: root
+        mode: '0775'
+
+    - name: Get installation script
+      ansible.builtin.get_url:
+        url: https://rclone.org/install.sh
+        dest: /usr/local/downloads/rclone-install.sh
+        owner: root
+        group: root
+        mode: '0775'
+
+    - name: Download and install rclone
+      ansible.builtin.shell:
+        cmd: >
+          bash -v /usr/local/downloads/rclone-install.sh
+      args:
+        creates: /usr/bin/rclone
