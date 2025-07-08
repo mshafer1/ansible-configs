@@ -3,7 +3,7 @@
     block:
       - name: Get cert {{ item.name }} (automatic)
         ansible.builtin.command:
-          cmd: /root/.local/bin/certbot run -d {{ item.name }} --nginx
+          cmd: /root/.local/bin/certbot run -d {{ item.name }} --nginx --non-interactive
         when: not item.get('private_challenge')
         loop: '{{ certbot_domains }}'
       - name: Get cert {{ item.name }} (acme challenge)
@@ -11,6 +11,7 @@
           cmd: >
             /root/.local/bin/certbot certonly
             -v
+            --non-interactive
             --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py
             --preferred-challenges dns 
             --debug-challenges

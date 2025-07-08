@@ -1,0 +1,11 @@
+- name: Create SSH keys
+  community.crypto.openssh_keypair:
+    path: '/home/{{ item.name }}/.ssh/id_ed25519'
+    type: 'ed25519'
+    owner: '{{ item.name }}'
+    group: "{{ item.name }}"
+    mode: '0600'
+  register: ssh_key
+- name: Print public key
+  ansible.builtin.debug:
+    msg: '{{ item.name }} - SSH Public key: {{ ssh_key.public_key }}'

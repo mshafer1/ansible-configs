@@ -36,6 +36,12 @@
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
 
+- name: Ensure immich web-server is running
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: '{{ immich_install_location }}'
+    state: present
+
 - name: Setup SSL
   become: true
   when: immich_setup_ssl
@@ -49,6 +55,7 @@
           --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py
           --preferred-challenges dns
           --debug-challenges
+          --agree-tos
           -d {{ immich_domain_name }} 2>&1 | tee /var/tmp/certbot_output_{{ immich_domain_name }}
       failed_when: "'skipped, since' not in certbot_call.stdout and 'Certbot failed to authenticate some domains' in certbot_call.stdout"
       changed_when: >

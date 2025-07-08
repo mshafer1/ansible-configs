@@ -1,0 +1,1 @@
+ufw_allow_ssh_on_docker__other_int_allowed_apps: []

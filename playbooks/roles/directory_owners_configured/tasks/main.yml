@@ -1,0 +1,6 @@
+- name: Setup directories
+  become: true
+  block:
+    - name: Loop...
+      ansible.builtin.include_tasks: config_directory.yml
+      loop: '{{ directories }}'

@@ -1,0 +1,36 @@
+
+- name: Assign vars
+  ansible.builtin.set_fact:
+    part: '{{ item.0.children | map(attribute="name") | last }}'
+    mount_point: '{{ item.1.mount_root }}'
+    luks_name: '{{ item.1.luks_name }}'
+
+- name: Setup encrypted drive
+  become: true
+  community.crypto.luks_device:
+    device: '/dev/{{ part }}'
+    passphrase: '{{ data_buddy_luks_passphrase }}'
+    name: '{{ luks_name }}'
+    state: opened
+  register: luks_output
+- name: Add to crypttab file
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/crypttab
+    regexp: '^{{ luks_name }} /dev/{{ part }} .*'
+    line: '{{ luks_name }} /dev/{{ part }} none luks' # changing to open on boot will come later
+
+- name: Mount drive
+  become: true
+  block:
+    - name: Make ext4 filesystem
+      community.general.filesystem:
+        dev: '/dev/mapper/{{ luks_name }}'
+        fstype: ext4
+    - name: Mount device to target location
+      ansible.posix.mount:
+        fstype: ext4
+        src: '/dev/mapper/{{ luks_name }}'
+        path: '{{ mount_point }}'
+        state: mounted
+

@@ -4,3 +4,4 @@ update_job_weekday: SUN
 update_job_timezone: America/Chicago
 reboot_controller: False
 grub_handled: True
+system_up_to_date__upgrade_mode: dist

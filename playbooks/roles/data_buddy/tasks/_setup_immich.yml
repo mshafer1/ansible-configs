@@ -8,3 +8,4 @@
   vars:
     immich_install_location: '{{ data_buddy_immich_root }}'
     immich_setup_ssl: true
+    immich_use_cloudflare_ddns: true

@@ -1,0 +1,6 @@
+- name: Handle OS Specific Family
+  ansible.builtin.include_tasks: '{{ ansible_os_family }}.yml'
+
+- name: Mount Shares
+  ansible.builtin.include_tasks: _posix_mount.yml
+  with_items: '{{ smb_shares_mounted__mounts }}'

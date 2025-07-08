@@ -1,0 +1,2 @@
+- name: Include the system's specific file
+  include_tasks: '{{ ansible_system }}.yml'

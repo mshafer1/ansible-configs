@@ -1,0 +1,40 @@
+- name: install warp deps
+  become: true
+  block:
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: latest
+        update_cache: true
+        cache_valid_time: '{{ 3600 * 24 }}'
+
+    - name: Install cloudflare warp
+      become: true
+      block:
+      - name: Download Warp gpg key
+        get_url:
+          url: https://pkg.cloudflareclient.com/pubkey.gpg
+          dest: /tmp/warpgpg
+          checksum: sha256:1d78962d81c4c1061ef6b80bb28e85d6a76735d73677cf46f54ff5ea78abc94e # curl -sSL https://pkg.cloudflareclient.com/pubkey.gpg|sha256sum
+
+      - name: De-Armor Warp GPG key
+        command:
+          cmd: gpg --dearmor < /tmp/warpgpg > /usr/share/keyrings/warp-archive-keyring.gpg
+        args:
+          creates: /usr/share/keyrings/warp-archive-keyring.gpg
+
+      - name: Add cloudflare-warp Repository
+        ansible.builtin.apt_repository:
+          repo: >-
+            deb [signed-by=/usr/share/keyrings/warp-archive-keyring.gpg] 
+            https://pkg.cloudflareclient.com/ {{ ansible_distribution_release | lower }} main
+          update_cache: true
+      - name: Install cloudflare warp
+        apt:
+          pkg:
+            - cloudflare-warp
+          state: latest

@@ -1,0 +1,5 @@
+- name: Install requirements
+  become: true
+  ansible.builtin.apt:
+    name: cifs-utils
+    state: present

@@ -30,8 +30,10 @@
         mode: "2775"
         setype: "samba_share_t"
     - name: Set SMB users' password
-      ansible.builtin.command:
-        cmd: echo '{{ data_buddy_smb_pass }}' | smbpasswd -s -a -e data-buddy
+      register: smb_user_pass
+      failed_when: "'failed' in smb_user_pass.stdout or smb_user_pass.rc != 0"
+      ansible.builtin.shell:
+        cmd: echo '{{ data_buddy_smb_pass }}' | smbpasswd -s -e -a data-buddy
     - name: Configure the samba share
       notify:
         - start_samba
@@ -39,9 +41,10 @@
         path: /etc/samba/smb.conf
         block: |
           [{{ data_buddy_share_name }}]
-                path = {{ data_buddy_smb_root }}
-                guest ok = no
-                writable = yes
-                browsable = yes
-                valid users = @smbusers
-                write list = "@smbusers"
+          path = {{ data_buddy_smb_root }}/
+          guest ok = no
+          guest only = no
+          writable = yes
+          browsable = yes
+          valid users = @smbusers
+          write list = @smbusers

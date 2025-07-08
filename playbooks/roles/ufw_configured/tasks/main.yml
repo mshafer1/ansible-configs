@@ -1,0 +1,55 @@
+# ansible no-worky :( -> https://github.com/ansible-collections/community.general/issues/2336
+# - name: Config ufw
+#   become: true
+#   block:
+#     - name: Reset ufw to default config
+#       when: ufw_configured__force
+#       register: reset
+#       community.general.ufw:
+#         state: reset
+#     - name: Enable UFW and deny everything
+#       when: ufw_configured__force or reset.changed
+#       community.general.ufw:
+#         state: enabled
+#         default: reject
+#     - name: 'Firewall: permit traffic in default zone services'
+#       community.general.ufw:
+#         app: '{{ item }}'
+#         policy: allow
+#       with_items: '{{ ufw_configured_allowed_apps }}'
+#     - name: 'Firewall: permit traffic in default zone services'
+#       community.general.ufw:
+#         app: '{{ item.app }}'
+#         interface: '{{ item.interface }}'
+#         direction: incoming
+#         destination: any
+#         policy: allow
+#       with_items: '{{ ufw_configured_allowed_specific_int_apps }}'
+- name: Make fallback script
+  become: true
+  block:
+  - name: Store vars
+    ansible.builtin.set_fact:
+      script_file: '/usr/local/bin/ufw-setup'
+  - name: make script file
+    ansible.builtin.copy:
+      dest: '{{ script_file }}'
+      content: |
+        #!/bin/bash -v
+        ufw disable
+        ufw reset
+        ufw enable
+        ufw default reject
+      owner: root
+      group: root
+      mode: "0770"
+  - name: 'Firewall: permit traffic in default zone services'
+    ansible.builtin.lineinfile:
+      dest: '{{ script_file }}'
+      line: 'ufw allow {{ item }}'
+    with_items: '{{ ufw_configured_allowed_apps }}'
+  - name: 'Firewall: permit traffic in default zone services'
+    ansible.builtin.lineinfile:
+      dest: '{{ script_file }}'
+      line: 'ufw allow in on {{ item.interface }} to any port {{ item.app }}'
+    with_items: '{{ ufw_configured_allowed_specific_int_apps }}'

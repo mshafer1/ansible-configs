@@ -2,4 +2,14 @@ data_buddy_install_root: /usr/local/app/data_buddy
 data_buddy_smb_root: '{{ data_buddy_install_root }}/local/network_share'
 data_buddy_immich_root: '{{ data_buddy_install_root }}/local/immich'
 data_buddy_smb_user: data-buddy
-data_buddy_share_name: share 
+data_buddy_share_name: share
+
+data_buddy_setup_drives_in_mirror: true
+
+# NOTE: only used if data_buddy_setup_drives_in_mirror == false
+data_buddy_mount_configs:
+  - mount_root: '{{ data_buddy_install_root }}/local'
+    luks_name: localZip
+  - mount_root: '{{ data_buddy_install_root }}/remote'
+    luks_name: remoteZip
+  

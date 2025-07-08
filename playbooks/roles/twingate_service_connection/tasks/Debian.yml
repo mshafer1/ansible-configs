@@ -1,0 +1,38 @@
+- name: Download and install Twingate client
+  become: true
+  block:
+    - name: Ensure download dir exists
+      ansible.builtin.file:
+        path: /usr/local/download
+        state: directory
+    - name: Download setup file
+      ansible.builtin.get_url: 
+        url: https://binaries.twingate.com/client/linux/install.sh
+        dest: /usr/local/download/setup-twingate-client.sh
+        owner: root
+        group: root
+        mode: '0744'
+        force: false
+      register: file_download
+    - name: Run script
+      when: file_download.changed
+      ansible.builtin.command:
+        cmd: /usr/local/download/setup-twingate-client.sh
+- name: Setup Twingate service connection
+  become: true
+  block:
+    - name: Ensure config dir exists
+      ansible.builtin.file:
+        path: '{{ twingate_service_config_location }}'
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Render service config file
+      notify: Start Twingate Client
+      ansible.builtin.copy:
+        content: '{{ twingate_service_connection_info | to_nice_json(sort_keys=False, indent=2) }}'
+        dest: '{{ twingate_service_config_location }}/service.json'
+        owner: root
+        group: root
+        mode: '0600'

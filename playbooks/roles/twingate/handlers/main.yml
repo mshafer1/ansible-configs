@@ -1,0 +1,12 @@
+- name: Stop service if running
+  listen: Start service
+  become: true
+  community.docker.docker_compose_v2:
+    state: absent
+    project_src: '{{ twingate_connector_directory }}'
+
+- name: Start service
+  become: true
+  community.docker.docker_compose_v2:
+    state: present
+    project_src: '{{ twingate_connector_directory }}'

@@ -1,9 +1,12 @@
 dependencies:
   - role: docker
+  - role: user_sanity_tools_installed
+  - name: twingate # connector, used for access
+    twingate_connector_in_docker: true
+    twingate_connector_host_network: false
+  - name: twingate_service_connection # client, used for backup
   - role: ufw_installed
     ufw_installed__allowed_apps:
       - ssh
       - smb
-  - role: rclone_installed
-  - role: cloudflare_tunnel
-    using_docker: yes
+

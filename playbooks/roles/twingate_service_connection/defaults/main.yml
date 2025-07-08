@@ -1,0 +1,2 @@
+twingate_service_connection_info: '{{ twingate_service_info_data | mandatory }}'
+twingate_service_config_location: /usr/local/app/twingate

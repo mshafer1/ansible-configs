@@ -1,0 +1,30 @@
+- name: Ensure directory exists with correct permissions {{ item.name }}
+  ansible.builtin.file:
+    dest: '{{ item.name }}'
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
+    mode: '1770'
+    recurse: true
+- name: Make sure parent dirs are accessible
+  become: true
+  block:
+    - name: Render script
+      ansible.builtin.copy:
+        content: |
+          dir=$1
+          group=$2
+          
+          cwd=$dir
+          while [[ "$cwd" != "/" && "$cwd" != "." ]]; do
+              echo "$cwd"
+              chown :$group "$cwd"
+              chmod g+srx "$cwd"
+              cwd=$(dirname "$cwd")
+          done
+        dest: /usr/local/bin/set-group-and-permission-for-dir-and-parents
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Run script
+      ansible.builtin.shell: 
+        cmd: /usr/local/bin/set-group-and-permission-for-dir-and-parents '{{ item.name }}' '{{ item.group }}'

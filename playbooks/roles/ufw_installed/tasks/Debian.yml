@@ -1,7 +1,9 @@
 - name: Apt install ufw
   become: true
   ansible.builtin.apt:
-    name: ufw
+    name: 
+    - ufw
+    - rsyslog
     state: present
     update_cache: true
     cache_valid_time: '{{ 3600 * 24 }}'

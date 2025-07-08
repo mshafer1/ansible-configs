@@ -1,0 +1,16 @@
+- name: Setup Twingate Client
+  listen: Start Twingate Client
+  become: true
+  ansible.builtin.command:
+    cmd: twingate setup --headless '{{ twingate_service_config_location }}/service.json'
+- name: Start Twingate Client
+  become: true
+  ansible.builtin.command:
+    cmd: twingate start
+- name: Enable and start twingate service
+  listen: Start Twingate Client
+  become: true
+  ansible.builtin.systemd_service:
+    name: twingate
+    state: started
+    enabled: true

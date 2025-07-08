@@ -1,0 +1,56 @@
+- name: Setup unlocking crypt tabs with tpm
+  become: true
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: 
+          - tpm2-initramfs-tool 
+          - tpm2-tools
+        state: present
+    - name: Determine flag filename
+      ansible.builtin.set_fact:
+        # SHA1 the password, split into 5 slices (of 8), take the first, join it into a string
+        # this is NOT intended to be a secure storage and is **intentionally** arranged to have many collisions
+        # the objective is to decide "this value is already stored" -> or at least one that looks like it.
+        key_stored_flag_file: "/usr/local/app/tpm_key_stored/{{ _drives_unlock_with_tpm2__fde_pass | hash('sha1') | slice(5) | first | join('') }}"
+    - name: Make sure flag parent folder exists
+      ansible.builtin.file:
+        name: /usr/local/app/tpm_key_stored/
+        state: directory
+        owner: root
+        group: root
+        mode: '0600'
+    - name: Store key in tpm
+      ansible.builtin.shell:
+        cmd: tpm2-initramfs-tool seal --data "$FDE_PASS" && touch {{ key_stored_flag_file }}
+      args:
+        creates: '{{ key_stored_flag_file }}'
+      environment:
+        FDE_PASS: '{{ _drives_unlock_with_tpm2__fde_pass }}'
+    - name: Set crypttab to unseal
+      notify: Update initramfs
+      ansible.builtin.replace:
+        path: /etc/crypttab
+        regexp: none
+        replace: unseal
+    - name: Specify keyscript for unlocking
+      notify: Update initramfs
+      ansible.builtin.replace:
+        path: /etc/crypttab
+        regexp: 'luks$'
+        replace: luks,keyscript=/usr/bin/tpm2-initramfs-tool
+    - name: Setup tpm2 tool
+      notify: Update initramfs
+      ansible.builtin.copy:
+        content: |
+          . /usr/share/initramfs-tools/hook-functions
+
+          copy_exec /usr/lib/x86_64-linux-gnu/libtss2-tcti-device.so.0
+          copy_exec /usr/bin/tpm2-initramfs-tool
+        dest: /etc/initramfs-tools/hooks/tpm2-initramfs-tool
+        owner: root
+        group: root
+        mode: '0755'
+
+- name: Run handlers now
+  ansible.builtin.meta: flush_handlers

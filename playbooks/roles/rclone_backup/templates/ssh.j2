@@ -1,0 +1,13 @@
+[{{ _rclone_backup__name }}]
+type = sftp
+host = {{ _rclone_backup__remote_host }}
+user = {{ _rclone_backup__username }}
+{% if rclone_backup__key_file is defined %}
+key_file = {{ rclone_backup__key_file }}
+{% endif %}
+{% if rclone_backup__no_modtime | default(false) %}
+set_modtime = false
+{% endif %}
+shell_type = unix
+md5sum_command = md5sum
+sha1sum_command = sha1sum

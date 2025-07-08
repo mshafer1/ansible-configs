@@ -1,0 +1,24 @@
+- name: Make sure backup user can read files
+  become: true
+  ansible.builtin.file:
+    dest: '{{ data_buddy_install_root }}'
+    state: directory
+    group: '{{ rclone_backup_config_user }}'
+    recurse: true
+    mode: 'g+srx'
+- name: Make sure backup user can read files
+  become: true
+  ansible.builtin.file:
+    dest: '{{ data_buddy_install_root }}/..'
+    state: directory
+    group: '{{ rclone_backup_config_user }}'
+    recurse: false
+    mode: 'g+srx'
+- name: Configure rclone
+  ansible.builtin.include_role:
+    name: rclone_backup
+  vars:
+    rclone_backup_subtask: setup
+    rclone_backup_use_ssh: true
+    rclone_backup_use_crypt: true
+    rclone_backup_dir: '/usr/local/app/data_buddy/local'

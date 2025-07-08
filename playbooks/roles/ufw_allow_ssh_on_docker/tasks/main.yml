@@ -1,0 +1,14 @@
+- name: Find Docker network interface
+  ansible.builtin.set_fact:
+    docker_interfaces: "{{ ansible_facts | dict2items | selectattr('value.ipv4', 'defined') | map(attribute='value') | list | selectattr('type', 'defined') | selectattr('type', 'equalto', 'bridge') | selectattr('device', 'search', '^br-') | list | map(attribute='device') | list }}"
+    _ufw_allow_ssh_on_docker__int_allowed_apps: []
+- name: Join UFW rules
+  ansible.builtin.set_fact:
+    _ufw_allow_ssh_on_docker__int_allowed_apps: '{{ _ufw_allow_ssh_on_docker__int_allowed_apps + [{"app": "ssh", "interface": item}] }}'
+  loop: '{{ docker_interfaces }}'
+- name: Configure
+  ansible.builtin.include_role:
+    name: ufw_configured
+  vars:
+    ufw_configured_allowed_specific_int_apps: '{{ _ufw_allow_ssh_on_docker__int_allowed_apps }}'
+    ufw_configured__force: true

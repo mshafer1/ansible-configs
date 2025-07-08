@@ -1,0 +1,10 @@
+- name: Render service
+  notify: Rclone-service-enabled
+  ansible.builtin.template:
+    src: rclone-backup.service.j2
+    dest: /etc/systemd/system/rclone-backup.service
+- name: Render timer
+  notify: Rclone-timer-started
+  ansible.builtin.template:
+    src: rclone-backup.timer.j2
+    dest: /etc/systemd/system/rclone-backup.timer

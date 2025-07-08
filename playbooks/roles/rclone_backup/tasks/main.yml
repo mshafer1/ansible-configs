@@ -1,0 +1,20 @@
+- name: Setup rclone
+  become: true
+  module_defaults:
+    ansible.builtin.file:
+      owner: '{{ rclone_backup_config_user }}'
+      group: '{{ rclone_backup_config_user }}'
+      mode: "0700"
+    ansible.builtin.lineinfile:
+      owner: '{{ rclone_backup_config_user }}'
+      group: '{{ rclone_backup_config_user }}'
+      create: true
+      mode: "0700"
+    ansible.builtin.blockinfile:
+      owner: '{{ rclone_backup_config_user }}'
+      group: '{{ rclone_backup_config_user }}'
+      create: true
+      mode: "0700"
+  block:
+    - name: Include sub-task
+      ansible.builtin.include_tasks: "{{ rclone_backup_subtask | default('ran') }}.yml"

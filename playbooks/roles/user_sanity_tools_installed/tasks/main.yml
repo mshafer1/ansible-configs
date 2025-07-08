@@ -1,0 +1,13 @@
+- name: Install preferred tools
+  become: true
+  ansible.builtin.package:
+    name:
+      - nano
+      # - micro
+      - curl
+      - tree
+      - eject
+      - dnsutils
+      - inetutils-ping
+      - rsyslog # turn on logging...
+    state: present

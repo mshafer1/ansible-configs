@@ -1,0 +1,45 @@
+- name: render config
+  ansible.builtin.template:
+    dest: '{{ rclone_backup_config_file }}.partial'
+    src: crypted.j2
+    force: false # don't replace if exists
+- name: Check if password set
+  check_mode: true
+  changed_when: false
+  register: line_exists
+  ansible.builtin.lineinfile:
+    path: '{{ rclone_backup_config_file }}.partial'
+    regexp: '^password = (.*)$'
+    state: absent
+- name: Set passwords
+  when: not line_exists.found
+  block:
+    - name: Get obscured1
+      register: obscured1
+      changed_when: false
+      ansible.builtin.command:
+        cmd: "rclone obscure '{{ rclone_backup__crypt_password }}'"
+    - name: Get obscured2
+      register: obscured2
+      changed_when: false
+      ansible.builtin.command:
+        cmd: "rclone obscure '{{ rclone_backup__crypt_password2 }}'"
+    - name: Store password in file
+      ansible.builtin.lineinfile:
+        dest: '{{ rclone_backup_config_file }}.partial'
+        regexp: 'password = (.*)'
+        line: 'password = {{ obscured1.stdout }}'
+    - name: Store password2 in file
+      ansible.builtin.lineinfile:
+        dest: '{{ rclone_backup_config_file }}.partial'
+        regexp: 'password2 = (.*)'
+        line: 'password2 = {{ obscured2.stdout }}'
+- name: Get block
+  register: crypt_config
+  ansible.builtin.slurp:
+    src: '{{ rclone_backup_config_file }}.partial'
+- name: output full config
+  ansible.builtin.blockinfile:
+    dest: '{{ rclone_backup_config_file }}'
+    block: '{{ crypt_config.content | b64decode }}'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - crypt"

@@ -1,0 +1,5 @@
+ufw_configured_allowed_apps:
+  - ssh
+  - https
+ufw_configured_allowed_specific_int_apps: []
+ufw_configured__force: false

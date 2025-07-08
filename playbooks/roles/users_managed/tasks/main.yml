@@ -1,0 +1,53 @@
+- name: Setup users
+  become: true
+  block:
+    - name: Create users
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        shell: /bin/bash
+        state: present
+        create_home: "{{ item.create_home | default(true) }}"
+      loop: "{{ users }}"
+    - name: Configure users' groups
+      ansible.builtin.include_tasks: tasks/_setup_groups.yml
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+    - name: Ensure ssh home dir exists
+      ansible.builtin.file:
+        path: "/home/{{ item.name }}/.ssh"
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "0700"
+      loop: "{{ users }}"
+    - name: Add SSH user key
+      ansible.builtin.lineinfile:
+        path: "/home/{{ item.name }}/.ssh/authorized_keys"
+        create: true
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "600"
+        line: "{{ item.key }}"
+      when: "'key' in item"
+      loop: "{{ users }}"
+    - name: Add SSH user keys
+      ansible.builtin.lineinfile:
+        path: "/home/{{ item.0.name }}/.ssh/authorized_keys"
+        create: true
+        owner: "{{ item.0.name }}"
+        group: "{{ item.0.name }}"
+        mode: "0600"
+        line: "{{ item.1 }}"
+      loop: "{{ users | subelements('keys', skip_missing=True) }}"
+    - name: Create SSH key for user
+      ansible.builtin.include_tasks: _create_ssh_key.yml
+      when: "'create_ssh_key' in item and (item['create_ssh_key'] | default(true))"
+      loop: "{{ users }}"
+    - name: Store known hosts for user
+      ansible.builtin.known_hosts:
+        path: /home/{{ item.0.name }}/.ssh/known_hosts
+        state: present
+        name: '{{ item.1.name }}'
+        key: '{{ item.1.key }}'
+      loop: "{{ users|subelements('known_hosts', skip_missing=True) }}"

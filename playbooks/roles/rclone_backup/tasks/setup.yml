@@ -1,0 +1,12 @@
+- name: Ensure config dir exists
+  ansible.builtin.file:
+    path: /home/{{ rclone_backup_config_user }}/.config/rclone/
+    state: directory
+- name: config ssh
+  when: rclone_backup_use_ssh
+  ansible.builtin.include_tasks: _setup_ssh.yml
+- name: config encrypted
+  when: rclone_backup_use_crypt
+  ansible.builtin.include_tasks: _setup_crypt.yml
+- name: Setup backup service
+  ansible.builtin.include_tasks: _config_service.yml

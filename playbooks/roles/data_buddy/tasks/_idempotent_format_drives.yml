@@ -1,0 +1,154 @@
+
+- name: Install requirements
+  become: true
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: 
+          - parted
+          - jq
+        state: present
+
+- name: Get and store initial partitions
+  become: true
+  block:
+    - name: Store initial partitions info
+      args:
+        creates: /usr/local/_initial_nvme_partitions.json
+      ansible.builtin.shell:
+        cmd: |
+          lsblk --json -o name,mountpoints,tran,label,id,uuid | jq '[.blockdevices[] | select(.tran=="nvme")]' > /usr/local/_initial_nvme_partitions.json
+    - name: Read initial file
+      slurp: # https://stackoverflow.com/a/41654953
+        src: /usr/local/_initial_nvme_partitions.json
+      register: slurpfile
+    - name: Load initial file into var
+      ansible.builtin.set_fact:
+        initial_drives: "{{ slurpfile['content'] | b64decode | safe | string | from_json }}"
+
+- name: Make partition on each drive
+  include_tasks: _make_one_more_partition.yml
+  with_items: '{{ initial_drives }}'
+
+- name: Get and store configured partitions
+  become: true
+  block:
+    - name: Store configured partitions info
+      args:
+        creates: /usr/local/_configured_nvme_partitions.json
+      ansible.builtin.shell:
+        cmd: |
+          lsblk --json -o name,mountpoints,tran,label,id,uuid | jq '[.blockdevices[] | select(.tran=="nvme")]' > /usr/local/_configured_nvme_partitions.json
+    - name: Read configured file
+      slurp: # https://stackoverflow.com/a/41654953
+        src: /usr/local/_configured_nvme_partitions.json
+      register: slurpfile
+    - name: Load configured file into var
+      ansible.builtin.set_fact:
+        configured_drives: "{{ slurpfile.content | b64decode | safe | string | from_json }}"
+
+
+- name: Mount drives
+  when: not data_buddy_setup_drives_in_mirror
+  include_tasks: _mount_drive.yml
+  loop: '{{ configured_drives | zip(data_buddy_mount_configs) }}'
+
+- name: Mount drives in mirror
+  when: data_buddy_setup_drives_in_mirror
+  become: true
+  block:
+    - name: Debug getting partitions
+      ansible.builtin.debug:
+        msg: Last children are {{ configured_drives | map(attribute="children") | map(attribute="0.name") |list | join(" ") }}
+
+    - name: Store last partitions in var
+      ansible.builtin.set_fact:
+        last_partitions_on_configured_drives: '{{ configured_drives | map(attribute="children") | map(attribute="0.name") | list }}'
+        raided_mount_info:
+          - - children:
+              - name: md0p1
+            - mount_root: '{{ data_buddy_install_root }}/local'
+              luks_name: dataBuddyLocalZip
+          - - children:
+              - name: md0p2
+            - mount_root: '{{ data_buddy_install_root }}/remote'
+              luks_name: dataBuddyRemoteZip
+    - name: Last partitions to string
+      ansible.builtin.set_fact:
+        partition_ids_to_mount: '{{ (["/dev/"] | product(last_partitions_on_configured_drives)) | map("join") | join(" ") }}'
+
+    - name: Debug getting partitions
+      ansible.builtin.debug:
+        msg: Last children are {{ partition_ids_to_mount }}
+
+    - name: Make raid1 of drives
+      ansible.builtin.command:
+        cmd: mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 {{ partition_ids_to_mount }}
+        stdin: 'y'
+      args:
+        creates: /dev/md0
+    - name: Make partitions on raid
+      community.general.parted:
+        device: /dev/md0
+        fs_type: ext4
+        label: gpt
+        number: '{{ item.number }}'
+        part_end: '{{ item.end }}'
+        part_start: '{{ item.start }}'
+        state: present
+      loop:
+        - number: 1
+          start: '0%'
+          end: '50%'
+        - number: 2
+          start: '50%'
+          end: '100%'
+    - name: Get mdadm config block
+      ansible.builtin.command:
+        cmd: mdadm --detail --scan
+      register: mdadm_output
+    - name: Make array persistent
+      ansible.builtin.blockinfile:
+        block: '{{ mdadm_output.stdout }}'
+        marker: '# {mark} ANSIBLE MANAGED BLOCK - data-buddy-mdadm'
+        path: /etc/mdadm/mdadm.conf
+   
+    - name: Mount raid
+      ansible.builtin.include_tasks: _mount_drive.yml
+      loop: '{{ raided_mount_info }}'
+
+- name: Set drives to unlock on boot
+  become: true
+  block:
+  - name: Basic setup
+    ansible.builtin.include_role:
+      name: drives_unlock_with_tpm2
+    vars:
+      drives_unlock_with_tpm2__fde_pass: '{{ data_buddy_luks_passphrase }}'
+
+  - name: Create script for last mile
+    when: not data_buddy_setup_drives_in_mirror
+    ansible.builtin.copy:
+      content: |
+        #!/bin/bash -v
+        set -euo pipefail
+        {% for children in (configured_drives | map(attribute="children")) %}
+        systemd-cryptenroll --wipe-slot tpm2 --tpm2-device auto --tpm2-pcrs "1+3+5+7+11+12+14" /dev/{{ children | map(attribute="name") | last }}
+        {% endfor %}
+      dest: '/usr/local/bin/enroll-drives-in-tpm'
+      owner: root
+      group: root
+      mode: '0755'
+
+  - name: Create script for last mile
+    when: data_buddy_setup_drives_in_mirror
+    ansible.builtin.copy:
+      content: |
+        #!/bin/bash -v
+        set -euo pipefail
+        systemd-cryptenroll --wipe-slot tpm2 --tpm2-device auto --tpm2-pcrs "1+3+5+7+11+12+14" /dev/md0p1
+        systemd-cryptenroll --wipe-slot tpm2 --tpm2-device auto --tpm2-pcrs "1+3+5+7+11+12+14" /dev/md0p2
+      dest: '/usr/local/bin/enroll-drives-in-tpm'
+      owner: root
+      group: root
+      mode: '0755'

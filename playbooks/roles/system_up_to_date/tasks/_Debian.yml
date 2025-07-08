@@ -3,7 +3,7 @@
   block:
     - name: Run system updates
       ansible.builtin.apt:
-        upgrade: dist
+        upgrade: '{{ system_up_to_date__upgrade_mode }}'
         update_cache: yes
         autoremove: yes
     - name: Check if reboot required 

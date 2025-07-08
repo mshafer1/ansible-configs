@@ -1,0 +1,1 @@
+smb_shares_mounted__mounts: '{{ network_mounts }}'

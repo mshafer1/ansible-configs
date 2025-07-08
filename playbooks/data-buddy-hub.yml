@@ -1,0 +1,50 @@
+- name: System up to date
+  hosts: data-buddy-host
+  tasks:
+    - name: Config self-inventory file
+      become: true
+      block:
+        - name: Ensure config dir exists
+          ansible.builtin.file:
+            dest: /etc/ansible
+            state: directory
+            owner: root
+            group: root
+            mode: "0660"
+        - name: Copy self-inventory file
+          ansible.builtin.copy:
+            content: |
+              all:
+                hosts:
+                  localhost:
+                    reboot_controller: true
+                    grub_handled: false
+            dest: /etc/ansible/hosts
+            owner: root
+            group: root
+            mode: "0660"
+  roles:
+    - role: system_up_to_date
+      sub_task: sync_repo
+    - role: system_up_to_date
+      sub_task: setup_schedule
+    - role: system_up_to_date
+
+- name: Setup databuddy sync host
+  hosts: data-buddy-host
+  roles:
+    - name: users_managed
+    - name: user_sanity_tools_installed
+    - name: drives_unlock_with_tpm2
+      drives_unlock_with_tpm2__fde_pass: '{{ data_buddy_luks_passphrase }}'
+    - name: docker
+    - name: twingate # connector, used for access
+      twingate_connector_in_docker: true
+      twingate_connector_host_network: false
+    - name: twingate_service_connection # client, used for backup
+    - name: ufw_installed
+      ufw_installed__allowed_apps:
+        - ssh
+    - name: rclone_installed
+    - name: smb_shares_mounted
+    - name: directory_owners_configured

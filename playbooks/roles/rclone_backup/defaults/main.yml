@@ -1,0 +1,16 @@
+_rclone_backup_dir: '{{ rclone_backup_dir | mandatory }}'
+_rclone_backup__remote_host: '{{ rclone_backup__remote_host | mandatory }}'
+_rclone_backup__username: '{{ rclone_backup__username | mandatory }}'
+_rclone_backup__name: '{{ rclone_backup__name | mandatory }}'
+_rclone_backup__crypt_name: '{{ _rclone_backup__name }}-crypt'
+_rclone_backup__crypt_remote: '{{ _rclone_backup__name }}'
+
+rclone_backup_use_ssh: false
+rclone_backup_config_user: '{{ ansible_user }}'
+
+rclone_backup__name: RClone Backup
+rclone_backup__day: Sat
+rclone_backup__hour: 5
+# not defined to make mandatory, but only for rclone_backup_subtask=crypt
+# rclone_backup__crypt_password
+# rclone_backup__crypt_password2

@@ -1,0 +1,20 @@
+- name: set last child
+  ansible.builtin.set_fact:
+    last_child: '{{ item.children | default([None]) | last }}'
+    num_children: '{{ item.children | default([]) | length }}'
+
+- name: Not implemented
+  when: 'num_children | int > 0'
+  failed_when: true
+  ansible.builtin.debug:
+    msg: Handling pre-initialized drives is not handled yet
+
+- name: Make whole partition
+  become: true
+  community.general.parted:
+    device: '/dev/{{ item.name }}'
+    fs_type: ext4
+    number: 1
+    state: present
+    label: gpt
+    # part_start: last_child ?? end ??

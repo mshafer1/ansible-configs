@@ -1,0 +1,19 @@
+- name: Reload systemd
+  become: true
+  listen:
+    - Rclone-timer-started
+    - Rclone-service-enabled
+  ansible.builtin.systemd:
+    daemon_reload: true
+- name: Rclone-service-enabled
+  listen: Rclone-timer-started
+  become: true
+  ansible.builtin.systemd:
+    name: rclone-backup
+    enabled: false
+- name: Rclone-timer-started
+  become: true
+  ansible.builtin.systemd:
+    name: rclone-backup.timer
+    state: started
+    enabled: true

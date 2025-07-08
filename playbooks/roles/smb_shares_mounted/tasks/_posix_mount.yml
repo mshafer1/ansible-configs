@@ -1,0 +1,26 @@
+- name: Do a posix based mount
+  become: true
+  block:
+    - name: Store credentials in a root owned file
+      ansible.builtin.copy:
+        content: |
+          username={{ item.user }}
+          password={{ item.password }}
+        dest: '/root/{{ item.dest | replace("/", "_") }}.credentials'
+        owner: root
+        group: root
+        mode: '0660'
+    - name: Ensure target dir exists
+      ansible.builtin.file:
+        dest: '{{ item.dest }}'
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Mount Share
+      ansible.posix.mount:
+        src: '//{{ item.server }}/{{ item.share }}'
+        path: '{{ item.dest }}'
+        state: mounted
+        opts: 'rw,vers=3,file_mode=0660,dir_mode=0770,credentials=/root/{{ item.dest | replace("/", "_") }}.credentials,gid={{ item.mount_group }}'
+        fstype: cifs

@@ -1,7 +1,13 @@
+- name: ensure samba is started
+  become: true
+  listen: start_samba
+  systemd_service:
+    name: smb
+    daemon_reload: true
+    state: started
 - name: start_samba
   become: true
   systemd_service:
     name: smb
-    daemon_reload: true
     enabled: true
-    state: started
+    state: restarted
