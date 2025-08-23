@@ -28,9 +28,21 @@ This is a collection of [Ansible](https://docs.ansible.com/ansible/latest/gettin
 1. Create a `hosts` file.
 
     On Linux, the majority of configuration is stored in the `/etc` directory. Ansible is no exception to this. Create `/etc/ansible/hosts` file containing:
-    ```toml
-    [nginx]
-    localhost ansible_connection=local SSH_PORT=22
+    ```yaml
+    all:
+      vars:
+        certbot_email: ...
+      hosts:
+        localhost:
+          ansible_connection: local
+          SSH_PORT: 22
+          reboot_controller: True
+          grub_handled: False
+          system_up_to_date__upgrade_mode: safe
+      children:
+        nginx:
+          hosts:
+            localhost:
     ```
 
     **NOTE**: the SSH_PORT is used to adjust SSHD and firewalld to only allow ssh on that port. [While 22 is the default, many people recommend choosing a non-standard port for security-through-obscurity](https://www.howtogeek.com/443156/the-best-ways-to-secure-your-ssh-server/#:~:text=are%20being%20rejected.-,Avoid%20Port%2022,-Port%2022%20is)
