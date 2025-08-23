@@ -8,7 +8,7 @@ apt-get update
 apt-get install python3 python3-pip pipx
 
 # Use pip to install ansible
-pipx install ansible
+pipx install ansible --include-deps
 
 # If pip binary path is not on the PATH var, add it to profile file
 echo $PATH | grep "\.local" > /dev/null || echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc
