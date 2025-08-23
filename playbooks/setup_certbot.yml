@@ -4,7 +4,7 @@
   hosts: certbot
 
   roles:
-  - certbot_installed
+    - certbot_installed
 
   tasks:
   
@@ -26,6 +26,7 @@
             -v
             --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py
             --preferred-challenges dns 
+            --non-interactive
             --debug-challenges
             -d {{ item.name }} | tee /var/tmp/certbot_output_{{ my_index }}
         args:

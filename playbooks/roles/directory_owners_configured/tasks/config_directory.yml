@@ -1,10 +1,11 @@
 - name: Ensure directory exists with correct permissions {{ item.name }}
+  become: true
   ansible.builtin.file:
     dest: '{{ item.name }}'
     owner: '{{ item.owner }}'
     group: '{{ item.group }}'
     mode: '1770'
-    recurse: true
+    recurse: '{{ not (item.skip_child_permissions | default(false) ) }}'
 - name: Make sure parent dirs are accessible
   become: true
   block:

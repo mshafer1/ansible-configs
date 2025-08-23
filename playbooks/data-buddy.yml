@@ -15,7 +15,7 @@
 - name: Local shares
   hosts: data-buddy
   vars:
-    ufw_configured_allowed_apps: '{{ data_buddy_allowed_ufw_apps | default(["https"]) }}'
+    ufw_configured_allowed_apps: '{{ data_buddy_allowed_ufw_apps | default(["https", "smb"]) }}'
   roles:
     - name: user_sanity_tools_installed
     - name: data_buddy

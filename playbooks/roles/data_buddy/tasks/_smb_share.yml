@@ -48,3 +48,14 @@
           browsable = yes
           valid users = @smbusers
           write list = @smbusers
+    - name: Set SMB security settings to make Windows happy
+      notify: 
+        - start_samba
+      ansible.builtin.lineinfile:
+        path: /etc/samba/smb.conf
+        line: '{{ item }}'
+        state: present
+        insertbefore: '## Browsing/Identification ###'
+      loop:
+        - min protocol = SMB3
+        - server signing = mandatory

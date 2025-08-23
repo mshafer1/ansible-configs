@@ -45,6 +45,12 @@
     - name: ufw_installed
       ufw_installed__allowed_apps:
         - ssh
+        - https
     - name: rclone_installed
     - name: smb_shares_mounted
     - name: directory_owners_configured
+    - name: data_buddy
+      when: data_buddy_use_immich | default(true)
+      sub_task: _setup_immich
+    - name: multi_rclone_backups_configured
+      multi_rclone_backups_configured__backups: '{{ rclone_backups }}'

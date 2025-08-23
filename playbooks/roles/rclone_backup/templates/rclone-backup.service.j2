@@ -1,12 +1,12 @@
 [Unit]
-Description=Run RClone backup
+Description=Run RClone backup{{ rclone_backup__name_suffix }}
 
 [Service]
 User={{ rclone_backup_config_user }}
 {% if rclone_backup_use_crypt | default(false) %}
 ExecStart=/bin/bash -c '/usr/bin/rclone sync {{ _rclone_backup_dir }} {{ _rclone_backup__crypt_name }}:/'
 {% else %}
-ExecStart=/bin/bash -c '/usr/bin/rclone sync {{ _rclone_backup_dir }} {{ _rclone_backup__crypt_name }}:{{ rclone_backup__remote_path }}'
+ExecStart=/bin/bash -c '/usr/bin/rclone sync {{ _rclone_backup_dir }} {{ _rclone_backup__name }}:{{ rclone_backup__remote_path }}'
 {% endif %}
 
 [Install]

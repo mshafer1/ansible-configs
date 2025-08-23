@@ -2,7 +2,7 @@
   ansible.builtin.blockinfile:
     dest: /home/{{ rclone_backup_config_user }}/.config/rclone/rclone.conf
     block: "{{ lookup('ansible.builtin.template', 'ssh.j2') }}"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - ssh"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - ssh{{ rclone_backup__name }}{{ rclone_backup__name_suffix }}"
 # TODO: do we need this? can we just use the key file??
 # - name: Set password
 #   become: true

@@ -9,11 +9,11 @@
   listen: Rclone-timer-started
   become: true
   ansible.builtin.systemd:
-    name: rclone-backup
+    name: '{{ rclone_backup__name | lower }}{{ rclone_backup__name_suffix }}'
     enabled: false
 - name: Rclone-timer-started
   become: true
   ansible.builtin.systemd:
-    name: rclone-backup.timer
+    name: '{{ rclone_backup__name | lower }}{{ rclone_backup__name_suffix }}.timer'
     state: started
     enabled: true

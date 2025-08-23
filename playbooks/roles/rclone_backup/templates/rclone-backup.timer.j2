@@ -2,8 +2,8 @@
 Description="Run {{ rclone_backup__name }} on {{ rclone_backup__day }} at {{ rclone_backup__hour }} AM"
 
 [Timer]
-OnCalendar={{ rclone_backup__day }} {{ "%02d" | format(rclone_backup__hour) }}:00:00
-Unit=rclone-backup.service
+OnCalendar={{ rclone_backup__day }} {{ "%02d" | format(rclone_backup__hour | int) }}:00:00
+Unit={{ rclone_backup__name | lower }}{{ rclone_backup__name_suffix }}.service
 
 [Install]
 WantedBy=multi-user.target
