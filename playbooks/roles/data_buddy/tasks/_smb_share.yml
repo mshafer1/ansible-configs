@@ -42,6 +42,7 @@
         block: |
           [{{ data_buddy_share_name }}]
           path = {{ data_buddy_smb_root }}/
+          server min protocol = SMB3
           guest ok = no
           guest only = no
           writable = yes
