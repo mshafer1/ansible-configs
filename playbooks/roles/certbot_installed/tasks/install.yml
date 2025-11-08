@@ -69,7 +69,7 @@
   become: true
   ansible.builtin.cron:
     name: certbot-renewal
-    job: "/bin/bash -lc '/usr/local/bin/certbot renew >> /var/log/certbot'"
+    job: "/bin/bash -lc 'certbot renew 2>&1 >> /var/log/certbot'"
     minute: "0"
     hour: "6"
     day: "*"

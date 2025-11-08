@@ -1,4 +1,4 @@
 - name: 'Certbot register {{ item }}'
-  command: '/usr/local/bin/certbot -n --nginx -d {{ item }}'
+  command: 'certbot -n --nginx -d {{ item }}'
   args:
     creates: '/etc/letsencrypt/live/{{ item }}'
