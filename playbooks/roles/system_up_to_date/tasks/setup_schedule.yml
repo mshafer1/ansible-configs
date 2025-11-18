@@ -46,3 +46,13 @@
         name: system-updater.timer
         enabled: true
         state: started
+- name: Disable unattended upgrades
+  block:
+    - name: Disable unattended upgrades
+      ansible.builtin.systemd_service:
+        name: unattended-upgrade
+        enabled: false
+  rescue:
+    - name: Handle error
+      ansible.builtin.debug:
+        msg: Failed to disable unattended-upgrade, continuing...

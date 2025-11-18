@@ -50,7 +50,7 @@
           valid users = @smbusers
           write list = @smbusers
     - name: Set SMB security settings to make Windows happy
-      notify: 
+      notify:
         - start_samba
       ansible.builtin.lineinfile:
         path: /etc/samba/smb.conf

@@ -27,10 +27,16 @@
       community.general.filesystem:
         dev: '/dev/mapper/{{ luks_name }}'
         fstype: ext4
+    - name: Ensure mount point exists
+      ansible.builtin.file:
+        state: directory
+        owner: root
+        group: root
+        path: '{{ mount_point }}'
+        mode: 0770
     - name: Mount device to target location
       ansible.posix.mount:
         fstype: ext4
         src: '/dev/mapper/{{ luks_name }}'
         path: '{{ mount_point }}'
         state: mounted
-

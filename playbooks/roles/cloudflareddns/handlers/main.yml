@@ -1,0 +1,16 @@
+- name: Reload systemd
+  listen: Restart cloudflare DDNS Timer
+  ansible.builtin.systemd_service:
+    name: cloudflare-ddns-ip-update.service
+    state: started # run now
+    enabled: true # allow running on boot
+    daemon_reload: true
+
+- name: Restart cloudflare DDNS Timer
+  ansible.builtin.systemd_service:
+    name: '{{ item }}'
+    state: started # run now
+    enabled: true # allow running on boot
+  loop:
+    - cloudflare-ddns-ip-update.service
+    - cloudflare-ddns-ip-update.timer

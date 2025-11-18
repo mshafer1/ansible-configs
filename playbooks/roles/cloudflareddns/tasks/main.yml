@@ -45,17 +45,10 @@
         group: root
         mode: '0644'
     - name: Create script file
+      notify: Restart cloudflare DDNS Timer
       ansible.builtin.template:
         dest: /usr/local/bin/cloudflare-update-dns-ip
         src: cloudflare-update-dns-ip.j2
         owner: root
         group: root
         mode: '0770'
-    - name: Enable service and timer and start them both
-      ansible.builtin.systemd_service:
-        name: '{{ item }}'
-        state: started # run now
-        enabled: true # allow running on boot
-      loop:
-        - cloudflare-ddns-ip-update.service
-        - cloudflare-ddns-ip-update.timer
