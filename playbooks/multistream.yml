@@ -1,0 +1,6 @@
+---
+
+- name: Configure multistream servers
+  hosts: multistream
+  roles:
+  - role: multistream_server
