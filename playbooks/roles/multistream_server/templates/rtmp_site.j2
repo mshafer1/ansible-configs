@@ -1,18 +1,31 @@
-server {
-    listen ${{ rtmp_port }};
-    server_name  localhost;
+rtmp {
+    server {
+        listen 1935;
+        chunk_size 2048;
+        {% for ip in multistream_server_allowed_publishers %}
+        allow publish {{ ip }};
+        {% endfor %}
+        deny publish all;
 
-    # rtmp stat
-    location /stat {
-        rtmp_stat all;
-        rtmp_stat_stylesheet stat.xsl;
-    }
-    location /stat.xsl {
-        root /var/www/html/rtmp;
-    }
+        {% if multistream_server_allowed_play == 'all' %}
+        allow play all;
+        {% else %}
+        {% for ip in multistream_server_allowed_play %}
+        allow play {{ ip }};
+        {% endfor %}
+        {% endif %}
 
-    # rtmp control
-    location /control {
-        rtmp_control all;
+        application {{ multistream_application_name }} {
+                live on;
+                record off;
+
+                {% for push in multistream_pushes %}
+                push {{ push }};
+                {% endfor %}
+
+                {% for exec in multistream_execs %}
+                exec {{ exec }};
+                {% endfor %}
+        }
     }
 }

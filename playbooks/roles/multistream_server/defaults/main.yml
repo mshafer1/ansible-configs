@@ -1,2 +1,13 @@
-ALLOWED_PUBLISHERS:
+multistream_server_allowed_publishers:
   - 127.0.0.1
+
+# use list for multiple values. if "all", will not block play at all. Use ["127.0.0.1"] to block all
+multistream_server_allowed_play: all
+
+multistream_application_name: live
+
+# URI (rtmp) locations to push to
+multistream_pushes: []
+
+# execs (e.g., vlc) to run/push
+multistream_execs: []
