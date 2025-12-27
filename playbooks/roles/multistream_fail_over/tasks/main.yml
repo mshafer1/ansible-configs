@@ -12,6 +12,7 @@
       owner: root
       group: root
       mode: '0775'
+  become: true
   block:
     - name: Install requirements
       ansible.builtin.package:

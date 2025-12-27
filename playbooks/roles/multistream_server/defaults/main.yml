@@ -4,6 +4,7 @@ multistream_server_allowed_publishers:
 # use list for multiple values. if "all", will not block play at all. Use ["127.0.0.1"] to block all
 multistream_server_allowed_play: all
 
+# NOTE: some suggest using this as a secret key; however, be mindful that without rtmps (ssl), the uri is inspectable...
 multistream_application_name: live
 
 # URI (rtmp) locations to push to

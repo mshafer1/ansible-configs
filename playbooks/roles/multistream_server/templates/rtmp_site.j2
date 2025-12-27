@@ -2,30 +2,32 @@ rtmp {
     server {
         listen 1935;
         chunk_size 2048;
-        {% for ip in multistream_server_allowed_publishers %}
-        allow publish {{ ip }};
-        {% endfor %}
-        deny publish all;
-
-        {% if multistream_server_allowed_play == 'all' %}
-        allow play all;
-        {% else %}
-        {% for ip in multistream_server_allowed_play %}
-        allow play {{ ip }};
-        {% endfor %}
-        {% endif %}
 
         application {{ multistream_application_name }} {
-                live on;
-                record off;
+            {% for ip in multistream_server_allowed_publishers %}
+            allow publish {{ ip }};
+            {% endfor %}
+            deny publish all;
 
-                {% for push in multistream_pushes %}
-                push {{ push }};
-                {% endfor %}
+            {% if multistream_server_allowed_play == 'all' %}
+            allow play all;
+            {% else %}
+            {% for ip in multistream_server_allowed_play %}
+            allow play {{ ip }};
+            {% endfor %}
+            {% endif %}
 
-                {% for exec in multistream_execs %}
-                exec {{ exec }};
-                {% endfor %}
+
+            live on;
+            record off;
+
+            {% for push in multistream_pushes %}
+            push {{ push }};
+            {% endfor %}
+
+            {% for exec in multistream_execs %}
+            exec {{ exec }};
+            {% endfor %}
         }
     }
 }

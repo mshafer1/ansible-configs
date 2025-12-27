@@ -11,9 +11,10 @@
       dest: /etc/nginx/nginx.conf
       block: "{{ lookup('template', 'rtmp_site.j2') }}"
 
-  - name: 'firewall: Enable rtmp port'
-    ansible.posix.firewalld:
-      immediate: yes
-      port: 1935/tcp
-      permanent: yes
-      state: enabled
+  # TODO: re-enable this
+  # - name: 'firewall: Enable rtmp port'
+  #   ansible.posix.firewalld:
+  #     immediate: yes
+  #     port: 1935/tcp
+  #     permanent: yes
+  #     state: enabled
