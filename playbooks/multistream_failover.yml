@@ -1,0 +1,6 @@
+---
+
+- name: Configure multistream servers
+  hosts: multistream_failover
+  roles:
+  - role: multistream_fail_over
