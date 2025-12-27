@@ -1,0 +1,13 @@
+_multistream_fail_over__pushes: '{{ multistream_fail_over__pushes | mandatory }}'
+# format:
+# - scale: '-1:-1' # don't alter scale
+#   url: rtmps://a.rtmps.youtube.com/live2/... # example. Replace "..." with your stream key
+#   interface_grep: ens.* # optional, specifies to go out the first "eth..." interface NOTE: does not support altname
+# - scale: '-2:720' # tell ffmpeg to downscale to 720p and calculate the width
+#   url: rtmps://b.rtmps.youtube.com/live2/.../?backup=1 # example. Replace "..." with your stream key
+#   interface_grep: wlan.* # optional, specifies to go out the first "wlan..." interface NOTE: does not support altname
+multistream_fail_over__allowed_ips:
+  - '127.0.0.1'
+
+# use list for multiple values. if "all", will not block play at all. Use ["127.0.0.1"] to block all
+multistream_fail_over__allowed_play: all

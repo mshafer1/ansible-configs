@@ -1,0 +1,17 @@
+- name: Reload service daemon
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ multistream_fail_over__service_name }}'
+    daemon_reload: true
+- name: Restart service
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ multistream_fail_over__service_name }}'
+    state: restarted
+- name: Start service
+  listen: Restart service
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ multistream_fail_over__service_name }}'
+    state: started
+    enabled: true

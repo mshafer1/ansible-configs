@@ -1,0 +1,43 @@
+- name: Fail Over Multistreamer
+  module_defaults:
+    ansible.builtin.file:
+      owner: root
+      group: root
+      mode: '0775'
+    ansible.builtin.template:
+      owner: root
+      group: root
+      mode: '0775'
+    ansible.builtin.copy:
+      owner: root
+      group: root
+      mode: '0775'
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: jq
+        state: present
+    - name: Setup server
+      ansible.builtin.include_role:
+        name: multistream_server
+      vars:
+        multistream_server_allowed_publishers: '{{ multistream_fail_over__allowed_ips }}'
+        multistream_pushes: [] # don't push from nginx
+        multistream_execs: [] # don't downscale from nginx
+        multistream_server_allowed_play: '{{ multistream_fail_over__allowed_play }}'
+    - name: Setup service
+      notify:
+        - Restart service
+        - Reload service daemon
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/{{ multistream_fail_over__service_name }}.service
+        src: multistream-fail-over.service
+
+    - name: Setup Script
+      # notify: Restart service
+      become: true
+      ansible.builtin.template:
+        dest: /usr/local/bin/{{ multistream_fail_over__service_name }}
+        mode: '0771'
+        src: multistream-fail-over.sh
