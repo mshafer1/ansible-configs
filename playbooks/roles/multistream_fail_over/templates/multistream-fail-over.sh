@@ -39,7 +39,10 @@ ip_addresses=$(nslookup `echo "{{ push.url }}" \
 
 if [[ -n '{{ push.interface_grep | default("") }}' ]]; then
     interface=$(echo ${ip_links} | tr ' ' '\n' | grep -E '{{ push.interface_grep | default(".*") }}')
-    echo "${ip_addresses}" | tr ' ' '\n' | xargs -I {} bash -c "ip route add {} dev ${interface} || true"
+    gateway=$(ip route | grep 'default via' | grep -E '{{ push.interface_grep | default(".*") }}' | sed -E -e 's/^.* via //g' -e 's/ dev .*$//g'; exit 0)
+    if [[ -n "${gateway}" ]]; then
+      echo "${ip_addresses}" | tr ' ' '\n' | xargs -I {} bash -c "ip route add {} via ${gateway} dev ${interface} || true"
+    fi
 fi
 
 
