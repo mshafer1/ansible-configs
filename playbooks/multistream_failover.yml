@@ -3,4 +3,10 @@
 - name: Configure multistream servers
   hosts: multistream_failover
   roles:
-  - role: multistream_fail_over
+    - role: system_up_to_date
+      sub_task: sync_repo
+    - role: system_up_to_date
+      sub_task: setup_schedule
+    - role: system_up_to_date
+    
+    - role: multistream_fail_over
