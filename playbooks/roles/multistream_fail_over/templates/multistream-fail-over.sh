@@ -52,12 +52,12 @@ fi
 update_routes
 
 # setup interval
-(
-  while true; do
-    update_routes
-    sleep 30
-  done
-) &
+# (
+#   while true; do
+#     update_routes
+#     sleep 30
+#   done
+# ) &
 
 #----------------------------------------------------------
 # main loop, stream to first URL. 
