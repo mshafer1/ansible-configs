@@ -50,16 +50,15 @@
           - certbot-nginx
 
 - name: Register certbot
+  become: true
   block:
     - name: 'Certbot: create dir if needed'
-      become: true
       ansible.builtin.file:
         path: /etc/letsencrypt
         state: directory
         mode: '0700'
         force: true
     - name: Register
-      become: true
       when: cerbot_email is defined
       ansible.builtin.shell: |
         certbot -n register --agree-tos --email {{ certbot_email }}
