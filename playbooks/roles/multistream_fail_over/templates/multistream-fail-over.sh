@@ -10,10 +10,11 @@ clear_routes() {
     # cleanup any from last time
     routes=$(ip route | grep "scope link" | grep -v -e " src " -e "/" | grep -v -E -e "^10\." -e "^172\.1[6-9]\." -e "^172\.2\d\." -e "^172\.3[01]\." -e "^192.168."; exit 0)
     if [[ -z "${routes}" ]]; then
-    echo "No old routes identified"
-    return
+      echo "No old routes identified"
+      return
     fi
-    echo "$routes" | sed -e 's/ $//g' | xargs -I{} bash -c "ip route delete {}"
+
+    echo "$routes" | sed -e 's/ link linkdown/ link/g' -e 's/ $//g' | xargs -I{} bash -c "ip route delete {}"
 }
 
 
@@ -23,9 +24,11 @@ clear_routes() {
 clear_routes
 
 #----------------------------------------------------------
-# get IPs for pushes and make set routes
+# get IPs for pushes and set routes
 #----------------------------------------------------------
+update_routes() {
 ip_links=$(ip --json link show | jq -r '.[] | .ifname')
+# TODO: this only works if devices are already connected..., i.e., needs to run on slow schedule
 {% for push in _multistream_fail_over__pushes %}
 ip_addresses=$(nslookup `echo "{{ push.url }}" \
     | sed -r -e 's;^.*://;;' -e 's;/.*$;;g'` \
@@ -36,10 +39,22 @@ ip_addresses=$(nslookup `echo "{{ push.url }}" \
 
 if [[ -n '{{ push.interface_grep | default("") }}' ]]; then
     interface=$(echo ${ip_links} | tr ' ' '\n' | grep -E '{{ push.interface_grep | default(".*") }}')
-    echo "${ip_addresses}" | tr ' ' '\n' | xargs -I {} bash -c "ip route add {} dev ${interface}"
+    echo "${ip_addresses}" | tr ' ' '\n' | xargs -I {} bash -c "ip route add {} dev ${interface} || true"
 fi
-{% endfor %}
 
+
+{% endfor %}
+}
+
+update_routes
+
+# setup interval
+(
+  while true; do
+    update_routes
+    sleep 30
+  done
+) &
 
 #----------------------------------------------------------
 # main loop, stream to first URL. 
