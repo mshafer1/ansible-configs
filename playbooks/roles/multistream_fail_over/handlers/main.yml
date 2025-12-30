@@ -8,6 +8,18 @@
   ansible.builtin.systemd:
     name: '{{ multistream_fail_over__service_name }}'
     state: restarted
+- name: Restart timer
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ multistream_fail_over__service_name }}.timer'
+    state: restarted
+- name: Start timer
+  listen: Restart timer
+  become: true
+  ansible.builtin.systemd:
+    name: '{{ multistream_fail_over__service_name }}.timer'
+    state: started
+    enabled: true
 - name: Start service
   listen: Restart service
   become: true

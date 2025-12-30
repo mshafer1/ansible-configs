@@ -12,3 +12,6 @@ multistream_pushes: []
 
 # execs (e.g., vlc) to run/push
 multistream_execs: []
+
+# TODO: change this to true
+multistream_server__use_ufw: false

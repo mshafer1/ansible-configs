@@ -24,21 +24,71 @@
       vars:
         multistream_server_allowed_publishers: '{{ multistream_fail_over__allowed_ips }}'
         multistream_pushes: [] # don't push from nginx
-        multistream_execs: [] # don't downscale from nginx
+        multistream_execs:
+          - '/var/scripts/exec_wrapper.sh $name'
         multistream_server_allowed_play: '{{ multistream_fail_over__allowed_play }}'
+    - name: Setup wrapper script
+      ansible.builtin.copy:
+        dest: /var/scripts/exec_wrapper.sh
+        content: |
+          #!/bin/bash
+
+          on_die() {
+          # kill all children
+          kill $(jobs -p)
+          exit
+          }
+
+          trap 'on_die' TERM SIGTERM
+          /usr/local/bin/multistream-fail-over 2>&1 | tee /var/log/multistream &
+          wait
+        force: true
+
     - name: Setup service
       notify:
-        - Restart service
+        # - Restart service
         - Reload service daemon
-      become: true
       ansible.builtin.copy:
         dest: /etc/systemd/system/{{ multistream_fail_over__service_name }}.service
-        src: multistream-fail-over.service
+        src: multistream-ip-routes.service
 
-    - name: Setup Script
+    - name: Setup timer
+      notify:
+        # - Restart timer
+        - Reload service daemon
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/{{ multistream_fail_over__service_name }}.timer
+        src: multistream-ip-routes.timer
+
+    - name: Setup Scripts
       # notify: Restart service
-      become: true
       ansible.builtin.template:
-        dest: /usr/local/bin/{{ multistream_fail_over__service_name }}
-        mode: '0771'
-        src: multistream-fail-over.sh
+        dest: /usr/local/bin/{{ item.name }}
+        mode: '0775'
+        src: '{{ item.src }}'
+      with_items:
+        - src: multistream-ip-routes.sh
+          name: multistream-update-ip-routes
+        - src: multistream-fail-over.sh
+          name: multistream-fail-over
+
+    - name: Setup logrotate for job logs
+      ansible.builtin.blockinfile:
+        dest: '/etc/logrotate.conf'
+        block: |
+          "/var/log/multistream/_job_*" {
+            hourly
+            rotate 5
+            compress
+          }
+    - name: Ensure log file is writable
+      ansible.builtin.copy:
+        content: ""
+        dest: /var/log/multistream
+        mode: '0666'
+
+    - name: Ensure logrotate is getting run hourly
+      ansible.builtin.copy:
+        src: /etc/cron.daily/logrotate
+        dest: /etc/cron.hourly/logrotate
+        remote_src: true

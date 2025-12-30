@@ -5,13 +5,8 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-Type=simple
-ExecStart=/usr/local/bin/multistream-fail-over
-# Restart on any exit (success or failure)
-Restart=always
-# Wait 5 seconds before each restart to prevent CPU thrashing
-RestartSec=5s
-User=root
+Type=oneshot
+ExecStart=/usr/local/bin/multistream-update-ip-routes
 
 [Install]
 # Ensures the service starts during a normal multi-user boot

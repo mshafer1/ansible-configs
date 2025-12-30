@@ -28,6 +28,7 @@ rtmp {
             {% for exec in multistream_execs %}
             exec {{ exec }};
             {% endfor %}
+            exec_kill_signal term; # when stream stops, send TERM to exec's
         }
     }
 }

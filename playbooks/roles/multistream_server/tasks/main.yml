@@ -11,10 +11,21 @@
       dest: /etc/nginx/nginx.conf
       block: "{{ lookup('template', 'rtmp_site.j2') }}"
 
-  # TODO: re-enable this
-  # - name: 'firewall: Enable rtmp port'
-  #   ansible.posix.firewalld:
-  #     immediate: yes
-  #     port: 1935/tcp
-  #     permanent: yes
-  #     state: enabled
+- name: Allow RTMP through firewall
+  block:
+  - name: 'firewall: Enable rtmp port'
+    when: not multistream_server__use_ufw
+    register: firewall_cmd_out
+    ansible.posix.firewalld:
+      immediate: yes
+      port: 1935/tcp
+      permanent: yes
+      state: enabled
+  rescue:
+    # - name: Fail if not expected failure mode
+    #   when: "'firewall is not currently running' not in firewall_cmd_out.stdout"
+    #   ansible.builtin.fail:
+    #     msg: Failed to enable rtmp in firewall
+    - name: "Ignore"
+      ansible.builtin.debug:
+        msg: Ignoring for now
