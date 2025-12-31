@@ -40,7 +40,7 @@
           }
 
           trap 'on_die' TERM SIGTERM
-          /usr/local/bin/multistream-fail-over 2>&1 | tee /var/log/multistream &
+          /usr/local/bin/multistream-fail-over 2>&1 | tee /var/log/multistream
           wait
         force: true
 
@@ -69,7 +69,7 @@
       with_items:
         - src: multistream-ip-routes.sh
           name: multistream-update-ip-routes
-        - src: multistream-fail-over.sh
+        - src: multistream-fail-over.py
           name: multistream-fail-over
 
     - name: Setup logrotate for job logs
