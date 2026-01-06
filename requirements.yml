@@ -7,7 +7,7 @@ roles:
 
 collections:
   - name: chocolatey.chocolatey
-    version: 1.2.0
+    version: 1.5.3
     source: https://galaxy.ansible.com
   - name: community.general
     version: 5.6.0
