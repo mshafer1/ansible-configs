@@ -2,7 +2,7 @@
 # https://github.com/sensu/sensu-go
 # then copy those binaries into image
 
-FROM sensu/sensu:6.11.0
+FROM sensu/sensu:6.13.1
 
 RUN apk add --no-cache tzdata
 ENV TZ=America/Chicago
