@@ -1,0 +1,13 @@
+- name: Setup tpm unlocked booting with VPN tunnel
+  hosts:
+    - drives_unlock_with_tpm2
+  roles:
+    - drives_unlock_with_tpm2
+    - system_up_to_date
+    - users_managed
+
+- name: Setup VPN tunnel
+  hosts:
+    - twingate_tunnels
+  roles:
+    - twingate
