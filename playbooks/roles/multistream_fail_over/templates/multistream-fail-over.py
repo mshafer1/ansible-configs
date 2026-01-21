@@ -67,9 +67,8 @@ def get_thread_progress_time(name):
 
 class Send:
     def __init__(
-        self, e: concurrent.futures.ThreadPoolExecutor, push: Push, progress_name: str
+        self, push: Push, progress_name: str
     ):
-        self.executor = e
         self.push = push
         self._last_progress_time = None
         self.progress_name = progress_name
@@ -135,20 +134,35 @@ class Send:
     def is_stable(self):
         return self.is_alive and (self.run_time > 15)
 
+main_push, alt_push, *_ = _PUSHES
+main = Send(main_push, "progress_a")
+alt = Send(alt_push, "progress_b")
+
+_SENDS = [main, alt]
+DONE = False
+
+def _handle_term(*_):
+    print("Shut down requested, stopping children...")
+    DONE = True
+    for send in _SENDS:
+        send.stop()
+
+# Register the signal handlers
+signal.signal(signal.SIGINT, _handle_term)  # Handles Ctrl+C
+signal.signal(signal.SIGTERM, _handle_term) # Handles 'kill <PID>' or process manager termination
+
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s %(name)s-%(funcName)s %(levelname)s - %(message)s", level=logging.DEBUG)
     setup_work_dir()
     os.chdir(_WORK_DIR)
-    main_push, alt_push, *_ = _PUSHES
+    
     main_alive_last_time = False
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        main = Send(executor, main_push, "progress_a")
-        alt = Send(executor, alt_push, "progress_b")
         main.start()
 
         try:
-            while True:  # until terminated
+            while not DONE:  # until terminated
                 main_is_alive = main.is_alive
                 alt_is_alive = alt.is_alive
 
@@ -172,10 +186,10 @@ if __name__ == "__main__":
                     if alt_is_alive and main.is_stable:
                         _LOGGER.info("  stopping Alt")
                         alt.stop()
-
+                if DONE:
+                    break
                 time.sleep(1)
         except (KeyboardInterrupt, SystemExit):
             _LOGGER.warning("Exiting...")
-            # for each, send terminate ??
+            _handle_term()
             pass
-

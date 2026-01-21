@@ -39,13 +39,19 @@
           #!/bin/bash
 
           on_die() {
-          # kill all children
-          kill $(jobs -p)
-          exit
+            # kill all children
+            kill $(jobs -p)
+            sleep 1
+            # no, seriously
+            kill -9 $(ps -aux | grep /usr/local/bin/multistream-fail-over | grep -v grep | sed -e 's/  */ /g' | cut -d' ' -f2 | tr '\n' ' ')
+            sleep 1
+            # I wasn't asking
+            kill -9 $(ps -aux | grep ffmpeg | grep -v grep | sed -e 's/  */ /g' | cut -d' ' -f2 | tr '\n' ' ')
+            exit
           }
 
           trap 'on_die' TERM SIGTERM
-          /usr/local/bin/multistream-fail-over 2>&1 | tee /var/log/multistream
+          /usr/local/bin/multistream-fail-over 2>&1 | tee /var/log/multistream &
           wait
         force: true
 
