@@ -24,7 +24,7 @@
         permanent: true
         state: enabled
 
-- name: Firewall configs (ufw)
+- name: Check if UFW is active
   become: true
   when: not (use_firewalld | bool)
   block:
@@ -33,6 +33,22 @@
       community.general.ufw:
         state: enabled
       register: ufw_enable_check
+  rescue:
+    - name: Ensure UFW installed
+      ansible.builtin.package:
+        name: ufw
+        state: present
+    - name: Assume not active
+      ansible.builtin.debug:
+        msg: UFW enable failed, assuming it's not active
+      register: ufw_enable_check
+      changed_when: true
+
+
+- name: Firewall config (ufw)
+  become: true
+  when: not (use_firewalld | bool)
+  block:
     - name: Enable UFW and deny everything # noqa: no-handler - this is a only if needed step
       when: ufw_enable_check.changed
       community.general.ufw:
