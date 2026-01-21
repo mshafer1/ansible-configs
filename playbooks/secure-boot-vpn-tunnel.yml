@@ -3,7 +3,11 @@
     - drives_unlock_with_tpm2
   roles:
     - drives_unlock_with_tpm2
-    - system_up_to_date
+    - role: system_up_to_date
+      sub_task: sync_repo
+    - role: system_up_to_date
+      sub_task: setup_schedule
+    - role: system_up_to_date
     - users_managed
 
 - name: Setup VPN tunnel
