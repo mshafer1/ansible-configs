@@ -29,6 +29,7 @@ rtmp {
             exec {{ exec }};
             {% endfor %}
             exec_kill_signal term; # when stream stops, send TERM to exec's
+            wait_key on;
         }
     }
 }

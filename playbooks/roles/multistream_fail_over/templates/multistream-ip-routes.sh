@@ -22,13 +22,17 @@ echo "old routes is: ${old_routes}"
 
 {% for push in _multistream_fail_over__pushes %}
 domain_name=$(echo "{{ push.url }}" | sed -r -e 's;^.*://;;' -e 's;/.*$;;g')
-ip_addresses=$(nslookup ${domain_name} | sed -n -e '/answer:/,$p' | grep Address | cut -d' ' -f2 | grep -v ":"; exit 0)
+echo "Getting IP addresses for ${domain_name}"
+ip_addresses=$(nslookup ${domain_name} | sed -n -e '/answer:/,$p' | grep Address | cut -d' ' -f2 | grep -v ":" | sort; exit 0)
+echo "IP lines count: `echo ${ip_addresses} | wc -l`"
+# echo "IP address: ${ip_addresses}"
 
 for ip in ${ip_addresses}; do
 all_ips+=("$ip")
 done
 
 if [[ -n '{{ push.interface_grep | default("") }}' ]]; then
+    echo 'Determining interface gateway for {{ push.interface_grep | default(".*") }}'
     interface=$(echo ${ip_links} | tr ' ' '\n' | grep -E '{{ push.interface_grep | default(".*") }}')
     gateway=$(ip route | grep 'default via' | grep -E '{{ push.interface_grep | default(".*") }}' | sed -E -e 's/^.* via //g' -e 's/ dev .*$//g'; exit 0)
     if [[ -n "${gateway}" ]]; then
@@ -38,6 +42,8 @@ if [[ -n '{{ push.interface_grep | default("") }}' ]]; then
     else
       echo "No gateway found for ${interface}, skipping"
     fi
+else
+  echo "No interface specified for push"
 fi
 
 echo "finished with ${domain_name}"

@@ -1,0 +1,7 @@
+- name: Install requirements
+  ansible.builtin.apt:
+    name:
+      - jq
+      - logrotate
+      - dnsutils # nslookup
+    state: present

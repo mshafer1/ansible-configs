@@ -14,4 +14,4 @@ multistream_pushes: []
 multistream_execs: []
 
 # TODO: change this to true
-multistream_server__use_ufw: false
+multistream_server__use_ufw: '{{ not (use_firewalld | default(true)) }}'

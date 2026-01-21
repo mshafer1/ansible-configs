@@ -15,9 +15,7 @@
   become: true
   block:
     - name: Install requirements
-      ansible.builtin.package:
-        name: jq
-        state: present
+      ansible.builtin.include_tasks: "_{{ ansible_os_family }}_install_requirements.yml"
     - name: Setup server
       ansible.builtin.include_role:
         name: multistream_server
@@ -27,6 +25,13 @@
         multistream_execs:
           - '/var/scripts/exec_wrapper.sh $name'
         multistream_server_allowed_play: '{{ multistream_fail_over__allowed_play }}'
+    - name: Ensure script dir exists
+      ansible.builtin.file:
+        path: /var/scripts
+        state: directory
+        owner: root
+        group: root
+        mode: '0775'
     - name: Setup wrapper script
       ansible.builtin.copy:
         dest: /var/scripts/exec_wrapper.sh
@@ -46,7 +51,7 @@
 
     - name: Setup service
       notify:
-        # - Restart service
+        - Restart service 
         - Reload service daemon
       ansible.builtin.copy:
         dest: /etc/systemd/system/{{ multistream_fail_over__service_name }}.service
@@ -54,14 +59,14 @@
 
     - name: Setup timer
       notify:
-        # - Restart timer
+        - Restart timer
         - Reload service daemon
       ansible.builtin.copy:
         dest: /etc/systemd/system/{{ multistream_fail_over__service_name }}.timer
         src: multistream-ip-routes.timer
 
     - name: Setup Scripts
-      # notify: Restart service
+      notify: Restart service
       ansible.builtin.template:
         dest: /usr/local/bin/{{ item.name }}
         mode: '0775'

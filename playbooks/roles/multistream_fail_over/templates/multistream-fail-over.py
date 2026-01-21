@@ -21,7 +21,7 @@ def setup_work_dir():
 
 class Push(typing.NamedTuple):
     url: str
-    bandwidth: typing.Optional[str] = None
+    bitrate: typing.Optional[str] = None
     framerate: int = 30
     scale: typing.Optional[str] = None
     name: str = ''
@@ -29,31 +29,31 @@ class Push(typing.NamedTuple):
     @property
     def command(self):
         scale_arg = (
-            "copy"
+            f"libx264 -crf {self.framerate}"
             if self.scale in {None, -1, "-1", "-1:-1"}
             else (
-                f"libx264 -vf scale={self.scale} -preset veryfast "
-                f"-tune zerolatency -g {self.framerate * 2} "
-                f"-keyint_min {self.framerate * 4} -sc_threshold 0"
+                f"libx264 -vf scale={self.scale} -crf {self.framerate}"
             )
         )
 
-        bitrate_arg = ("" if self.bandwidth in {None, ""} else f"-b:v {self.bandwidth}")
+        bitrate_arg = ("" if self.bitrate in {None, ""} else f"-b:v '{self.bitrate}'")
 
         return shlex.split(
-            "ffmpeg -i rtmp://localhost/live -c:a copy "
-            f"-c:v {scale_arg} -crf {self.framerate} {bitrate_arg} -f flv "
-            "-probesize 32 -analyzeduration 0 -fflags nobuffer -rw_timeout 50000 "
-            f"-nostdin -progress ./progress_{self.name} "
-            "-stats_period 1 -reconnect 1 -reconnect_streamed 1 "
-            f"{self.url}"
+            "ffmpeg -i rtmp://localhost/live -c:a aac -b:a 128k -ar 44100  "
+            f" -c:v {scale_arg} {bitrate_arg} -f flv -flvflags no_duration_filesize "
+            f" -preset veryfast -tune zerolatency -g {self.framerate * 2}"
+            f" -keyint_min {self.framerate * 2} -sc_threshold 0"
+            " -probesize 500K -analyzeduration 1M -fflags +genpts+nobuffer+discardcorrupt"
+            f" -nostdin -progress ./progress_{self.name} "
+            " -stats_period 1 -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 2"
+            f" {self.url}"
         )
 
 
 {% set alphabet = "abcdefghijklmnopqrstuvwxyz" %}
 _PUSHES = (
   {% for push in _multistream_fail_over__pushes %}
-  Push('{{push.url}}', '{{ push.bandwidth | default("") }}', {{ push.framerate | default(30) }}, {% if 'scale' in push %}"{{ push.scale }}"{% else %}None{% endif %}, "{{ alphabet[loop.index0] }}"),
+  Push('{{push.url}}', '{{ push.bitrate | default("") }}', {{ push.framerate | default(30) }}, {% if 'scale' in push %}"{{ push.scale }}"{% else %}None{% endif %}, "{{ alphabet[loop.index0] }}"),
   {% endfor %}
 )
 
