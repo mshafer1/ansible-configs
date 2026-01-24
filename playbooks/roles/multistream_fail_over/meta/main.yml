@@ -1,0 +1,4 @@
+dependencies:
+  - role: networks_managed
+    vars:
+      networks_managed__wifi_connections: '{{ multistream_fail_over__wifi_connections }}'

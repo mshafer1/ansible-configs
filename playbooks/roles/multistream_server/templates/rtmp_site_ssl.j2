@@ -1,0 +1,57 @@
+stream {
+    upstream publish {
+        server 127.0.0.1:19361;
+    }
+    server {
+        listen 1936 ssl;        # additional port for publishing
+        proxy_pass publish;
+        ssl_certificate /etc/letsencrypt/live/{{ multistream_server__fqdn }}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/{{ multistream_server__fqdn }}/privkey.pem;
+
+        {% for ip in multistream_server_allowed_publishers %}
+            allow {{ ip }};
+        {% endfor %}
+        deny all;               # deny publish from the rest
+    }
+
+    upstream live {
+        server 127.0.0.1:19351;
+    }
+    server {
+        listen 1935 ssl;        # standard RTMP(S) port
+        proxy_pass live;
+        ssl_certificate /etc/letsencrypt/live/{{ multistream_server__fqdn }}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/{{ multistream_server__fqdn }}/privkey.pem;
+
+        allow all;              # this is public (this is also the default)
+    }
+}
+
+
+rtmp {
+    server {
+        listen 127.0.0.1:19361;
+        chunk_size 4096;
+
+        application {{ multistream_server__secret_key }} {
+            live on;
+            record off;
+            allow publish 127.0.0.1;  # publishing through rtmps://rtmp.example.com:1936
+            allow play 127.0.0.1;     # for the pull from rtmp://localhost:19351/live
+        }
+    }
+
+    server {
+        listen 127.0.0.1:19351;
+        chunk_size 4096;
+
+        application live {
+            live on;
+            record off;
+            deny publish all;         # no need to publish on /live -- IMPORTANT!!!
+            allow play 127.0.0.1;     # playing through rtmps://rtmp.example.com:1935/live
+
+            pull rtmp://127.0.0.1:19361/{{ multistream_server__secret_key }};
+        }
+    }
+}

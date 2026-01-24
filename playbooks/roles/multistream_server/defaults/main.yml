@@ -15,3 +15,5 @@ multistream_execs: []
 
 # TODO: change this to true
 multistream_server__use_ufw: '{{ not (use_firewalld | default(true)) }}'
+
+multistream_server__use_ssl: false
