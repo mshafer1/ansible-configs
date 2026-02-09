@@ -1,1 +1,6 @@
-cerbot_installed__force_pip_install_pipx: false
+certbot_installed__force_pip_install_pipx: false
+certbot_installed__acmedns_url: '' # note: acme-dns will fail if not provided
+certbot_installed__acmedns_allow_from: ''
+certbot_installed__acmedns_use_mtls: false
+certbot_installed__client_cert: '' # note: required if certbot_installed__acmedns_use_mtls is true
+certbot_installed__client_key: '' # note: required if certbot_installed__acmedns_use_mtls is true

@@ -21,12 +21,12 @@
         state: present
         update_cache: true
         cache_valid_time: "{{ (12*60*60)|int }}" # 12 hr * 60 min/hr * 60 sec/min
-      when: ansible_distribution == 'Ubuntu' and not cerbot_installed__force_pip_install_pipx
+      when: ansible_distribution == 'Ubuntu' and not certbot_installed__force_pip_install_pipx
     - name: Pip install pipx
       ansible.builtin.pip:
         name:
           - pipx
-      when: ansible_distribution != 'Ubuntu' or cerbot_installed__force_pip_install_pipx
+      when: ansible_distribution != 'Ubuntu' or certbot_installed__force_pip_install_pipx
       environment:
         PIP_BREAK_SYSTEM_PACKAGES: 1
     - name: Add pipx paths to PATH
@@ -70,7 +70,7 @@
   become: true
   ansible.builtin.cron:
     name: certbot-renewal
-    job: "/bin/bash -lc 'certbot renew 2>&1 >> /var/log/certbot'"
+    job: "/bin/bash -lc '/root/.local/bin/certbot renew 2>&1 >> /var/log/certbot'"
     minute: "0"
     hour: "6"
     day: "*"
@@ -84,3 +84,28 @@
     mode: '700'
     owner: root
     group: root
+
+- name: Create settings file
+  become: true
+  ansible.builtin.copy:
+    content: '{{ certbot_installed__acme_challenge_config_data | to_nice_json }}'
+    dest: /etc/letsencrypt/conf.json
+    mode: '0700'
+    owner: root
+    group: root
+- name: Config mTLS cert files
+  become: true
+  when: certbot_installed__acmedns_use_mtls
+  ansible.builtin.copy:
+    content: '{{ item.value }}'
+    dest: '{{ item.path }}'
+    force: true
+    mode: '0700'
+    owner: root
+    group: root
+  no_log: true
+  loop:
+    - path: /etc/letsencrypt/acmedns_mtls_client_cert.pem
+      value: '{{ certbot_installed__client_cert }}'
+    - path: /etc/letsencrypt/acmedns_mtls_client_key.pem
+      value: '{{ certbot_installed__client_key }}'
