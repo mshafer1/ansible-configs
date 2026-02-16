@@ -22,6 +22,14 @@ metadata:
 {% if 'status_proxy' in proxy %}
     status_proxy: '{{ proxy.status_proxy }}'
 {% endif %}
+{% if 'dns_type' in proxy %}
+    dns_type: '{{ proxy.dns_type }}'
+{% endif %}
+{% if 'labels' in proxy %}
+{% for label in proxy.labels %}
+    {{ label.name }}: '{{ label.value }}'
+{% endfor %}
+{% endif %}
     sensu.io/workflow: sensu-flow
 
 spec:
