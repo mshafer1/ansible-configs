@@ -12,7 +12,8 @@ ENV TZ=America/Chicago
 # nano -> my sanity 
 # util-linux -> uuidgen for ntfy-handler
 # bind-tools -> dig for DNS monitoring
-RUN apk add curl jq yq nano util-linux bind-tools
+# figlet -> output formatting
+RUN apk add curl jq yq nano util-linux bind-tools figlet
 
 
 # make symlinks for scripts
