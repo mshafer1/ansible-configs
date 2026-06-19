@@ -32,15 +32,19 @@ all_ips+=("$ip")
 done
 
 if [[ -n '{{ push.interface_grep | default("") }}' ]]; then
-    echo 'Determining interface gateway for {{ push.interface_grep | default(".*") }}'
-    interface=$(echo ${ip_links} | tr ' ' '\n' | grep -E '{{ push.interface_grep | default(".*") }}')
-    gateway=$(ip route | grep 'default via' | grep -E '{{ push.interface_grep | default(".*") }}' | sed -E -e 's/^.* via //g' -e 's/ dev .*$//g'; exit 0)
-    if [[ -n "${gateway}" ]]; then
-      echo "Configuring to send all traffic destined for ${domain_name} out ${interface} via ${gateway}"
-      echo "-- ${ip_addresses}"
-      (echo "${ip_addresses}" | sed -e 's/^/ip route add /g' -e "s/\$/ via ${gateway} dev ${interface}/g" | tee -a _new_routes | sed -e '/^$/d' | grep -E -v "${old_routes:-/}" | tee -a _route_changes || true)
+    echo 'Determining interface gateway for {{ push.interface_grep }}'
+    interface=$(echo "${ip_links}" | tr ' ' '\n' | grep -E '{{ push.interface_grep }}' || true)
+    if [[ -n "${interface}" ]]; then
+      gateway=$(ip route | grep 'default via' | grep "${interface}" | sed -E -e 's/^.* via //g' -e 's/ dev .*$//g' || true)
+      if [[ -n "${gateway}" ]]; then
+        echo "Configuring to send all traffic destined for ${domain_name} out ${interface} via ${gateway}"
+        echo "-- ${ip_addresses}"
+        (echo "${ip_addresses}" | sed -e 's/^/ip route add /g' -e "s/\$/ via ${gateway} dev ${interface}/g" | tee -a _new_routes | sed -e '/^$/d' | grep -E -v "${old_routes:-/}" | tee -a _route_changes || true)
+      else
+        echo "No gateway found for ${interface}, skipping"
+      fi
     else
-      echo "No gateway found for ${interface}, skipping"
+      echo "No interface matching {{ push.interface_grep }} found, skipping"
     fi
 else
   echo "No interface specified for push"
