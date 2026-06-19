@@ -3,4 +3,6 @@
 - name: Configure multistream servers
   hosts: multistream_failover
   roles:
+    - role: users_managed
+    - role: group_allowed_commands
     - role: multistream_fail_over

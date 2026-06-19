@@ -1,0 +1,33 @@
+- name: Setup group allowed commands
+  become: true
+  block:
+    - name: Ensure group exists
+      ansible.builtin.group:
+        name: "{{ _group_allowed_commands__group }}"
+        state: present
+    - name: Configure sudoers file for group
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ _group_allowed_commands__group }}"
+        content: |
+          %{{ _group_allowed_commands__group }} ALL=(ALL) NOPASSWD: {{ _group_allowed_commands__commands | map('ansible.builtin.regex_replace', '^', '/usr/local/bin/') | list | join(',') }}
+        owner: root
+        group: root
+        mode: "0440"
+        force: true
+    - name: Validate sudoers file syntax
+      ansible.builtin.command:
+        cmd: visudo -cf "/etc/sudoers.d/{{ _group_allowed_commands__group }}"
+      register: visudo_check
+      failed_when: visudo_check.rc != 0
+
+    - name: Create alias for allowed commands
+      ansible.builtin.copy:
+        dest: "/usr/local/bin/{{ item.key | basename }}"
+        content: |
+          #!/bin/bash
+          set -euo pipefail
+          {{ item.value }}
+        owner: root
+        group: root
+        mode: "0755"
+      loop: "{{ _group_allowed_commands__commands | dict2items }}"

@@ -1,0 +1,2 @@
+_group_allowed_commands__group: "{{ group_allowed_commands__group | mandatory }}"
+_group_allowed_commands__commands: "{{ group_allowed_commands__commands | mandatory }}"
