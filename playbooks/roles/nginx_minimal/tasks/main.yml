@@ -69,3 +69,35 @@
       with_items:
         - http
         - https
+
+- name: Ensure nginx restarts if it errors out.
+  become: true
+  block:
+  - name: Ensure dir exists for nginx overrides
+    become: true
+    ansible.builtin.file:
+      path: /etc/systemd/system/nginx.service.d
+      state: directory
+      owner: root
+      group: root
+      mode: "0755"
+
+
+  - name: Make nginx restart any time it errors out
+    ansible.builtin.copy:
+      dest: /etc/systemd/system/nginx.service.d/override.conf
+      content: |
+        [Service]
+        Restart=always
+        RestartSec=10s
+      owner: root
+      group: root
+      mode: "0644"
+      force: true
+    notify:
+      - Restart nginx
+      - Reload systemd
+
+
+- name: Run handlers now to ensure nginx is restarted if needed before we check for the CVE
+  ansible.builtin.meta: flush_handlers

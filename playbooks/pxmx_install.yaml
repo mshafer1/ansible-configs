@@ -18,6 +18,8 @@
           [Unit]
           Requires=pve-cluster.service
           After=pve-cluster.service
+          Restart=always
+          RestartSec=10s
       backup: yes
       create: yes # create if needed
       owner: root
