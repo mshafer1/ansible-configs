@@ -44,6 +44,7 @@
 
 - name: Allow RTMP through firewall
   when: multistream_server__use_ssl
+  become: true
   block:
     - name: Allow RTMP through firewall
       when: not multistream_server__use_ufw

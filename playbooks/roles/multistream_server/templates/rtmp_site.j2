@@ -3,7 +3,7 @@ rtmp {
         listen 1935;
         chunk_size 2048;
 
-        application {{ multistream_application_name }} {
+        application {{ multistream_server__secret_key | default(multistream_application_name) }} {
             {% for ip in multistream_server_allowed_publishers %}
             allow publish {{ ip }};
             {% endfor %}
