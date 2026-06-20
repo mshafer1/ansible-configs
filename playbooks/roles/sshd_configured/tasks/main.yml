@@ -1,0 +1,33 @@
+- name: Set SSH Auth Enabled/Disabled
+  become: true
+  block:
+    - name: Identify other occurrences
+      ansible.builtin.shell:
+        cmd: grep -r 'PasswordAuthentication' /etc/ssh | grep -v 60_sshd_password_auth | cut -d':' -f1 | sort | uniq
+      register: password_auth_files
+    - name: Disable other occurrences
+      notify: Restart SSH
+      ansible.builtin.lineinfile:
+        path: '{{ item }}'
+        regexp: '#?\s*PasswordAuthentication'
+        line: '# PasswordAuthentication config moved to 60_sshd_password_auth'
+      loop: '{{ password_auth_files.stdout.splitlines() }}'
+    - name: Enable Password Auth
+      notify: Restart SSH
+      when: sshd_configured__allow_password_auth
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/60_sshd_password_auth.confg
+        force: true
+        content: |
+          PasswordAuthentication yes
+    - name: Disable Password Auth
+      notify: Restart SSH
+      when: not sshd_configured__allow_password_auth
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/60_sshd_password_auth.confg
+        force: true
+        content: |
+          PasswordAuthentication no
+
+- name: Run handlers so that SSHD is restarted now when we're in the logs
+  ansible.builtin.meta: flush_handlers

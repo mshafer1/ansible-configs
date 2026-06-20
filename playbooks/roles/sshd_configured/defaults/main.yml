@@ -1,0 +1,1 @@
+sshd_configured__allow_password_auth: false # while less secure then keys, my norm is to lock down at the firewall level.

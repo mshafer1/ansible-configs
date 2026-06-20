@@ -1,0 +1,16 @@
+- name: Local restart ssh
+  listen: Restart SSH
+  become: true
+  when: ansible_connection == 'local'
+  ansible.builtin.systemd:
+    service: ssh
+    state: restarted
+- name: Remote restart ssh
+  listen: Restart SSH
+  become: true
+  when: ansible_connection != 'local'
+  ansible.builtin.reboot:
+
+- name: Restart SSH
+  ansible.builtin.debug:
+    msg: "Connection appropriate restart method should have been called already."

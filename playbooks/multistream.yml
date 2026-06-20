@@ -4,5 +4,6 @@
   hosts: multistream
   roles:
     - role: users_managed
+    - role: sshd_configured
     - role: group_allowed_commands
     - role: multistream_server
