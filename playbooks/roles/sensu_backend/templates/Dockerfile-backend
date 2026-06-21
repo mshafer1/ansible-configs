@@ -11,7 +11,9 @@ ENV TZ=America/Chicago
 # curl, jq, yq -> for sensuflow.sh
 # nano -> my sanity 
 # util-linux -> uuidgen for ntfy-handler
-RUN apk add curl jq yq nano util-linux
+# bind-tools -> dig for DNS monitoring
+# figlet -> output formatting
+RUN apk add curl jq yq nano util-linux bind-tools figlet
 
 
 # make symlinks for scripts
