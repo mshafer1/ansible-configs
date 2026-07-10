@@ -17,3 +17,10 @@ multistream_execs: []
 multistream_server__use_ufw: '{{ not (use_firewalld | default(true)) }}'
 
 multistream_server__use_ssl: false
+
+multistream_server__ffmpeg_log_dir: /var/log/ffmpeg
+multistream_server__ffmpeg_log_file: push-to-rtmps.log
+multistream_server__ffmpeg_log_owner: www-data
+multistream_server__ffmpeg_log_group: adm
+multistream_server__ffmpeg_log_rotate_frequency: daily
+multistream_server__ffmpeg_log_rotate_count: 14

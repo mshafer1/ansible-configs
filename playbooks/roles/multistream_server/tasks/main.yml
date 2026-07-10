@@ -24,6 +24,7 @@
         block: "{{ lookup('template', 'rtmp_site_ssl.j2') }}"
 
 - name: Allow RTMP through firewall
+  become: true
   when: not multistream_server__use_ssl
   block:
     - name: Allow RTMP through firewall
@@ -91,3 +92,41 @@
         certbot_call.rc != 0
       args:
         creates: /etc/letsencrypt/live/{{ multistream_server__fqdn }}/privkey.pem
+
+- name: Setup push_script
+  become: true
+  block:
+    - name: Create push script
+      ansible.builtin.template:
+        dest: /usr/local/bin/push-to-rtmps
+        src: push_to_rtmps.sh.j2
+        owner: root
+        group: root
+        mode: "0755"
+
+- name: Setup ffmpeg log file and logrotate policy
+  become: true
+  block:
+    - name: Ensure ffmpeg log directory exists
+      ansible.builtin.file:
+        path: '{{ multistream_server__ffmpeg_log_dir }}'
+        state: directory
+        owner: '{{ multistream_server__ffmpeg_log_owner }}'
+        group: '{{ multistream_server__ffmpeg_log_group }}'
+        mode: "0755"
+
+    - name: Ensure ffmpeg log file exists
+      ansible.builtin.file:
+        path: '{{ multistream_server__ffmpeg_log_dir }}/{{ multistream_server__ffmpeg_log_file }}'
+        state: touch
+        owner: '{{ multistream_server__ffmpeg_log_owner }}'
+        group: '{{ multistream_server__ffmpeg_log_group }}'
+        mode: "0640"
+
+    - name: Install logrotate rule for ffmpeg push logs
+      ansible.builtin.template:
+        src: ffmpeg_push.logrotate.j2
+        dest: /etc/logrotate.d/multistream-ffmpeg-push
+        owner: root
+        group: root
+        mode: "0644"
