@@ -1,0 +1,150 @@
+- name: Install required packages
+  become: true
+  ansible.builtin.package:
+    name: network-manager
+    state: present
+
+- name: Ensure overrides dir exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/systemd-networkd-wait-online.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Fast boot option
+  become: true
+  when: networks_managed__boot_interface is defined
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/lib/systemd/systemd-networkd-wait-online -i {{ networks_managed__boot_interface }}
+
+- name: Setup Wifi connections
+  become: true
+  block:
+    - name: Ensure NetworkManager is installed
+      ansible.builtin.package:
+        name: network-manager
+        state: present
+
+    - name: Register NetworkManager as a netplan renderer
+      ansible.builtin.copy:
+        dest: /etc/netplan/01-networkmanager.yaml
+        owner: root
+        group: root
+        mode: '0600'
+        content: |
+          network:
+            version: 2
+            renderer: NetworkManager
+      register: netplan_config
+      notify: Update Netplan configuration
+
+    - name: Force NetworkManager config to manage all devices
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/10-manage-all.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [keyfile]
+          unmanaged-devices=none
+      register: nm_manage_all
+
+    - name: Ensure NetworkManager is unmasked, enabled, and running
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: started
+        enabled: true
+        masked: false
+    
+    - name: Restart NetworkManager to pick up global overrides
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: restarted
+      when: nm_manage_all.changed
+
+    - name: Configure Wi-Fi connection
+      community.general.nmcli:
+        conn_name: "{{ connection.ssid }}"
+        ifname: "{{ connection.interface }}"
+        type: wifi
+        ssid: "{{ connection.ssid }}"
+        gw4: "{{ connection.gateway | default(omit) }}"
+        never_default4: "{{ connection.never_default | default(omit) }}"
+        autoconnect: true
+        method6: disabled
+        wifi_sec:
+          key-mgmt: wpa-psk
+          psk: "{{ connection.password }}"
+        state: present
+      notify: Update Netplan configuration
+      loop: '{{ networks_managed__wifi_connections }}'
+      loop_control:
+        loop_var: connection
+
+
+    - name: Ensure Wi-Fi profile retries forever
+      ansible.builtin.command: >-
+        nmcli connection modify "{{ connection.ssid }}"
+        connection.autoconnect yes
+        connection.autoconnect-retries 0
+        connection.interface-name "{{ connection.interface }}"
+      loop: "{{ networks_managed__wifi_connections }}"
+      loop_control:
+        loop_var: connection
+
+    - name: Set reconnect watchdog target from first Wi-Fi connection
+      ansible.builtin.set_fact:
+        networks_managed__timer_reconnect_ssid: "{{ (networks_managed__wifi_connections | first).ssid }}"
+        networks_managed__timer_reconnect_interface: "{{ (networks_managed__wifi_connections | first).interface }}"
+      when:
+        - networks_managed__timer_reconnect | default(false) | bool
+        - networks_managed__wifi_connections | length > 0
+
+    - name: Install Wi-Fi reconnect service unit
+      ansible.builtin.template:
+        src: nm-wifi-reconnect.service.j2
+        dest: /etc/systemd/system/nm-wifi-reconnect.service
+        owner: root
+        group: root
+        mode: '0644'
+      when:
+        - networks_managed__timer_reconnect | default(false) | bool
+        - networks_managed__wifi_connections | length > 0
+
+    - name: Install Wi-Fi reconnect timer unit
+      ansible.builtin.template:
+        src: nm-wifi-reconnect.timer.j2
+        dest: /etc/systemd/system/nm-wifi-reconnect.timer
+        owner: root
+        group: root
+        mode: '0644'
+      when:
+        - networks_managed__timer_reconnect | default(false) | bool
+        - networks_managed__wifi_connections | length > 0
+
+    - name: Enable Wi-Fi reconnect timer
+      ansible.builtin.systemd:
+        name: nm-wifi-reconnect.timer
+        state: started
+        enabled: true
+        daemon_reload: true
+      when:
+        - networks_managed__timer_reconnect | default(false) | bool
+        - networks_managed__wifi_connections | length > 0
+
+
+    - name: Configure Ethernet connection
+      ansible.builtin.include_tasks: _config_ethernet.yml
+      loop: '{{ networks_managed__ethernet_connections }}'
+      loop_control:
+        loop_var: connection
+

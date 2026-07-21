@@ -1,0 +1,8 @@
+[Unit]
+Description=Reconnect Wi-Fi profile when interface is disconnected
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -lc 'if ! /usr/bin/nmcli -t -f GENERAL.STATE device show "{{ networks_managed__timer_reconnect_interface }}" | /usr/bin/grep -q "^GENERAL.STATE:100"; then /usr/bin/nmcli --wait 20 connection up "{{ networks_managed__timer_reconnect_ssid }}" ifname "{{ networks_managed__timer_reconnect_interface }}"; fi'

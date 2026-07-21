@@ -1,0 +1,17 @@
+# - ssid: MyAwesomeWifi
+#   interface: wlan0
+#   password: examplePassword
+networks_managed__wifi_connections: []
+networks_managed__timer_reconnect: false
+
+
+# # dhcp enabled
+# - interface: enp1s0
+#   method: auto
+# - interface: enp1s0
+#   method: manual
+#   addresses:
+#     - 192.168.1.24/24
+networks_managed__ethernet_connections: []
+
+# TODO: remove others?? default false??

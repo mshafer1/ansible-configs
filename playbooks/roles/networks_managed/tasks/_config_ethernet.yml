@@ -1,0 +1,23 @@
+- name: Config Ethernet (static)
+  when: "'addresses' in connection"
+  notify: Update Netplan configuration
+  community.general.nmcli:
+    conn_name: "{{ connection.interface }}"
+    type: ethernet
+    method4: manual
+    ip4: "{{ connection.addresses }}"
+    dns4: "{{ connection.dns }}"
+    dns4_ignore_auto: "{{ connection.dns_ignore_auto | default(false) }}"
+    gw4: "{{ connection.gateway | default(omit) }}"
+    never_default4: "{{ connection.never_default | default(omit) }}"
+    state: present
+
+- name: Config Ethernet (dhcp)
+  when: "'addresses' not in connection"
+  notify: Update Netplan configuration
+  community.general.nmcli:
+    conn_name: "{{ connection.interface }}"
+    type: ethernet
+    method4: auto
+    never_default4: "{{ connection.never_default4 | default(false) }}"
+    state: present
