@@ -1,0 +1,9 @@
+[Interface]
+PrivateKey = {{ _wireguard_client__private_key }}
+Address = {{ _wireguard_client__local_address }}
+
+[Peer]
+PublicKey = {{ _wireguard_client__server_public_key }}
+PresharedKey = {{ _wireguard_client__preshared_key }}
+AllowedIPs = {{ _wireguard_client__relayed_ips }}
+Endpoint = {{ _wireguard_client__server }}

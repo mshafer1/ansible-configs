@@ -1,0 +1,16 @@
+- name: Include OS specific steps
+  include_tasks: '{{ ansible_os_family }}.yml'
+
+- name: Render client config
+  ansible.builtin.template:
+    src: wg-conf.j2
+    dest: /etc/wireguard/wg{{ wireguard_client__interface_index }}.conf
+    owner: '{{ wireguard_client__conf_owner }}'
+    group: '{{ wireguard_client__conf_owner_group }}'
+    mode: '0600'
+  register: wireguard_client__config_rendered
+
+- name: Bring up interface
+  notify: alpine-commit
+  when: wireguard_client__config_rendered.changed
+  ansible.builtin.raw: wg-quick up wg{{ wireguard_client__interface_index }}

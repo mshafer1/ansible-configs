@@ -1,0 +1,6 @@
+- name: Install requirements
+  notify: alpine-commit
+  ansible.builtin.package:
+    name: 
+      - wireguard-tools
+    state: present
