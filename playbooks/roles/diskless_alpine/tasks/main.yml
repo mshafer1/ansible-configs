@@ -1,0 +1,2 @@
+- name: Initialize system
+  ansible.builtin.include_tasks: ./initialize_system.yml
