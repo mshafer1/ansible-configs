@@ -19,7 +19,7 @@ APKREPOSOPTS="-1"
 
 # SSH & Credentials
 SSHDOPTS="openssh"
-ROOTPASSWORD="{{ diskless_alpine__root_password }}"
+ROOTPASSWORD="{{ _diskless_alpine__root_password }}"
 USEROPTS="-a -u -g wheel,audio,video -k https://github.com/mshafer1.keys pi"
 
 
@@ -34,32 +34,6 @@ DISKOPTS="none"
 # Tell setup-lbu to target the newly formatted label/device name directly
 LBOOTOPTS="{{ diskless_alpine__disk_mount_point }}"
 LBUOPTS="{{ diskless_alpine__partition_name }}"
-# LBUOPTS=none
-
-# apk add dosfstools util-linux
-# mydev={{ diskless_alpine__disk }}
-# fdisk -w always $mydev <<EOF
-#   o
-#   n
-#   p
-#   1
-#   2048
-#   -0
-#   t
-#   0c
-#   a
-#   w
-# EOF
-# mkdosfs -F32 ${mydev}1
-# dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$mydev
-# mydevname=$(basename $mydev)1
-# mkdir -p /media/$mydevname
-# mount -t vfat ${mydev}1 /media/$mydevname
-# cp -aT /media/cdrom /media/$mydevname  # -T to copy hidden files
-# umount /media/$mydevname
-# mkdir /media/mmcblk0p1
-# mount /dev/mmcblk0p1 /media/mmcblk0p1
-# setup-lbu mmcblk0p1
 
 # use chrony to enable ntp
 NTPOPTS="chrony"

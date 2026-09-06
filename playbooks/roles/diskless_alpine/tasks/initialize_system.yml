@@ -17,10 +17,6 @@
     {{ answers_data.content | b64decode | safe }}
     EOF
 
-# - name: Wipe and mount the existing disk
-#   ansible.builtin.raw: wipefs --all {{ diskless_alpine__disk }} && echo -e "n\np\n1\n\n\nw" | fdisk {{ diskless_alpine__disk }}
-#   changed_when: true
-
 - name: Setup ntp and then repo URL
   ansible.builtin.raw: |
     setup-ntp busybox && setup-apkrepos -1 && apk update
@@ -29,14 +25,6 @@
   delegate_to: localhost
   ansible.builtin.set_fact:
     install_cmd: >-
-      wipefs {{ diskless_alpine__disk }} &&
-      echo -e "o\nn\np\n1\n\n\nt\n\nc\na\nw" | fdisk {{ diskless_alpine__disk }} &&
-      sleep 3 && partprobe {{ diskless_alpine__disk }} && mdev -s && 
-      mkfs.vfat -F 32 {{ diskless_alpine__disk_partition }} &&
-      mkdir -p {{ diskless_alpine__disk_mount_point }} &&
-      mount {{ diskless_alpine__disk_partition }} {{ diskless_alpine__disk_mount_point }} &&
-      mkdir -p {{ diskless_alpine__disk_mount_point }}/cache &&
-
       DEFAULT_DISK=none
       setup-alpine -e -f /tmp/alpine-answers 2>&1 | tee /tmp/setup-log
 
@@ -45,30 +33,16 @@
   ansible.builtin.debug:
     var: install_cmd
 
-- name: Install utils to setup partitions
-  ansible.builtin.raw: |
-    apk add util-linux dosfstools
-
-
 - name: Run the installer
   ansible.builtin.raw: '{{ install_cmd }}'
   changed_when: true
 
 - name: Complete Alpine Diskless Installation
   ansible.builtin.raw: |
-    setup-bootable /media/usb {{ diskless_alpine__disk_partition }}
-    # 1. Setup local package cache on SD card
+    # 1. Setup local package cache to storage
     mkdir -p {{ diskless_alpine__disk_mount_point }}/cache
     setup-apkcache {{ diskless_alpine__disk_mount_point }}/cache
     
-    # 2. Commit /etc configuration overlay to SD card
-    mkdir -p {{ diskless_alpine__disk_mount_point }}/backup
-    # edit lbu file for storing, LBU_MEDIA=usb and LBU_BACKUPDIR=/root/config-backups and BACKUP_LIMIT=3
-    sed -E -e 's/^#? *LBU_MEDIA=.*$/LBU_MEDIA={{ diskless_alpine__partition_name }}/g' -e 's;^#? *LBU_BACKUPDIR=.*$;LBU_BACKUPDIR={{ diskless_alpine__disk_mount_point }}/backup;g' -e 's/^#? *BACKUP_LIMIT=.*$/BACKUP_LIMIT=3/g' -i /etc/lbu/lbu.conf
-
+    # 2. Commit /etc configuration overlay to storage
     lbu commit -d
   changed_when: true
-
-# - name: Reboot target system into installed diskless environment
-#   ansible.builtin.raw: reboot
-#   failed_when: false

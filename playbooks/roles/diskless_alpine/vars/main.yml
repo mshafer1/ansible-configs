@@ -1,3 +1,2 @@
 diskless_alpine__disk_mount_point: "{{ diskless_alpine__disk_partition | replace('/dev/', '/media/') }}"
-diskless_alpine__disk_name: "{{ diskless_alpine__disk | split('/') | last }}"
 diskless_alpine__partition_name: "{{ diskless_alpine__disk_partition | split('/') | last }}"

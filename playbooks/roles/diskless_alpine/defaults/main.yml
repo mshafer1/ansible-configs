@@ -1,6 +1,6 @@
+_diskless_alpine__root_password: "{{ diskless_alpine__root_password | mandatory }}"
+
 diskless_alpine__disk: /dev/mmcblk0
 diskless_alpine__disk_partition: "{{ diskless_alpine__disk }}p1"
-# yes, this sounds weird. "diskless_alpine" merely refers to configuring it to load the system into RAM and run diskless.
-# it still needs an install disk for the bootloader
 
 diskless_alpine__timezone: America/Chicago

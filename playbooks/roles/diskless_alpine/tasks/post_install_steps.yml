@@ -1,3 +1,12 @@
 # - name: Alpine recommended post install steps
 #   # https://docs.alpinelinux.org/user-handbook/0.1a/Working/post-install.html
 #   block:
+- name: Install packages for use
+  ansible.builtin.raw: apk add python3 py3-pip doas nano
+
+- name: Make persistent
+  ansible.builtin.raw: lbu commit
+
+- name: Reboot target system into installed diskless environment
+  ansible.builtin.raw: reboot
+  failed_when: false
