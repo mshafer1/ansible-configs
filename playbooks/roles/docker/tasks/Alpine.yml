@@ -1,0 +1,17 @@
+- name: Install Docker
+  ansible.builtin.package:
+    name:
+      - docker
+      - openrc
+      - docker-cli-compose
+    state: present
+
+- name: Start and enable Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Commit Alpine changes if in diskless mode
+  ansible.builtin.command: lbu commit
+  when: alpine_diskless_mode | default(false) | bool

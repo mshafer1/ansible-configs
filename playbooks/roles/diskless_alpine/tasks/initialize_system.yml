@@ -19,7 +19,7 @@
 
 - name: Setup ntp and then repo URL
   ansible.builtin.raw: |
-    setup-ntp busybox && setup-apkrepos -1 && apk update
+    setup-ntp busybox && setup-apkrepos -1 -c && apk update
 
 - name: Store command
   delegate_to: localhost
