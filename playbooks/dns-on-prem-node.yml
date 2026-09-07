@@ -1,0 +1,20 @@
+# TODO: document the stack and how this fits in
+
+- name: Finish Alpine install
+  hosts: on_prem_dns_servers
+  gather_facts: false  # Must be false since Python isn't installed yet
+  roles:
+  - role: diskless_alpine
+    when: run_diskless_setup | default(false) | bool
+
+- name: Setup DNS server
+  hosts: on_prem_dns_servers
+  handlers:
+    - name: alpine-commit
+      ansible.builtin.command: lbu commit
+      when: alpine_diskless_mode | default(false) | bool
+
+  roles:
+  - docker
+  - wireguard_client
+  - pihole_server

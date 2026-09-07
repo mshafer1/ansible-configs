@@ -1,0 +1,11 @@
+- name: Remove old stack
+  listen: pihole-server bring up stack
+  ansible.builtin.command:
+    cmd: docker compose down
+    chdir: '{{ pihole_server__app_dir }}'
+  failed_when: false # not up already is fine
+
+- name: pihole-server bring up stack
+  ansible.builtin.command:
+    cmd: sh bootstrap-stack.sh # will ensure secrets are generated/stored then launch the stack
+    chdir: '{{ pihole_server__app_dir }}'

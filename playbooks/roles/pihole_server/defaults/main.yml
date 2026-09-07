@@ -1,0 +1,8 @@
+# When setting up pihole, also setup https://github.com/mshafer1/pihole-helper-dns-user
+pihole_server__include_admin_side_car: true
+
+# DNS server for the system to use in case pihole goes down
+pihole_server__upstream_system_dns: '1.1.1.3,1.0.0.3' # arbitrarily chose "CloudFlare Families" for the upstream
+
+# upstream DNS server for pihole to use
+pihole_server__upstream_dns: '{{ pihole_server__upstream_system_dns.replace(",", ";") }}'

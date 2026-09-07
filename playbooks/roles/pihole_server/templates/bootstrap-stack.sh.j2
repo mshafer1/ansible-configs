@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV_PIHOLE=".env_pihole"
+ENV_SIDECAR=".env_sidecar"
+touch "${ENV_PIHOLE}" "${ENV_SIDECAR}" # ensure files exist
+PIHOLE_HOST="http://localhost:4080"  # Adjust port/host if Pi-hole is mapped differently
+
+ADMIN_PASS=$(source "${ENV_PIHOLE}" && echo "${FTLCONF_webserver_api_password:-}"; exit 0)
+
+if [ -z "${ADMIN_PASS}" ]; then
+  echo "==> Generating 18-character secure admin password..."
+  ADMIN_PASS=$(python3 -c "import secrets, string; alphabet = string.ascii_letters + string.digits; print(''.join(secrets.choice(alphabet) for _ in range(18)))")
+
+  echo "==> Writing admin password to ${ENV_PIHOLE}..."
+  cat <<EOF >> "${ENV_PIHOLE}"
+FTLCONF_webserver_api_password='${ADMIN_PASS}'
+EOF
+else
+  echo "==> Existing admin password found. Skipping generation."
+fi
+
+echo "==> Launching Pi-hole container..."
+docker compose up -d pihole
+
+if [ "{{ pihole_server__include_admin_side_car }}" = "False" ] ; then
+   echo "Only doing main pihole server. Exiting..."
+   exit 0
+return
+fi
+
+echo "==> Waiting for Pi-hole API to become healthy..."
+until curl -s -f "${PIHOLE_HOST}/api/info/client" > /dev/null 2>&1; do
+  sleep 2
+  echo -n "."
+done
+echo ""
+echo "==> Pi-hole API is healthy."
+echo ""
+
+echo "==> Authenticating with Pi-hole API..."
+AUTH_RESPONSE=$(curl -s -X POST "${PIHOLE_HOST}/api/auth" \
+  -H "Content-Type: application/json" \
+  -d "{\"password\": \"${ADMIN_PASS}\"}")
+
+SESSION_SID=$(echo "${AUTH_RESPONSE}" | jq -r '.session.sid // empty')
+
+if [ -z "${SESSION_SID}" ]; then
+  echo "Error: Failed to authenticate with Pi-hole API."
+  echo "Response: ${AUTH_RESPONSE}"
+  exit 1
+fi
+
+APP_PASSWORD=$(source "${ENV_SIDECAR}" && echo "${PIHOLE_API_TOKEN:-}" || true)
+if [ -n "${APP_PASSWORD}" ]; then
+  echo "==> Existing App Password / API Token found. Skipping generation."
+else
+  echo "==> Requesting new App Password / API Token..."
+  APP_RESPONSE=$(curl -s -X GET "${PIHOLE_HOST}/api/auth/app" \
+    -H "Content-Type: application/json" \
+    -H "sid: ${SESSION_SID}")
+
+  APP_PASSWORD=$(echo "${APP_RESPONSE}" | jq -r '.app.password // empty')
+  APP_PASSWORD_HASHED=$(echo "${APP_RESPONSE}" | jq -r '.app.hash // empty')
+
+  if [ -z "${APP_PASSWORD}" ]; then
+    echo "Error: Failed to generate app password."
+    echo "Response: ${APP_RESPONSE}"
+    exit 1
+  fi
+
+  if [ -z "${APP_PASSWORD_HASHED}" ]; then
+    echo "Error: Failed to retrieve hashed app password."
+    echo "Response: ${APP_RESPONSE}"
+    exit 1
+  fi
+
+  echo "==> Activating App Password / API Token..."
+  ACTIVATE_RESPONSE=$(curl -s -X PATCH "${PIHOLE_HOST}/api/config/webserver/api/app_pwhash" \
+    -H "Content-Type: application/json" \
+    -H "sid: ${SESSION_SID}" \
+    -d "{\"config\": {\"webserver\": {\"api\": {\"app_pwhash\": \"${APP_PASSWORD_HASHED}\"}}}}")
+
+  echo "==> Storing App Password in ${ENV_SIDECAR}..."
+  cat <<EOF >> "${ENV_SIDECAR}"
+PIHOLE_API_TOKEN='${APP_PASSWORD}'
+EOF
+fi
+
+
+SECRET_KEY=$(source "${ENV_SIDECAR}" && echo "${SECRET_KEY:-}" || true)
+if [ -z "${SECRET_KEY}" ]; then
+  echo "==> Generating secret key for side car..."
+  SECRET_KEY=$(python3 -c "import secrets, string; alphabet = string.ascii_letters + string.digits; print(''.join(secrets.choice(alphabet) for _ in range(64)))")
+  echo "==> Storing secret key for side car in ${ENV_SIDECAR}..."
+  cat <<EOF >> "${ENV_SIDECAR}"
+SECRET_KEY='${SECRET_KEY}'
+EOF
+fi
+
+SIDECAR_PORT=$(source "${ENV_SIDECAR}" && echo "${SIDECAR_PORT:-}" || true)
+if [ -z "${SIDECAR_PORT}" ]; then
+  echo "==> Storing 80 for the side car port in ${ENV_SIDECAR}..."
+  cat <<EOF >> "${ENV_SIDECAR}"
+SIDECAR_PORT=80
+EOF
+fi
+
+
+echo "==> Launching remaining sidecar containers..."
+docker compose up -d
+
+echo "==> Bootstrap complete! Sidecar configured and running."

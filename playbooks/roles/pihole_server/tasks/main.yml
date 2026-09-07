@@ -1,0 +1,11 @@
+# set system DNS to a public upstream
+  # since it is expected that local network will point to this box
+  # prevent this DNS server failing causing this system to also be unusable
+- name: Include system specific tasks
+  include_tasks: '_{{ ansible_system }}.yml'
+
+
+# bring up docker-compose stack
+- name: setup pihole stack
+  ansible.builtin.include_tasks: setup_pihole_stack.yml
+

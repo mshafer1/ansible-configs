@@ -1,0 +1,22 @@
+- name: Ensure target dir exists
+  ansible.builtin.file:
+    path: '{{ pihole_server__app_dir }}'
+    state: directory
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+    mode: '0700'
+
+- name: Render files
+  notify: pihole-server bring up stack
+  ansible.builtin.template:
+    src: '{{ item.src }}'
+    dest: '{{ pihole_server__app_dir }}/{{ item.dest }}'
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+    mode: '0700'
+  loop:
+    - src: bootstrap-stack.sh.j2
+      dest: bootstrap-stack.sh
+    - src: docker-compose.yml.j2
+      dest: docker-compose.yml
+

@@ -1,0 +1,9 @@
+- name: Install requirements
+  ansible.builtin.package:
+    name:
+      - curl
+      - jq
+    state: present
+
+- name: Handle OS Specific Family
+  ansible.builtin.include_tasks: '_{{ ansible_os_family }}.yml'

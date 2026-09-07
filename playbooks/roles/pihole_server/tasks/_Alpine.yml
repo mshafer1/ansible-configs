@@ -1,0 +1,28 @@
+- name: Prevent DHCP from overwriting DNS on Alpine
+  become: true
+  block:
+    - name: Create udhcpc configuration override
+      notify: alpine-commit
+      ansible.builtin.copy:
+        dest: /etc/udhcpc/udhcpc.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          # Prevent udhcpc from replacing nameservers
+          RESOLV_CONF="no"
+
+    - name: Enforce static nameservers
+      notify: alpine-commit
+      ansible.builtin.copy:
+        dest: /etc/resolv.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          {{ pihole_server__upstream_system_dns.split(',') | map('ansible.builtin.regex_replace', '^', 'nameserver ') | join(newline) }}
+
+- name: add app dir to saved paths # this only has an effect on diskless systems
+  notify: alpine-commit
+  ansible.builtin.command:
+    cmd: lbu include {{ pihole_server__app_dir }}

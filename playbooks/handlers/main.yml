@@ -1,9 +1,0 @@
-
-- name: commit warning
-  listen: alpine-commit
-  when: '(alpine_diskless_mode | default(false) | bool) | not'
-  ansible.builtin.debug:
-    msg: Not calling "lbu commit" because alpine_diskless_mode is not set to True.
-- name: alpine-commit
-  ansible.builtin.command: lbu commit
-  when: alpine_diskless_mode | default(false) | bool

@@ -1,0 +1,51 @@
+networks:
+  internal:
+    driver: macvlan
+    internal: true
+    # no/default parent
+    ipam:
+      config:
+        - subnet: "172.19.0.0/24"
+          ip_range: "172.19.0.0/24"
+          # no gateway
+  external:
+    driver: bridge
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    # For DNS to function flawlessly, bind to specific host interfaces or use host networking
+    ports:
+      - "0.0.0.0:53:53/tcp"
+      - "0.0.0.0:53:53/udp"
+      - "0.0.0.0:4080:80/tcp" # (admin) Web interface and API port. Moving off of port 80
+    env_file:
+      - .env_pihole
+    networks:
+      external:
+      internal:
+        ipv4_address: 172.19.0.2 # Specify IP so the sidecar knows where to find it
+    environment:
+      - TZ=America/Chicago
+      - FTLCONF_dns_listeningMode=all
+      - FTLCONF_dns_upstreams={{ pihole_server__upstream_dns }}
+    volumes:
+      - './etc-pihole:/etc/pihole'
+    restart: unless-stopped
+{% if pihole_server__include_admin_side_car %}
+  sidecar:
+    container_name: pihole-sidecar
+    image: ghcr.io/mshafer1/pihole-helper-dns-user:latest
+    ports:
+        - "0.0.0.0:${SIDECAR_PORT:-80}:5000/tcp" # uses 5000 by default
+    environment:
+        - TZ=America/Chicago
+        - PIHOLE_HOST=172.19.0.2:80
+    env_file:
+        - .env_sidecar
+    networks:
+      external:
+      internal:
+        ipv4_address: 172.19.0.4 # Specify IP to force a valid IP in the right range
+{% endif %}
