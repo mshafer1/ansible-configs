@@ -1,0 +1,6 @@
+pihole_server__app_dir: /usr/local/app/pihole
+long_string: |-
+  a
+  a
+
+newline: '{{ long_string | trim("a") }}'
