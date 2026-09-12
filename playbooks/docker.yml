@@ -2,5 +2,9 @@
 
 - name: Configure docker servers
   hosts: docker
+  handlers:
+    - name: alpine-commit
+      ansible.builtin.command: lbu commit
+      when: alpine_diskless_mode | default(false) | bool
   roles:
   - role: docker

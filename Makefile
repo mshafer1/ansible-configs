@@ -1,5 +1,7 @@
 all: dns python install-deps certbot tunnels kitchen_owl
 
+on-prem-dns: objects/on-prem-dns
+
 dns: objects/dns
 
 certbot: objects/certbot
@@ -71,5 +73,11 @@ objects/tunnels: playbooks/tunnel_servers.yml $(wildcard playbooks/roles/cloudfl
 	mv $@.tmp $@
 
 objects/sensu: playbooks/sensu.yml $(wildcard playbooks/roles/nginx_minimal/*) $(wildcard playbooks/roles/docker/*) $(wildcard playbooks/roles/sensu_backend/*)
-	unbuffer ansible-playbook -vv $< 2>&1
+	unbuffer ansible-playbook -vv $< 2>&1 | tee $@.tmp
+	mv $@.tmp $@
+
+.PHONY: objects/on-prem-dns
+
+objects/on-prem-dns: playbooks/dns-on-prem-node.yml
+	unbuffer ansible-playbook -i ./dev-inventory -vv $< 2>&1 | tee $@.tmp
 	mv $@.tmp $@
