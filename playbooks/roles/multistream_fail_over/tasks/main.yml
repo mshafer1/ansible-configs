@@ -82,6 +82,14 @@
           name: multistream-update-ip-routes
         - src: multistream-fail-over.py
           name: multistream-fail-over
+    - name: More scripts
+      ansible.builtin.copy:
+        dest: /usr/local/bin/{{ item.name }}
+        mode: '0775'
+        src: '{{ item.src }}'
+      with_items:
+        - src: multistream-ip-routes.py
+          name: multistream-ip-routes.py
 
     - name: Setup logrotate for job logs
       ansible.builtin.blockinfile:
