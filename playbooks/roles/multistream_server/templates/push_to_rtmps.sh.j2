@@ -1,0 +1,19 @@
+on_die() {
+        # kill all children
+        kill $(jobs -p)
+        sleep 1
+        # no, seriously
+        kill -9 $(ps -aux | grep ffmpeg | grep -v grep | sed -e 's/  */ /g' | cut -d' ' -f2 | tr '\n' ' ')
+        sleep 1
+        # I wasn't asking
+        kill -9 $(ps -aux | grep ffmpeg | grep -v grep | sed -e 's/  */ /g' | cut -d' ' -f2 | tr '\n' ' ')
+        exit
+}
+
+trap 'on_die' TERM SIGTERM
+
+sleep 2
+
+
+/usr/bin/ffmpeg -i rtmp://127.0.0.1/live -analyzeduration 0 -probesize 32 -c copy -f flv rtmps://a.rtmps.youtube.com/live2/{{ stream_key }} >> {{ multistream_server__ffmpeg_log_dir }}/{{ multistream_server__ffmpeg_log_file }} 2>&1 &
+wait

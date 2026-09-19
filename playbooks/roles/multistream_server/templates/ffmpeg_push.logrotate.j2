@@ -1,0 +1,10 @@
+{{ multistream_server__ffmpeg_log_dir }}/{{ multistream_server__ffmpeg_log_file }} {
+    {{ multistream_server__ffmpeg_log_rotate_frequency }}
+    rotate {{ multistream_server__ffmpeg_log_rotate_count }}
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    create 0640 {{ multistream_server__ffmpeg_log_owner }} {{ multistream_server__ffmpeg_log_group }}
+}
