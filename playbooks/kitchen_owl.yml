@@ -4,3 +4,4 @@
     - role: kitchen_owl
     - role: certbot_installed
       sub_task: setup_certs
+      when: (ssl_enabled | default(true) | bool)
